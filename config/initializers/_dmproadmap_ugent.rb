@@ -258,7 +258,7 @@ module DMPRoadmap
     # ------------------------------------------------------------------------ #
     # reCAPTCHA - recaptcha appears on the create account and contact us forms #
     # ------------------------------------------------------------------------ #
-    config.x.recaptcha.enabled = false
+    config.x.recaptcha.enabled = true
 
     ENV["DMP_HOST"] ||= "localhost:3000"
     ENV["DMP_PROTOCOL"] ||= "http"
