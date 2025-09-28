@@ -150,6 +150,8 @@ Changes to the core dmproadmap
   We show all "Contributors" with name
   (and orcid if applicable).
 
+  We allow exporting all phases in one pdf
+
 * Changed text on welcome page
 
 * Changed icon and layout (minimal)
@@ -174,6 +176,10 @@ Changes to the core dmproadmap
     that lists domain names per organisation.
     This way we can match an email's domain
     to an organisation during user creation.
+
+  For example: we added table question_option_themes to attach
+    themes also to question options. This is ONLY needed
+    for the GDR export.
 
 * Disabled functionality to manage schools and departments
 
@@ -212,4 +218,33 @@ Changes to the core dmproadmap
 
 * always show phase title in the tab of the plan detail page.
 
-  the original show "Write plan" in the tab title when there is only one phase
+  the original show "Write plan" in the tab title when there is only one phasea
+
+* merge these automatic mails into one when sharing plans with new users:
+
+  * invitation email (which is not necessary when we create users)
+
+  * plan sharing notification (which is only sent to existing users)
+
+* plan creation wizard:
+
+  * Make the intention of the wizard more clear: select a template from a prefiltered
+    list, provide a title, some optional guidances, and hit "create".
+
+    In the base application, this intention was not always clear. The application
+    does not provide a long list of templates, but let the user first preselect
+    their "primary research organization" and "primary funding organization".
+    Based on those selections, the best possible templates are shown in a select box
+    that appears. However if there is only one template to choose from,
+    that box is not shown. Even more, people are not informed about the template
+    that will be used.
+
+    People started to misinterpet the function of this wizard, and thought that
+    they had to fill in their real organization, which was not always listed
+    (not every organization has their own templates).
+
+  * input field "primary research organization" and "primary funding organization"
+    are no longer autocomplete fields, but select-boxes with controlled values.
+    Autocomplete fields assume that end users know how the organization names
+    were entered (e.g. "ghent" or "ugent" or "Ghent University"). Therefore people
+    often did not find their organization.

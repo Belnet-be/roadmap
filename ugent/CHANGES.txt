@@ -324,6 +324,8 @@
     These associations can only be read/updated in the RailsAdmin controller
     http://localhost:3000/admin/question_option
 
+    This is only needed for the specialized GDPR export
+
   * adds methods to model User:
 
     * alternative_accounts
