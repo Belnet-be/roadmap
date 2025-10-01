@@ -26,7 +26,7 @@
     * in our override, we do not want to show invitation mails. When a user logs in via
     either shibboleth or orcid, any invitation that was set, is automatically cleared.
       So we only want to send the mail that informs about the plan, but unfortunately
-      the base application only send that mail to an existing user. Therefore we override
+      the base application only sends that mail to an existing user. Therefore we override
       the view that renders the invitation mail, and make it look sort of the same as
       the sharing notification mail. Unfortunately, that view does not have any reference
       to the plan being shared, so we can only link to the page /plans.
@@ -101,7 +101,7 @@
 
   overrides app/views/plans/new.html.erb
 
-  makes sure that research org id and funder id taken
+  makes sure that research org id and funder id are taken
   from a preselected list, and are presented in a select box
 
   IMPORTANT: both TemplateOptionsController#index and
@@ -115,8 +115,8 @@
              plan[org][id] and plan[funder][id] contain
              JSON values!
 
-  TODO: why does upstream version not mark default option in 
-  "select_tag(:plan_template_id" as html_safe? Does it work without?
+  TODO: why does the upstream version not mark default option in 
+   `select_tag(:plan_template_id` as html_safe? Does it work without?
   Where did we get this from?
 
 - app/views/branded/shared/export/_plan.erb
@@ -142,13 +142,15 @@
 
   overrides app/views/paginable/plans/_privately_visible.html.erb
 
-  adds column "owner", makes use of new method PlansHelper#display_user
+  adds column "owner", whice makes use of new method `PlansHelper#display_user`
+
+  See `config/initializers/ugent.rb`
 
 - app/views/branded/phases/_edit_plan_answers.html.erb
 
   overrides app/views/phases/_edit_plan_answers.html.erb
 
-  does not black left border when comments are shown by default
+  removes black left border when comments are shown by default
 
 - app/views/branded/plans/_project_details.html.erb
 
@@ -231,7 +233,7 @@
 
 - config/initializers/wicked_pdf_ugent.rb
 
-  sets path of wkhtmltopdf (like in DMPonline_v4)
+  sets path to command `wkhtmltopdf` (like in DMPonline_v4)
 
 - app/views/branded/org_admin/shared/_theme_selector.html.erb
 
@@ -241,7 +243,7 @@
 
   that these are not visible in the org admin interface.
 
-  those invisible themes are added of course to the form
+  Those invisible themes are added of course to the form
 
   as hidden inputs though
 
@@ -253,7 +255,7 @@
 
   Reason:
 
-  * themes with title "UGENT:*" are ugent specific
+  * themes with title  `UGENT:*` are ugent specific and are only added for the GDPR export
 
   * themes with title "https://w3id.org/GDPRtEXT#*" are ugent specific
 
@@ -314,6 +316,10 @@
 
   * overrides methods of Users::OmniauthCallbacksController
 
+    * completely overrides callback phase of authentication with shibboleth (`handle_shibboleth`)
+    
+    * completely overrides callback phase of authentication with orcid (`handle_orcid`)
+
   * adds relation question_options_themes to QuestionOption
 
     this reuses an old (custom!) generated table options_themes,
@@ -346,11 +352,15 @@
     a template contains privacy related data
     if one of the questions contains the theme "UGENT:DATA"
 
+    only needed for gdpr export
+
   * adds methods Plan.ld_uri and Plan.ld
 
     See also:
       - app/controllers/ugent/internal/exports_controller.rb
       - app/models/ugent/rest_user.rb
+
+    only needed for gdpr export
 
   * adds method Plan#old_project_groups
 
@@ -405,24 +415,24 @@
   /projects to /plans
   /projects/:id to /plans/:id
 
-  TODO: do these extra routes still work?
+  TODO: do these extra routes still work? Still needed?
 
 - app/controllers/ugent/selectable_user_controller.rb
 
-  ugent specific controller
+  added controller
 
   when user authenticates with orcid,
-  and this orcid matches with multiple users at this end,
+  and his orcid matches with multiple users at this end,
   this controller shows a select box from which one
   can choose the user to login to
 
   this use case is necessary to accomodate for users
-  that are part of multiple organisations,
+  that are part of multiple organisations (with different email addresses),
   but for some reason only have orcid as a login method.
 
 - app/controllers/ugent/switch_user_controller.rb
 
-  ugent specific controller
+  added controller
 
   if a user has an orcid that matches with other user accounts
   he/she can switch to that other user account
@@ -433,7 +443,7 @@
 
 - app/controllers/ugent/internal/exports_controller.rb
 
-  ugent specific controller (deprecated)
+  added controller (deprecated), only for gdpr export
 
   provides access to JSON exports of plans per organisation in /opt/dmponline_internal
 
@@ -456,7 +466,7 @@
 
 - app/controllers/ugent/roles_controller.rb
 
-  ugent specific controller
+  added controller
 
   added to routes in config/routes/ugent.rb
 
@@ -468,9 +478,13 @@
 
   prematurely fix bug as fixed by https://github.com/DMPRoadmap/roadmap/pull/3325
 
+  remove when fixed upstream
+
 - app/models/ugent/rest_user.rb
 
   ugent specific model
+
+  only used for gdpr export
 
   Stores authentication information for REST users that want to access Ugent::Internal::ExportsController
 
@@ -499,6 +513,8 @@
 
   ugent specific rake tasks
 
+  only used for gdpr export
+
   generates JSON export of plans per organisation, and stores them in /opt/dmponline_internal
 
   See also:
@@ -518,6 +534,8 @@
   Of course a plan can be removed in the CLI
 
   Still usefull?
+
+  Can be removed
 
 - app/models/ugent/org_domain.rb
 
@@ -558,11 +576,12 @@
 
   disables partial app/views/orgs/_external_identifiers.html.erb
 
-  with one could edit the org identifiers, which only allowed for
-  one identifier per scheme. If you had multiple per scheme,
-  it would only save one. e.g. Org "UGent" has two shibboleth identifiers
-
-  Id management should be done in /admin/identifier
+    * we allow multiple org shibboleth identifiers (idp's) per organization,
+      but the existing form only showed one, and the validation in the server
+      only reads the first given identifier. So even if you would add multiple
+      identifiers to the form, the server would only read the first one,
+      and ignore the other, effectively deleting the second
+    * id management should be done in /admin/identifier (rails_admin)
 
 - app/views/branded/shared/_sign_in_form.html.erb
   app/views/branded/shared/_dev_sign_in_form.html.erb
@@ -611,6 +630,8 @@
 
   in order to load to extra files,
   I had to edit config/application.rb!
+
+  Keep this in mind when git merge conflicts happen
 
 - app/views/branded/plans/index.html.erb
 

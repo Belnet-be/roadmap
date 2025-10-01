@@ -8,10 +8,10 @@ Changes to the core dmproadmap
     you'll have to assign a password using the rails cli.
 
   * The home page lists all organisations that have
-    a wayfless entity (i.e. the shibboleth IDP) assigned to them.
+    a wayfless ("where are you from") entity (i.e. the shibboleth IDP) assigned to them.
     In the default dmproadmap, an organisation can
     only have one wayfless entity. We allow for
-    multiple. If multiple, the domain of that
+    multiple. When multiple, the domain of that
     IDP is added to name in the list.
 
   * Users are created automatically after returning
@@ -135,7 +135,7 @@ Changes to the core dmproadmap
   but provides only one input per schema. If you have multiple in store
   and you hit save, you lose the second one.
 
-  Id management should be done in /admin/identifier
+  Id management should be done in `/admin/identifier` (rails_admin)
 
 * Changed pdf/word export of a plan
 
@@ -177,7 +177,7 @@ Changes to the core dmproadmap
     This way we can match an email's domain
     to an organisation during user creation.
 
-  For example: we added table question_option_themes to attach
+  For example: we added table `question_option_themes` to attach
     themes also to question options. This is ONLY needed
     for the GDR export.
 
@@ -185,7 +185,7 @@ Changes to the core dmproadmap
 
 * Added controllers for our own flavoured export of plans
 
-  See [ugent/doc/internal_export.md](https://github.com/DMPbelgium/roadmap/blob/master/ugent/doc/internal_export.md)
+  See [ugent/doc/internal_export.md](doc/internal_export.md)
 
   The only partner who is using this at the moment
   is the UGent Sharepoint team. They need
@@ -214,11 +214,11 @@ Changes to the core dmproadmap
   but rather use of existing configuration.
 
   This can be reenabled in `config/initializers/_dmproadmap_ugent.rb` by
-  settting `config.x.madmp.enable_research_outputs = true`
+  setting `config.x.madmp.enable_research_outputs = true`
 
 * always show phase title in the tab of the plan detail page.
 
-  the original show "Write plan" in the tab title when there is only one phasea
+  the original shows "Write plan" in the tab title when there is only one phase
 
 * merge these automatic mails into one when sharing plans with new users:
 
