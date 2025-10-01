@@ -95,7 +95,7 @@ Changes to the core dmproadmap
 
   So if you are the owner of a plan,
   and your function is "Data Manager",
-  you need to manually add yourself
+  you would need to manually add yourself
   as contributor and reenter your
   user data there (like email and orcid).
 

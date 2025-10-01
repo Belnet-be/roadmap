@@ -1,8 +1,6 @@
 #!/bin/bash
 cd `dirname $0`/../..
 
-[ -f env.sh ] && . env.sh
-
 # force mode development
 export RAILS_ENV=development
 unset EXECJS_RUNTIME

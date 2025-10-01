@@ -6,16 +6,36 @@ services:
       dockerfile: Dockerfile-dev
     working_dir: "/opt/roadmap"
     container_name: roadmap-dev
+    env_file:
+      - path: '/opt/roadmap/.env'
+        required: false
+    environment:
+      - MALLOC_ARENA_MAX=${MALLOC_ARENA_MAX:-2}
+      - RAILS_LOG_TO_STDOUT=${RAILS_LOG_TO_STDOUT:-true}
+      - DMP_LOCAL_LOGIN=${DMP_LOCAL_LOGIN:-true}
+      - DB_ADAPTER=${DB_ADAPTER:-mysql2}
+      - DB_PASSWORD=${DB_PASSWORD:-root}
+      - RAILS_ENV=${RAILS_ENV:-development}
+      - RAILS_SERVE_STATIC_FILES=${RAILS_SERVE_STATIC_FILES:-false}
+      - EXECJS_RUNTIME=${EXECJS_RUNTIME:-Node}
+      - WEB_CONCURRENCY=${WEB_CONCURRENCY:-0}
+      - RAILS_MAX_THREADS=${RAILS_MAX_THREADS:-1}
+      - DMP_SMTP_ADDRESS=${DMP_SMTP_ADDRESS:-0.0.0.0}
+      - DMP_SMTP_PORT=${DMP_SMTP_PORT:-25}
     entrypoint: "./entrypoint-dev.sh"
     depends_on:
       - mysql
     ports:
-      - "80:3000"
-      - "9000:9000"
-      - "26162:26162"
+      - "3000:3000"
 
   mysql:
     image: mysql
     container_name: mysql
     environment:
       MYSQL_ROOT_PASSWORD: root
+      MYSQL_HOST: "0.0.0.0"
+      MYSQL_DATABASE: roadmap_developent
+    ports:
+      - 3307:3306
+    volumes:
+      - ./tmp/mysql:/var/lib/mysql

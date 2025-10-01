@@ -35,5 +35,5 @@ RUN [ -d app/assets/builds ] || mkdir app/assets/builds
 RUN apt-get -y install nodejs yarnpkg vim
 RUN yarnpkg install
 RUN ln -s /usr/bin/yarnpkg /usr/bin/yarn
-RUN gem install ruby-debug-ide
-RUN gem install debase -v 0.2.5beta2
+#RUN gem install ruby-debug-ide
+#RUN gem install debase -v 0.2.5beta2
