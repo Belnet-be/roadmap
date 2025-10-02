@@ -820,3 +820,7 @@
   to be moved to bin/rails during build/installment
 
   follow issue https://github.com/DMPRoadmap/roadmap/issues/3316 for changes
+
+- config/initializers/assets_local.rb
+
+  local addition that adds assets from rails_admin to the asset pipeline
