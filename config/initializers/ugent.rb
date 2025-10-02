@@ -1010,7 +1010,7 @@ User.before_invitation_created do |user|
 end
 
 class Devise::Mailer
-  # devise mailer does not user app/views/branded as stated by rails
+  # devise mailer does not use app/views/branded as stated by rails
   # purpose: when a user is added to a plan, an invitation mail is
   # and for existing user a sharing notification mail. We made sure
   # here that the invitation mail looks the same as the sharing notification
