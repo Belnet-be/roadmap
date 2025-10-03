@@ -30,6 +30,7 @@ test:
   <<: *defaults
 EOF1
 
+yarnpkg install
 ./bin/rails assets:precompile
 ./bin/rails db:migrate
 ./bin/rails server -p 3000 -b 0.0.0.0
