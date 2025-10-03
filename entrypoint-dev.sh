@@ -1,5 +1,7 @@
 #!/bin/sh
 
+bundle install
+
 # cleans up previous shutdown
 rm -f /opt/roadmap/tmp/pids/server.pid
 
@@ -30,5 +32,4 @@ EOF1
 
 ./bin/rails assets:precompile
 ./bin/rails db:migrate
-#rdebug-ide --host 0.0.0.0 --port 9000 -- bin/rails server -p 3000 -b 0.0.0.0
-bin/rails server -p 3000 -b 0.0.0.0
+./bin/rails server -p 3000 -b 0.0.0.0
