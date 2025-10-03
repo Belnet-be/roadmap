@@ -5,6 +5,8 @@ services:
       context: .
       dockerfile: Dockerfile-dev
     working_dir: "/opt/roadmap"
+    volumes:
+      - .:/opt/roadmap
     container_name: roadmap-dev
     env_file:
       - path: '/opt/roadmap/.env'
