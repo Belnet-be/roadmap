@@ -24,6 +24,7 @@ services:
       - RAILS_MAX_THREADS=${RAILS_MAX_THREADS:-1}
       - DMP_SMTP_ADDRESS=${DMP_SMTP_ADDRESS:-0.0.0.0}
       - DMP_SMTP_PORT=${DMP_SMTP_PORT:-25}
+      - BUNDLE_PATH=vendor/bundle
     entrypoint: "./entrypoint-dev.sh"
     depends_on:
       - mysql
