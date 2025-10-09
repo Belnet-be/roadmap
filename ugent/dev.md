@@ -296,6 +296,89 @@ A handy overview of the available models, and their attributes:
 * https://github.com/DMPRoadmap/roadmap/wiki/DB-Schema
 * https://github.com/DMPRoadmap/roadmap/issues/1382#issuecomment-405252771
 
+# Development with Debian/Ubuntu
+
+* Make sure you have your database imported in mysql
+
+* Install ruby 3.0.5. You can do this easily with [RVM](https://rvm.io/) as a ruby version manager:
+
+  ```
+  \curl -sSL https://get.rvm.io | bash -s stable
+  ```
+
+  * Let RVM build ruby: `rvm install ruby-3.0.5`
+
+  * Step into your application directory using the `cd` command, and RVM will set the right ruby instance
+
+* Install ruby dependencies:
+
+```
+gem install bundler:2.1.4
+bundle _2.1.4_ config set --local path "vendor/bundle"
+bundle _2.1.4_ config set --local with "mysl,puma"
+bundle _2.1.4_ config set --local without pgsql
+bundle _2.1.4_ install
+```
+
+* Install binary dependencies
+
+```
+apt-get update && apt-get -y install vim libpq5 libmariadb3 libyaml-0-2 libxml2 openssl bison libjpeg62-turbo libpng16-16 imagemagick libxrender1 libxext6 nodejs yarnpkg
+```
+
+* Install nodejs dependencies: `yarnpkg install`
+
+* Set database connection details in `config/database.yml` (example):
+
+```
+default: &default
+  adapter: mysql2
+  database: roadmap
+  username: roadmap
+  password: roadmap
+  encoding: utf8mb4
+
+development: *default
+production: *default
+```
+
+* Add or update the encrypted `config/credentials.yml.enc` ..
+
+```
+EDITOR=vim bin/rails credentials:edit
+```
+
+and edit
+
+```
+# Used as the base secret for all MessageVerifiers in Rails, including the one protecting cookies.
+secret_key_base: "replace_with_your_secret_key"
+
+# used in config/initializers/devise.rb
+devise_pepper: "replace_with_your_pepper"
+
+#used in config/initializers/dragonfly.rb
+dragonfly_secret: "replace_with_your_dregaonfly_secret"
+
+# used in recaptcha.rb
+recaptcha:
+ site_key: 'replace_this_with_your_public_key'
+ secret_key: 'replace_this_with_your_private_key'
+```
+
+This will generate a `config/master.key` which should NOT be included
+in the git repository.
+
+The encrypted `config/credentials.yml.enc` is a Rails 5.2 replacement
+of `config/secrets.yml`. Rails expects you to include this file
+(and not the master.key) in git.
+
+* Start application
+
+```
+bin/rails server
+```
+
 # Development within Mac OS X
 
 * Install [RVM](https://rvm.io/) as a ruby version manager:

@@ -1,5 +1,8 @@
-#!/bin/sh
+#!/bin/bash
 
+export BUNDLE_PATH="vendor/bundle"
+export BUNDLE_WITH="mysql:puma:development:test:ci"
+export BUNDLE_WITHOUT="aws"
 bundle install
 
 # cleans up previous shutdown
@@ -31,6 +34,7 @@ test:
 EOF1
 
 yarnpkg install
-./bin/rails assets:precompile
-./bin/rails db:migrate
-./bin/rails server -p 3000 -b 0.0.0.0
+[ -f /usr/bin/yarn ] || ln -s /usr/bin/yarnpkg /usr/bin/yarn
+bin/rails assets:precompile
+bin/rails db:migrate
+bin/rails server -p 3000 -b 0.0.0.0
