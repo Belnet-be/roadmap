@@ -14,6 +14,7 @@ EDITOR='echo "  site_key: \"\"" >>' bin/rails credentials:edit
 EDITOR='echo "  secret_key: \"\"" >>' bin/rails credentials:edit
 EDITOR='echo "devise_pepper: KJIJUIOJJeioejrerjerijrjerzerae__" >>' bin/rails credentials:edit
 EDITOR='echo "dragonfly_secret: eorizjerjrzeurJJJIEI" >>' bin/rails credentials:edit
+EDITOR='echo "secret_key_base: 12EJJJEHHEHEHHHEHZZYYYY9993JJDEHH__" >>' bin/rails credentials:edit
 
 # Configures database
 cat <<EOF1 > config/database.yml
