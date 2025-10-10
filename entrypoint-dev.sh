@@ -36,6 +36,5 @@ EOF1
 
 yarnpkg install
 [ -f /usr/bin/yarn ] || ln -s /usr/bin/yarnpkg /usr/bin/yarn
-bin/rails assets:precompile
 bin/rails db:migrate
-bin/rails server -p 3000 -b 0.0.0.0
+bin/dev
