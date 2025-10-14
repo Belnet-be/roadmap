@@ -1,0 +1,6 @@
+- drop table ugent_logs;
+- drop table ugent_rest_users;
+- drop table ugent_wayfless_entities
+- drop table question_options_themes;
+- delete from themes where title like 'UGENT:%';
+- delete from themes where title like 'https://w3id.org/GDPRtEXT#%';
