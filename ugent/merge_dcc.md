@@ -123,6 +123,8 @@ and restart docker compose
 docker compose up
 ```
 
+You'll notice changes made to `public/tinymce`. This is done by `config/initializers/assets.rb`. That is fixed in release 5.0.2.
+
 # Compare branded views if needed
 
 For every view in `views/app/branded`, see if the difference with the upstream version
