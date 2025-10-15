@@ -1,5 +1,21 @@
 # Changelog
 
+## v5.0.2
+- Bump Ruby to v3.1.4 and use `.ruby-version` in CI
+  - [#3566](https://github.com/DMPRoadmap/roadmap/pull/3566)
+  - [#3573](https://github.com/DMPRoadmap/roadmap/pull/3573)
+- Enable session timeout after 90 minutes of inactivity [#3568](https://github.com/DMPRoadmap/roadmap/pull/3568)
+- Validate CSV Separator [#3569](https://github.com/DMPRoadmap/roadmap/pull/3569)
+- Fix rendering of `confirm_merge` partial [#3567](https://github.com/DMPRoadmap/roadmap/pull/3567)
+- Improve CI configuration [#3551](https://github.com/DMPRoadmap/roadmap/issues/3551)
+- Bump nokogiri from 1.17.2 to 1.18.9 [#3547](https://github.com/DMPRoadmap/roadmap/pull/3547)
+- Bump activerecord from 7.1.5.1 to 7.1.5.2 [#3549](https://github.com/DMPRoadmap/roadmap/pull/3549)
+- Bump rack-session from 2.1.0 to 2.1.1 [#3524](https://github.com/DMPRoadmap/roadmap/pull/3524)
+- Bump net-imap from 0.4.19 to 0.4.20 [#3518](https://github.com/DMPRoadmap/roadmap/pull/3518)
+- Bump rexml from 3.4.1 to 3.4.2 [#3562](https://github.com/DMPRoadmap/roadmap/pull/3562)
+- Bump tmp from 0.2.3 to 0.2.4 [#3548](https://github.com/DMPRoadmap/roadmap/pull/3548)
+- Update Gems and Address New Rubocop Offences [#3572](https://github.com/DMPRoadmap/roadmap/pull/3572)
+
 ## v5.0.1
 - Updated seeds.rb file for identifier_schemes to include context value and removed logo_url and idenitifier_prefix for Shibboleth (as it was causing issues with SSO). [#3525](https://github.com/DMPRoadmap/roadmap/pull/3525)
 - Adjustments to style of select tags and plan download layout [#3509](https://github.com/DMPRoadmap/roadmap/pull/3509)
