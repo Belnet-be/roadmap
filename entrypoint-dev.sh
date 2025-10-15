@@ -1,8 +1,5 @@
 #!/bin/bash
 
-export BUNDLE_PATH="vendor/bundle"
-export BUNDLE_WITH="mysql:puma:development:test:ci"
-export BUNDLE_WITHOUT="aws"
 bundle install
 
 # cleans up previous shutdown

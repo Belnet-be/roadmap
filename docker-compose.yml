@@ -22,10 +22,13 @@ services:
       - EXECJS_RUNTIME=Node
       - WEB_CONCURRENCY=${WEB_CONCURRENCY:-0}
       - RAILS_MAX_THREADS=${RAILS_MAX_THREADS:-1}
-      - DMP_SMTP_ADDRESS=${DMP_SMTP_ADDRESS:-0.0.0.0}
-      - DMP_SMTP_PORT=${DMP_SMTP_PORT:-25}
+      - DMP_SMTP_ADDRESS=0.0.0.0
+      - DMP_SMTP_PORT=1025
       - BUNDLE_PATH=vendor/bundle
       - BINDING=0.0.0.0
+      - BUNDLE_PATH=vendor/bundle
+      - BUNDLE_WITH=mysql:puma:development:test:ci
+      - BUNDLE_WITHOUT=aws
     entrypoint: "./entrypoint-dev.sh"
     depends_on:
       - mysql
@@ -43,3 +46,9 @@ services:
       - 3307:3306
     volumes:
       - ./tmp/mysql:/var/lib/mysql
+
+  mail:
+    image: mailhog/mailhog
+    container_name: mail
+    ports:
+      - 8025:8025
