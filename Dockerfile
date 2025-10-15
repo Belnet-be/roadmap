@@ -21,10 +21,10 @@ RUN apt-get update && \
     rm -rf .git/ && \
     rm -rf tmp/ && \
     rm -rf log/ && \
-    rm -rf vendor/bundle/ruby/3.0.0/cache/ && \
+    rm -rf vendor/bundle/ruby/3.1.0/cache/ && \
     rm -rf /usr/local/bundle/cache/ && \
     (bin/wkhtmltopdf || true) &&\
-    rm -f vendor/bundle/ruby/3.0.0/gems/wkhtmltopdf-binary-0.12.6.6/bin/*.gz && \
+    rm -f vendor/bundle/ruby/3.1.0/gems/wkhtmltopdf-binary-0.12.6.10/bin/*.gz && \
     mv ./ugent/public/* ./public
 
 FROM ruby:3.1.4-slim
