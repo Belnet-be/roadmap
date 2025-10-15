@@ -26,32 +26,18 @@
  */
 
 /*!
- * Sizzle CSS Selector Engine v2.3.5
- * https://sizzlejs.com/
- *
- * Copyright JS Foundation and other contributors
- * Released under the MIT license
- * https://js.foundation/
- *
- * Date: 2020-03-14
- */
-
-/*!
- * jQuery JavaScript Library v3.5.1
+ * jQuery JavaScript Library v3.7.1
  * https://jquery.com/
  *
- * Includes Sizzle.js
- * https://sizzlejs.com/
- *
- * Copyright JS Foundation and other contributors
+ * Copyright OpenJS Foundation and other contributors
  * Released under the MIT license
  * https://jquery.org/license
  *
- * Date: 2020-05-04T22:49Z
+ * Date: 2023-08-28T13:37Z
  */
 
 /*!
- * jQuery UI :data 1.12.1
+ * jQuery UI :data 1.13.2
  * http://jqueryui.com
  *
  * Copyright jQuery Foundation and other contributors
@@ -60,7 +46,7 @@
  */
 
 /*!
- * jQuery UI Autocomplete 1.12.1
+ * jQuery UI Autocomplete 1.13.2
  * http://jqueryui.com
  *
  * Copyright jQuery Foundation and other contributors
@@ -69,7 +55,7 @@
  */
 
 /*!
- * jQuery UI Datepicker 1.12.1
+ * jQuery UI Datepicker 1.13.2
  * http://jqueryui.com
  *
  * Copyright jQuery Foundation and other contributors
@@ -78,7 +64,7 @@
  */
 
 /*!
- * jQuery UI Keycode 1.12.1
+ * jQuery UI Keycode 1.13.2
  * http://jqueryui.com
  *
  * Copyright jQuery Foundation and other contributors
@@ -87,7 +73,7 @@
  */
 
 /*!
- * jQuery UI Menu 1.12.1
+ * jQuery UI Menu 1.13.2
  * http://jqueryui.com
  *
  * Copyright jQuery Foundation and other contributors
@@ -96,7 +82,7 @@
  */
 
 /*!
- * jQuery UI Mouse 1.12.1
+ * jQuery UI Mouse 1.13.2
  * http://jqueryui.com
  *
  * Copyright jQuery Foundation and other contributors
@@ -105,7 +91,7 @@
  */
 
 /*!
- * jQuery UI Position 1.12.1
+ * jQuery UI Position 1.13.2
  * http://jqueryui.com
  *
  * Copyright jQuery Foundation and other contributors
@@ -116,7 +102,7 @@
  */
 
 /*!
- * jQuery UI Scroll Parent 1.12.1
+ * jQuery UI Scroll Parent 1.13.2
  * http://jqueryui.com
  *
  * Copyright jQuery Foundation and other contributors
@@ -125,7 +111,7 @@
  */
 
 /*!
- * jQuery UI Sortable 1.12.1
+ * jQuery UI Sortable 1.13.2
  * http://jqueryui.com
  *
  * Copyright jQuery Foundation and other contributors
@@ -134,7 +120,7 @@
  */
 
 /*!
- * jQuery UI Unique ID 1.12.1
+ * jQuery UI Unique ID 1.13.2
  * http://jqueryui.com
  *
  * Copyright jQuery Foundation and other contributors
@@ -143,7 +129,7 @@
  */
 
 /*!
- * jQuery UI Widget 1.12.1
+ * jQuery UI Widget 1.13.2
  * http://jqueryui.com
  *
  * Copyright jQuery Foundation and other contributors
