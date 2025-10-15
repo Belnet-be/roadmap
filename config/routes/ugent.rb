@@ -10,18 +10,6 @@ Rails.application.routes.draw do
 
   mount RailsAdmin::Engine => "/admin", as: "rails_admin"
 
-  get "/internal/exports/v01/organisations/:abbreviation/:name.json",
-    to: "ugent/internal/exports#show_link",
-    abbreviation: /[a-zA-Z0-9_\-]+/,
-    name: /[a-zA-Z0-9_\-\.:]+/
-
-  get "/internal/exports/v01/organisations/:abbreviation/:year/:month/:name.json",
-    to: "ugent/internal/exports#show_file",
-    abbreviation: /[a-zA-Z0-9_\-]+/,
-    year: /\d{4}/,
-    month: /\d{2}/,
-    name: /[a-zA-Z0-9_\-\.:]+/
-
   # legacy routes
   get "/projects", to: "ugent/legacy/projects#index"
   get "/projects/:id", to: "ugent/legacy/projects#show"
