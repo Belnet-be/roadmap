@@ -25,8 +25,7 @@ RUN apt-get update && \
     rm -rf /usr/local/bundle/cache/ && \
     (bin/wkhtmltopdf || true) &&\
     rm -f vendor/bundle/ruby/3.0.0/gems/wkhtmltopdf-binary-0.12.6.6/bin/*.gz && \
-    mv ./ugent/public/* ./public && \
-    mv bin/rails_without_spring bin/rails
+    mv ./ugent/public/* ./public
 
 FROM ruby:3.0.5-slim
 
