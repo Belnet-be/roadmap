@@ -1,5 +1,5 @@
 #syntax=docker/dockerfile:1
-FROM ruby:3.0.5 AS build
+FROM ruby:3.1.4 AS build
 
 WORKDIR /opt/roadmap
 COPY . .
@@ -27,7 +27,7 @@ RUN apt-get update && \
     rm -f vendor/bundle/ruby/3.0.0/gems/wkhtmltopdf-binary-0.12.6.6/bin/*.gz && \
     mv ./ugent/public/* ./public
 
-FROM ruby:3.0.5-slim
+FROM ruby:3.1.4-slim
 
 COPY --from=build /opt/roadmap /opt/roadmap
 COPY --from=build /usr/local/bundle /usr/local/bundle
