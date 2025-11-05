@@ -41,7 +41,7 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_HOST: "0.0.0.0"
-      MYSQL_DATABASE: roadmap_developent
+      MYSQL_DATABASE: roadmap_development
     ports:
       - 3307:3306
     volumes:
