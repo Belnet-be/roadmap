@@ -6,12 +6,14 @@ bundle install
 rm -f /opt/roadmap/tmp/pids/server.pid
 
 # Setup credentials
-EDITOR='echo "recaptcha:" >' bin/rails credentials:edit
-EDITOR='echo "  site_key: \"\"" >>' bin/rails credentials:edit
-EDITOR='echo "  secret_key: \"\"" >>' bin/rails credentials:edit
-EDITOR='echo "devise_pepper: KJIJUIOJJeioejrerjerijrjerzerae__" >>' bin/rails credentials:edit
-EDITOR='echo "dragonfly_secret: eorizjerjrzeurJJJIEI" >>' bin/rails credentials:edit
-EDITOR='echo "secret_key_base: 12EJJJEHHEHEHHHEHZZYYYY9993JJDEHH__" >>' bin/rails credentials:edit
+EDITOR='tee' bin/rails credentials:edit <<EOF
+recaptcha:
+  site_key: ""
+  secret_key: ""
+devise_pepper: KJIJUIOJJeioejrerjerijrjerzerae__
+dragonfly_secret: eorizjerjrzeurJJJIEI
+secret_key_base: 12EJJJEHHEHEHHHEHZZYYYY9993JJDEHH__
+EOF
 
 # Configures database
 cat <<EOF1 > config/database.yml
