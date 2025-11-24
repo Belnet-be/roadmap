@@ -68,6 +68,9 @@ class User < ApplicationRecord
          :rememberable, :trackable, :validatable, :omniauthable, :timeoutable,
          omniauth_providers: %i[shibboleth orcid]
 
+  # Placement of this include here is important because it depends on Devise being loaded (specifically :invitable)
+  include UserExtension
+
   # default user language to the default language
   attribute :language_id, :integer, default: -> { Language.default&.id }
 
