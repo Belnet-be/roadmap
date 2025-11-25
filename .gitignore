@@ -125,3 +125,6 @@ cloud9-start.sh
 vendor/bundle
 /env.sh
 #ugent - end
+
+.env.compose.roadmap
+.env.compose.postgres

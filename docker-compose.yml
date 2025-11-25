@@ -1,54 +1,75 @@
-version: "3.3"
 services:
-  web:
-    build:
-      context: .
-      dockerfile: Dockerfile-dev
-    working_dir: "/opt/roadmap"
+  roadmap:
+    build: .
+    image: roadmap
+    container_name: roadmap
+    profiles:
+      - prod
     volumes:
-      - .:/opt/roadmap
-    container_name: roadmap-dev
+      - roadmap-config:/opt/roadmap/config
     env_file:
-      - path: '/opt/roadmap/.env'
-        required: false
+      - .env.compose.roadmap
+      - .env.compose.postgres
     environment:
-      - MALLOC_ARENA_MAX=${MALLOC_ARENA_MAX:-2}
-      - RAILS_LOG_TO_STDOUT=${RAILS_LOG_TO_STDOUT:-true}
-      - DMP_LOCAL_LOGIN=${DMP_LOCAL_LOGIN:-true}
-      - DB_ADAPTER=${DB_ADAPTER:-mysql2}
-      - DB_PASSWORD=${DB_PASSWORD:-root}
-      - RAILS_ENV=development
-      - RAILS_SERVE_STATIC_FILES=${RAILS_SERVE_STATIC_FILES:-false}
-      - EXECJS_RUNTIME=Node
-      - WEB_CONCURRENCY=${WEB_CONCURRENCY:-0}
-      - RAILS_MAX_THREADS=${RAILS_MAX_THREADS:-1}
-      - DMP_SMTP_ADDRESS=mail
-      - DMP_SMTP_PORT=1025
-      - BUNDLE_PATH=vendor/bundle
-      - BINDING=0.0.0.0
-      - BUNDLE_PATH=vendor/bundle
-      - BUNDLE_WITH=mysql:puma:development:test:ci
-      - BUNDLE_WITHOUT=aws
-    entrypoint: "./entrypoint-dev.sh"
+      - ENV=prod
+    ports:
+      - 3000:3000
     depends_on:
-      - mysql
-    ports:
-      - "3000:3000"
+      - postgres
 
-  mysql:
-    image: mysql
-    container_name: mysql
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_HOST: "0.0.0.0"
-      MYSQL_DATABASE: roadmap_development
-    ports:
-      - 3307:3306
+  roadmap-dev:
+    build: .
+    image: roadmap
+    container_name: roadmap
+    profiles:
+      - dev
     volumes:
-      - ./tmp/mysql:/var/lib/mysql
+      - roadmap-config:/opt/roadmap/config
+    env_file:
+      - .env.compose.roadmap
+      - .env.compose.postgres
+    environment:
+      - BIND_ADDRESS=0.0.0.0
+      - RAILS_ENV=development
+    ports:
+      - 3000:3000
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres
+    container_name: postgres
+    profiles:
+      - prod
+      - dev
+    volumes:
+      - postgres-data:/var/lib/postgresql
+    env_file:
+      - .env.compose.postgres
+    ports:
+      - 5432:5432
 
   mail:
     image: mailhog/mailhog
-    container_name: mail
+    profiles:
+      - dev
+    container_name: mailhog
     ports:
       - 8025:8025
+
+  pgadmin:
+    image: dpage/pgadmin4
+    profiles:
+      - dev
+    container_name: pgadmin
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    env_file:
+      - .env.compose.postgres
+    ports:
+      - 80:80
+
+volumes:
+  postgres-data:
+  roadmap-config:
+  pgadmin-data:

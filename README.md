@@ -1,46 +1,130 @@
-## DMP Roadmap
+# DMP Roadmap
 
-[![Actions Status](https://github.com/DMPRoadmap/roadmap/actions/workflows/brakeman.yml/badge.svg?branch=main)](https://github.com/DMPRoadmap/roadmap/actions/workflows/brakeman.yml)
-[![Actions Status](https://github.com/DMPRoadmap/roadmap/actions/workflows/rubocop.yml/badge.svg?branch=main)](https://github.com/DMPRoadmap/roadmap/actions/workflows/rubocop.yml)
-[![Actions Status](https://github.com/DMPRoadmap/roadmap/actions/workflows/eslint.yml/badge.svg?branch=main)](https://github.com/DMPRoadmap/roadmap/actions/workflows/eslint.yml)
-[![Actions Status](https://github.com/DMPRoadmap/roadmap/actions/workflows/postgres.yml/badge.svg?branch=main)](https://github.com/DMPRoadmap/roadmap/actions/workflows/postgres.yml)
-[![Actions Status](https://github.com/DMPRoadmap/roadmap/actions/workflows/danger.yml/badge.svg?branch=main)](https://github.com/DMPRoadmap/roadmap/actions/workflows/danger.yml)
+[Original readme](https://github.com/DMPRoadmap/roadmap)
 
-<!-- [![Actions Status](https://github.com/DMPRoadmap/roadmap/actions/workflows/mysql.yml/badge.svg?branch=main)](https://github.com/DMPRoadmap/roadmap/actions/mysql.yml) -->
+## Up and running
 
-DMP Roadmap is a Data Management Planning tool. Management and development of DMP Roadmap is jointly provided by the Digital Curation Centre (DCC), http://www.dcc.ac.uk/, and the University of California Curation Center (UC3), http://www.cdlib.org/services/uc3/.
+The environment runs using q docker compose setup.  
+By default the docker compose starts a `postgres` server and a `roadmap` instance.  
 
-The tool has four main functions:
+A profile also needs to be passed.  
+Currently these profiles are either `prod` or `dev`.  
 
-1. To help create and maintain different versions of Data Management Plans;
-2. To provide useful guidance on data management issues and how to meet research funders' requirements;
-3. To export attractive and useful plans in a variety of formats;
-4. To allow collaborative work when creating Data Management Plans.
+```bash
+docker compose --profile=dev up -d
+```
 
-Click here for the latest [releases](https://github.com/DMPRoadmap/roadmap/releases/).
+The roadmap container crashing the first time it starts is normal.  
 
-#### Installation
-See the [Installation Guide](https://github.com/DMPRoadmap/roadmap/wiki/Installation) on the Wiki.
+### Config
 
-#### Troubleshooting
-See the [Troubleshooting Guide](https://github.com/DMPRoadmap/roadmap/wiki/Troubleshooting) on the Wiki.
+The compose setup requires 2 env files to be present:
 
-#### Support
-Issues should be reported here on [Github Issues](https://github.com/DMPRoadmap/roadmap/issues)
-Please be advised though that we can only provide limited support for your local installations.
-Any security patches and bugfixes will be applied to the most recent version, and we will endeavour to support migrations to the current release.
+- `.env.compose.postgres`:
 
-#### Contributing
-If you would like to contribute to the project. Please follow these steps to submit a contribution:
-* Comment on the Github issue (or create one if one does not exist) and let us know that you're working on it.
-* Fork the project (if you have not already) or rebase your fork so that it is up to date with the current repository's '_**development**_' branch
-* Create a new branch in your fork. This will ensure that you are able to work at your own pace and continue to pull in any updates made to this project.
-* Make your changes in the new branch
-* When you have finished your work, make sure that your version of the '_**development**_' branch is still up to date with this project. Then merge your new branch into your '_**development**_' branch.
-* Then create a new Pull Request (PR) from your branch to this project's '_**development**_' branch in GitHub
-* The project team will then review your PR and communicate with you to convey any additional changes that would ensure that your work adheres to our guidelines.
+This file seeds database name and credentials for both the `postgres` and the `roadmap` containers.  
 
-See the [Contribution Guide](https://github.com/DMPRoadmap/roadmap/blob/development/CONTRIBUTING.md) on the Wiki for more details.
+```bash
+POSTGRES_PASSWORD=
+POSTGRES_USER=dmponline_int
+POSTGRES_DB=dmponline_int
 
-#### License
-The DMP Roadmap project uses the <a href="./LICENSE.md">MIT License</a>.
+# pgadmin settings required for dev env
+PGADMIN_DEFAULT_EMAIL=
+PGADMIN_DEFAULT_PASSWORD=
+```
+
+- `.env.compose.roadmap`:
+
+This file seeds several roadmap settings.  
+
+```bash
+RAILS_LOG_LEVEL=debug
+RAILS_LOG_TO_STDOUT=true
+# Whether or not Rails will be serving your static assets 
+# RAILS_SERVE_STATIC_FILES=false
+# Maximum number of Puma threads
+RAILS_MAX_THREADS=5
+# Maximum number of Puma workers
+WEB_CONCURRENCY=2
+# The port and bind address puma will use to host the Rails app
+BIND_ADDRESS=127.0.0.1
+PORT=3000
+
+# Rails 6.1+ has a white-list of valid domains. You must set this for your production env!
+DMPROADMAP_HOST=localhost
+
+# Database settings.
+DB_ADAPTER=postgresql
+DB_HOST=postgres
+DB_POOL_SIZE=16
+
+# Translation IO variables. The Domain can be either `app` or `client` and is typically defined
+# when running `bin/rails translations:sync DOMAIN=app`. `client` will use any of your 
+# customized content in ./app/views/branded and `app` is for the core roadmap translations.
+# Include your Translation.io API key for the appropriate domains:
+#    app => TRANSLATION_API_ROADMAP
+#    client => TRANSLATION_API_CLIENT
+# Note: Domain = client does not work for this setup
+DOMAIN=app
+
+# Fixes a startup bug
+DMP_LOCAL_LOGIN=true
+
+# Site Credentials
+SITE_KEY=""
+SECRET_KEY=""
+DEVISE_PEPPER=
+DRAGONFLY_SECRET=
+SECRET_KEY_BASE=
+```
+
+### DB Config
+
+The db seed function from the original project have not been updated and thus currently it is recommended to request a dump of the test environment to upload to your postgres server.  
+
+Without a configured database, the ruby-on-rails will not start.  
+Once the postgres container has started.  
+
+```bash
+docker exec -i postgres bash -c "psql -U \$POSTGRES_USER -d \$POSTGRES_DB --echo-all" < /path/to/dump.sql
+```
+
+This will print the sql instructions, instruction per instruction.  
+Verify the database got populated before continuing.  
+
+After having configured all this run the docker compose up command again to relaunch the crashed roadmap container.  
+
+```bash
+docker compose --profile=dev up -d
+```
+
+It should soon be up and running.  
+Finaly, configure an admin user:
+
+```bash
+docker exec -ti roadmap bash
+```
+
+```bash
+bin/rails console
+
+user = User.new(email: "testuser@testuser.be")
+user.perms = Perm.all
+user.password =
+user.password_confirmation =
+
+user.save!
+```
+
+NOTE: Be sure to set the users password.  
+
+## Turning it off
+
+To turn off the system simply run docker compose down with the same profile as it was started with:
+
+```bash
+docker compose --profile=dev down
+```
+
+The data and configuration of postgres will persist for subsequent runs, as will the roadmap configuration.  

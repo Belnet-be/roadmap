@@ -1,39 +1,62 @@
-#syntax=docker/dockerfile:1
-FROM ruby:3.1.4 AS build
+FROM ruby:3.1.4
+
+RUN apt-get update
+RUN apt-get install -y autoconf \
+    automake curl gawk g++ \
+    imagemagick libffi-dev \
+    libgdbm-dev libreadline-dev \
+    libssl-dev libtool libyaml-dev \
+    shared-mime-info nodejs npm
+RUN npm install --global yarn
+
+RUN useradd -ms /bin/bash roadmap
+USER roadmap
 
 WORKDIR /opt/roadmap
-COPY . .
+RUN chown roadmap /opt/roadmap
 
-RUN apt-get update && \
-    gem install bundler:2.4.8 && \
-    rm -rf vendor/ && \
-    rm -f .bundle/config && \
-    gem install bundler:2.4.8 && \
-    bundle config build.nokogiri --use-system-libraries && \
-    bundle config path vendor/bundle && \
-    bundle config with pgsql mysql puma && \
-    bundle config without test development ci aws && \
-    bundle install && \
-    rm -rf app/assets/videos && \
-    rm -rf app/assets/builds && \
-    rm -rf public/assets/ && \
-    rm -rf node_modules/ && \
-    rm -rf .git/ && \
-    rm -rf tmp/ && \
-    rm -rf log/ && \
-    rm -rf vendor/bundle/ruby/3.1.0/cache/ && \
-    rm -rf /usr/local/bundle/cache/ && \
-    (bin/wkhtmltopdf || true) &&\
-    rm -f vendor/bundle/ruby/3.1.0/gems/wkhtmltopdf-binary-0.12.6.10/bin/*.gz && \
-    mv ./ugent/public/* ./public
+COPY --chown=roadmap:roadmap app ./app/
+COPY --chown=roadmap:roadmap config ./config/
+COPY --chown=roadmap:roadmap bin ./bin/
+COPY --chown=roadmap:roadmap db ./db/
+COPY --chown=roadmap:roadmap lib ./lib/
+COPY --chown=roadmap:roadmap public ./public/
+COPY --chown=roadmap:roadmap spec ./spec/
+COPY --chown=roadmap:roadmap ugent ./ugent/
+COPY --chown=roadmap:roadmap Gemfile .
+COPY --chown=roadmap:roadmap Gemfile.local .
+COPY --chown=roadmap:roadmap Gemfile.lock .
 
-FROM ruby:3.1.4-slim
+RUN gem install bundler -v 2.4.17
+RUN bundle install
 
-COPY --from=build /opt/roadmap /opt/roadmap
-COPY --from=build /usr/local/bundle /usr/local/bundle
+COPY --chown=roadmap:roadmap package.json .
+COPY --chown=roadmap:roadmap yarn.lock .
 
-RUN apt-get update && \
-  apt-get -y install vim libpq5 libmariadb3 libyaml-0-2 libxml2 openssl bison libjpeg62-turbo libpng16-16 imagemagick libxrender1 libxext6
+COPY --chown=roadmap:roadmap config.ru .
+COPY --chown=roadmap:roadmap Dangerfile .
+COPY --chown=roadmap:roadmap Rakefile .
+COPY --chown=roadmap:roadmap Procfile .
+COPY --chown=roadmap:roadmap Procfile.dev .
 
-# for testing purpose
-#CMD exec /bin/bash -c "trap : TERM INT; sleep infinity & wait"
+RUN cat <<EOF > config/database.yml
+defaults: &defaults
+  adapter: <%= ENV.fetch('DB_ADAPTER', 'postgresql') %>
+  encoding: <%= ENV.fetch('DB_ADAPTER', 'postgresql') == 'mysql2' ? 'utf8mb4' : '' %>
+  pool: <%= ENV.fetch('DB_POOL_SIZE', 16) %>
+  host: <%= ENV.fetch('DB_HOST', 'localhost') %>
+  port: <%= ENV.fetch('DB_PORT', '5432') %>
+  database: <%= ENV.fetch('POSTGRES_DB') %>
+  username: <%= ENV.fetch('POSTGRES_USER') %>
+  password: <%= ENV.fetch('POSTGRES_PASSWORD') %>
+
+development:
+  <<: *defaults
+
+test:
+  <<: *defaults
+EOF
+
+COPY --chown=roadmap:roadmap entrypoint.sh .
+
+CMD [ "bash", "/opt/roadmap/entrypoint.sh" ]
