@@ -61,12 +61,30 @@ namespace :belnet_dev do
   task destroy_test_users: :environment do
     puts "Destroying test users in the environment..."
 
+    # Find dummy users via email
+      
+    researcher_kul = User.find_by(email: 'researcher.kul@testuser-kul.be')
+    researcher_liege = User.find_by(email: 'researcher.liege@testuser-liege.be')
+    data_steward_liege = User.find_by(email: 'datasteward@testuser.be')
+    organisational_admin_liege = User.find_by(email: 'orgadmin@testuser.be')
+    super_admin_liege = User.find_by(email: 'superadmin@testuser.be')
+      
+    # Destroy dummy users
+      
     researcher_kul.destroy!
     researcher_liege.destroy!
     data_steward_liege.destroy!
     organisational_admin_liege.destroy!
     super_admin_liege.destroy!
- 
+      
+    # Remove org domains via name
+      
+    researcher_kul_org_domain = Ugent::OrgDomain.find_by(name: 'testuser-kul.be')
+    researcher_liege_org_domain = Ugent::OrgDomain.find_by(name: 'testuser-liege.be')
+    testuser_liege_org_domain = Ugent::OrgDomain.find_by(name: 'testuser.be')
+      
+    # Destroy org domains
+      
     researcher_kul_org_domain.destroy!
     researcher_liege_org_domain.destroy!
     testuser_liege_org_domain.destroy!
