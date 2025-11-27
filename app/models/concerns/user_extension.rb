@@ -36,30 +36,12 @@ module UserExtension
     end
   end
 
+  # There are 2 types of methods, class methods and instance methods
+  # Instance methods are called on instances of the class (user.method)
+
   class_methods do
-    def ensure_password
-      generate_password unless encrypted_password.present?
-    end
-
-    def generate_password
-      self.password = Devise.friendly_token[0, 20]
-      self.password_confirmation = password
-    end
-
-    def guest?
-      org_id == Org.guest.id
-    end
-
-    def self.nemo
-      'n.n.'
-    end
-
     def nemo?
       firstname.blank? || surname.blank? || firstname == User.nemo || surname == User.nemo
-    end
-
-    def self.identifier_scheme_orcid
-      @identifier_scheme_orcid ||= IdentifierScheme.find_by_name('orcid')
     end
 
     def identifier_orcid
@@ -67,22 +49,7 @@ module UserExtension
       identifiers.select { |id| id.identifier_scheme_id == scheme.id }.first
     end
 
-    def alternative_accounts
-      orcid = identifier_orcid
-
-      return [] if orcid.nil?
-
-      Identifier.where(
-        'identifier_scheme_id = ? AND identifiable_type = ? AND value = ? AND identifiable_id <> ?',
-        orcid.identifier_scheme_id,
-        'User',
-        orcid.value,
-        id
-      )
-                .map(&:identifiable)
-    end
-
-    def self.org_from_email(email)
+    def org_from_email(email)
       parts_email = email.split('@')
 
       org_domain = Ugent::OrgDomain.where(name: parts_email[1])
@@ -90,49 +57,85 @@ module UserExtension
       org_domain.present? ? org_domain.org : Org.guest
     end
 
-    def set_org_by_email
-      self.org = User.org_from_email(email)
-    end
-
-    def self.orcid_logo
+    def orcid_logo
       'https://orcid.org/sites/default/files/images/orcid_16x16.png'
     end
+  end
 
-    # get HTML snippet to show in docx/pdf for User
-    def orcid_link
-      orcid_id = identifier_orcid
-      return nil unless orcid_id.present?
+  def ensure_password
+    generate_password unless encrypted_password.present?
+  end
 
-      orcid_id = orcid_id.value
+  def generate_password
+    self.password = Devise.friendly_token[0, 20]
+    self.password_confirmation = password
+  end
 
-      str = []
+  def guest?
+    org_id == Org.guest.id
+  end
 
-      orcid_base_url = 'https://orcid.org'
+  def self.nemo
+    'n.n.'
+  end
 
-      str << '<a class="orcid-link" href="'
-      str << orcid_base_url
-      str << '"><img alt="ORCID logo" src="'
-      str << User.orcid_logo
-      str << '"></a>'
-      str << ' <a class="orcid-link" href="'
-      str << orcid_id
-      str << '" title="'
-      str << orcid_id
-      str << '">'
-      str << orcid_id
-      str << '</a>'
+  def self.identifier_scheme_orcid
+    @identifier_scheme_orcid ||= IdentifierScheme.find_by_name('orcid')
+  end
 
-      str.join('').html_safe
-    end
+  def alternative_accounts
+    orcid = identifier_orcid
 
-    def name_with_orcid
-      str = [name(false)]
+    return [] if orcid.nil?
 
-      l = orcid_link
+    Identifier.where(
+      'identifier_scheme_id = ? AND identifiable_type = ? AND value = ? AND identifiable_id <> ?',
+      orcid.identifier_scheme_id,
+      'User',
+      orcid.value,
+      id
+    )
+              .map(&:identifiable)
+  end
 
-      str << ' ' << l unless l.nil?
+  def set_org_by_email
+    self.org = User.org_from_email(email)
+  end
 
-      str.join('').html_safe
-    end
+  # get HTML snippet to show in docx/pdf for User
+  def orcid_link
+    orcid_id = identifier_orcid
+    return nil unless orcid_id.present?
+
+    orcid_id = orcid_id.value
+
+    str = []
+
+    orcid_base_url = 'https://orcid.org'
+
+    str << '<a class="orcid-link" href="'
+    str << orcid_base_url
+    str << '"><img alt="ORCID logo" src="'
+    str << User.orcid_logo
+    str << '"></a>'
+    str << ' <a class="orcid-link" href="'
+    str << orcid_id
+    str << '" title="'
+    str << orcid_id
+    str << '">'
+    str << orcid_id
+    str << '</a>'
+
+    str.join('').html_safe
+  end
+
+  def name_with_orcid
+    str = [name(false)]
+
+    l = orcid_link
+
+    str << ' ' << l unless l.nil?
+
+    str.join('').html_safe
   end
 end

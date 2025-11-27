@@ -50,6 +50,12 @@ class Perm < ApplicationRecord
     lazy_load('change_org_affiliation')
   end
 
+  def self.grant_api
+    lazy_load('grant_api_to_orgs')
+  end
+
+  # Non super admin perms
+
   def self.grant_permissions
     lazy_load('grant_permissions')
   end
@@ -68,10 +74,6 @@ class Perm < ApplicationRecord
 
   def self.change_org_details
     lazy_load('change_org_details')
-  end
-
-  def self.grant_api
-    lazy_load('grant_api_to_orgs')
   end
 
   def self.review_plans
