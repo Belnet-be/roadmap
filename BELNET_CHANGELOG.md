@@ -14,6 +14,7 @@
 - Upgrade to latest community version (from 4.2.0 to 5.0.2)
 - Moved code from large module_overrides.rb file to their own classes
 - Updated docker-compose.yml
+- Added script (task) for creating and removing test users from the database in 5 roles
  
 ### Known limitations
 - None
