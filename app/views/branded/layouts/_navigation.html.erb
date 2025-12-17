@@ -1,4 +1,4 @@
-<nav id="app-navbar" class="navbar navbar-expand-md navbar-branding">
+<nav id="app-navbar" class="navbar navbar-expand-md <%= @environment_navbar_background %>">
   <div class="container-fluid" >
     <div class="navbar-header d-sm-flex justify-content-sm-between">
       <!-- Brand and toggle get grouped for better mobile display -->
@@ -20,7 +20,7 @@
     <!-- Collect the nav links, forms, and other content for toggling -->
   
     <div class="collapse navbar-collapse" id="app-navbar-menu">
-      <ul class="navbar-nav">
+      <ul class="navbar-nav justify-content-center align-items-center">
         <% if user_signed_in? %>
           <li class="nav-item <%= ' active' if active_page?(plans_path, true) %>">
             <%= link_to _('My Dashboard'), plans_path, class: 'nav-link' %>
@@ -53,6 +53,7 @@
         <li class="nav-item <%= ' active' if active_page?(help_path, true) %>">
           <%= link_to _('Help'), help_path, class: 'nav-link' %>
         </li>
+        <%= render_belnet_environment_banner %>
       </ul>
 
       <ul class="navbar-nav ms-auto">

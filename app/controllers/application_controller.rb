@@ -11,6 +11,8 @@ class ApplicationController < ActionController::Base
 
   before_action :set_locale
 
+  before_action :set_environment_branding
+
   after_action :store_location
 
   include GlobalHelpers
@@ -26,6 +28,10 @@ class ApplicationController < ActionController::Base
   rescue_from Pundit::NotAuthorizedError, with: :user_not_authorized
 
   private
+
+  def set_environment_branding
+    @environment_navbar_background = ENV['DMP_ENVIRONMENT_COLOR_CODE'] || 'navbar-branding'
+  end
 
   def current_org
     current_user.org
