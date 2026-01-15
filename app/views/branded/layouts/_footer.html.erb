@@ -10,12 +10,12 @@
   <div class="container-fluid">
     <ul class="navbar-nav">
       <li class="nav-item"><%= link_to sanitize("&copy; 2004 - #{Time.now.year} #{Rails.configuration.x.organisation.name}"), "#{Rails.configuration.x.organisation.url}", class: 'nav-link' %></li>
-      <li class="nav-item">•</li>
       <li class="nav-item"><a class="nav-link" href="<%= about_us_path %>"><%= _('About') %></a></li>
       <li class="nav-item"><a class="nav-link" href="<%= contact_us %>"><%= _('Contact us') %></a></li>
       <li class="nav-item"><a class="nav-link" href="<%= terms_path %>"><%= _('Terms of use') %></a></li>
       <li class="nav-item"><a class="nav-link" href="<%= privacy_path %>"><%= _('Privacy statement') %></a></li>
-      <li class="nav-item"><a class="nav-link" href="https://github.com/DMPBelgium/roadmap"><%= _('GitHub') %></a></li>
+      <li class="nav-item"><a class="nav-link" href="https://github.com/Belnet-be/roadmap"><%= _('GitHub') %></a></li>
+      <li class="nav-item"><a class="nav-link" href="<%= version_path %>"><%= _('Version') %></a></li>
     </ul>
     <ul class="navbar-nav navbar-right">
       <li class="nav-item">
