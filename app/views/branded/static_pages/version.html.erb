@@ -14,10 +14,10 @@
       <div class="card-body">
         <dl class="row">
           <dt class="col-sm-3"><%= _('Application Name') %>:</dt>
-          <dd class="col-sm-9"><%= ApplicationService.application_name %></dd>
+          <dd class="col-sm-9"><%= @app_name %></dd>
 
           <dt class="col-sm-3"><%= _('Provider') %>:</dt>
-          <dd class="col-sm-9"><%= Rails.configuration.x.organisation.name %></dd>
+          <dd class="col-sm-9"><%= @provider %></dd>
 
           <dt class="col-sm-3"><%= _('Application Version') %>:</dt>
           <dd class="col-sm-9"><%= @app_version %></dd>

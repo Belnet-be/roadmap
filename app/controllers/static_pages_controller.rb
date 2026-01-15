@@ -15,9 +15,11 @@ class StaticPagesController < ApplicationController
   def help; end
 
   def version
+    @app_name = ApplicationService.application_name
+    @provider = Rails.configuration.x.organisation.name
     @ruby_version = RUBY_VERSION
     @rails_version = Rails.version
-    @app_version = ENV.fetch('BELNET_DMPONLINE_VERSION', 'unknown')
+    @app_version = ENV.fetch('BELNET_DMPONLINE_VERSION', 'Unknown')
     @build_date = "#{BOOTED_AT.strftime('%Y-%m-%d %H:%M:%S %Z')} (#{time_ago_in_words(BOOTED_AT)} ago)"
     @app_based_on = {
       'name' => 'DMPRoadmap v5.0.2',
