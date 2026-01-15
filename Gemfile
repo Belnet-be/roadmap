@@ -221,6 +221,10 @@ gem 'net-smtp'
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   gem 'byebug', platforms: %i[mri mingw x64_mingw]
+
+  # This gem brings back assigns to your controller tests as well as assert_template
+  # to both controller and integration tests.
+  gem 'rails-controller-testing'
 end
 
 group :test do
@@ -268,10 +272,6 @@ group :test do
 
   # A set of RSpec matchers for testing Pundit authorisation policies.
   gem 'pundit-matchers'
-
-  # This gem brings back assigns to your controller tests as well as assert_template
-  # to both controller and integration tests.
-  gem 'rails-controller-testing'
 
   # automating code review
   gem 'danger'
@@ -349,6 +349,6 @@ group :development do
   gem 'yard-tomdoc'
 end
 
-#ugent - start
+# ugent - start
 eval_gemfile 'Gemfile.local' if File.exist?('Gemfile.local')
-#ugent - end
+# ugent - end
