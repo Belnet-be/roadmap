@@ -31,6 +31,7 @@ development:
 
 test:
   <<: *defaults
+  database: roadmap_test
 EOF1
 
 yarnpkg install
