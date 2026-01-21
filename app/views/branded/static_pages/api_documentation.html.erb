@@ -1,0 +1,91 @@
+<% title _('API Documentation') %>
+<div class="row mt-5">
+  <div class="col-md-12">
+    <h1><%= _('DMPonline API Documentation') %></h1>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-12">
+    <div class="card mb-4">
+      <div class="card-header">
+        <h2 class="fontsize-h3 mb-0"><%= _('Introduction') %></h2>
+      </div>
+      <div class="card-body">
+        <p><%= _('DMPonline provides a suite of APIs to allow external systems to interact with the platform. This document outlines the available endpoints, the authentication process, and guidelines for testing these APIs using Postman.') %></p>
+      </div>
+    </div>
+
+    <div class="card mb-4">
+      <div class="card-header">
+        <h2 class="fontsize-h3 mb-0"><%= _('Prerequisites') %></h2>
+      </div>
+      <div class="card-body">
+        <p><%= _('To facilitate testing and development, we recommend using an API client.') %></p>
+        <ul>
+          <li><%= _('Postman: A free application that simplifies making API calls.') %></li>
+        </ul>
+        <p><%= _('Download Postman here:') %> <%= link_to 'https://www.postman.com/downloads/', 'https://www.postman.com/downloads/', target: '_blank' %></p>
+      </div>
+    </div>
+
+    <div class="card mb-4">
+      <div class="card-header">
+        <h2 class="fontsize-h3 mb-0"><%= _('Authentication and Setup') %></h2>
+      </div>
+      <div class="card-body">
+        <p><%= _('To interact with the API, you must first generate a valid Client ID and Client Secret.') %></p>
+        <h3><%= _('Generating API Credentials using API Client') %></h3>
+        <ol>
+          <li><%= _('Log in to your DMPonline instance with administrator privileges.') %></li>
+          <li><%= _('Navigate to the API Clients management page.') %></li>
+          <ul>
+            <li>
+                <%= _('Local Development:') %>
+                <code>http://localhost:3000/super_admin/api_clients</code>
+            </li>
+            <li>
+                <%= _('Production:') %>
+                <code>https://[Your-Domain]/super_admin/api_clients</code>
+            </li>
+          </ul>
+            <li>
+                <%= _('Click the Create API Client button in the top right corner.') %>
+            </li>
+          <li><%= _('Fill in the obligatory fields:') %></li>
+          <ul>
+            <li><%= _('Name: A descriptive name for the client.') %></li>
+            <li><%= _('Contact Email: The email address of the maintainer.') %></li>
+          </ul>
+          <li><%= _('Click Save.') %></li>
+        </ol>
+        <h3><%= _('Retrieving Credentials') %></h3>
+        <p><%= _('Once the client is created, the system will generate a client_id and client_secret. These are sent via email to the address you provided.') %></p>
+        <p><%= _('Note for Local Development: If you are running DMPonline locally, emails are captured by Mailhog. You can view the email at') %> <code>http://localhost:8025/</code>.</p>
+      </div>
+    </div>
+
+    <div class="card mb-4">
+      <div class="card-header">
+        <h2 class="fontsize-h3 mb-0"><%= _('Using the API') %></h2>
+      </div>
+      <div class="card-body">
+        <h3><%= _('Heartbeat Endpoint') %></h3>
+        <p><%= _('The heartbeat endpoint is a call to check the status of the server, it is purely informative and does not require authentication or authorization.') %></p>
+        <p><%= _('URL:') %> <code>http://localhost:3000/api/v1/heartbeat</code></p>
+        <p><%= _('Expected result:') %></p>
+        <p><%= _('Note: If this is not your result, make sure the server is up and running.') %></p>
+
+        <h3><%= _('Authentication / API Client Login') %></h3>
+        <p><%= _('URL:') %> <code>http://localhost:3000/api/v1/authenticate</code></p>
+        <p><%= _('For this request, you will need the credentials that you have received from the mail before in the previous steps.') %></p>
+        <p><%= _('Expected result:') %></p>
+
+        <h3><%= _('Get Plans') %></h3>
+        <p><%= _('URL:') %> <code>http://localhost:3000/api/v1/plans</code></p>
+        <p><%= _('An authenticated request can be made to retrieve a list of plans.') %></p>
+        <p><%= _('Expected result:') %></p>
+      </div>
+    </div>
+  </div>
+</div>

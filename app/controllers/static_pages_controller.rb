@@ -33,6 +33,9 @@ class StaticPagesController < ApplicationController
     end.sort_by { |gem| gem[:name].downcase }
   end
 
+  def api_documentation
+  end
+
   private
 
   def parse_package_json
