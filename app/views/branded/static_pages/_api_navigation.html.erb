@@ -1,0 +1,37 @@
+<ul class="nav nav-tabs" role="tablist">
+  <li role="presentation"
+      class="nav-item <%= active_page?(api_documentation_path) ? 'active' : '' %>">
+    <%= link_to _('Overview'),
+                api_documentation_path,
+                role: 'tab',
+                aria: { controls: 'content' },
+                class: 'nav-link' %>
+  </li>
+  <li role="presentation"
+      class="nav-item <%= active_page?(api_documentation_v0_path) ? 'active' : '' %>">
+    <%= link_to _('API v0'),
+                api_documentation_v0_path,
+                role: 'tab',
+                aria: { controls: 'content' },
+                class: 'nav-link' %>
+  </li>
+  <li role="presentation"
+      class="nav-item <%= active_page?(api_documentation_v1_path) ? 'active' : '' %>">
+    <%= link_to _('API v1'),
+                api_documentation_v1_path,
+                role: 'tab',
+                aria: { controls: 'content' },
+                class: 'nav-link' %>
+  </li>
+</ul>
+<div class="tab-content">
+  <div id="content" role="tabpanel" class="tab-pane active">
+    <div class="card card-default">
+      <div class="card-body">
+        <%= yield :api_documentation_tab_body %>
+      </div>
+    </div>
+  </div>
+</div>
+
+

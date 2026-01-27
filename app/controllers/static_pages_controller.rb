@@ -36,6 +36,12 @@ class StaticPagesController < ApplicationController
   def api_documentation
   end
 
+  def api_documentation_v0
+  end
+
+  def api_documentation_v1
+  end
+
   private
 
   def parse_package_json

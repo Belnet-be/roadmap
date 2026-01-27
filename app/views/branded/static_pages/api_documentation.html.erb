@@ -1,11 +1,17 @@
 <% title _('API Documentation') %>
-<div class="row mt-5">
+<div class="row">
   <div class="col-md-12">
     <h1><%= _('DMPonline API Documentation') %></h1>
   </div>
 </div>
 
-<div class="row">
+<%= render partial: 'api_navigation' %>
+
+<% content_for :api_documentation_tab_body do %>
+  <h2>
+    <%= _("API Documentation") %>
+  </h2>
+  <div class="row">
   <div class="col-md-12">
     <div class="card mb-4">
       <div class="card-header">
@@ -89,3 +95,6 @@
     </div>
   </div>
 </div>
+
+<% end %>
+

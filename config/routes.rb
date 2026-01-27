@@ -54,6 +54,8 @@ Rails.application.routes.draw do
   get 'help' => 'static_pages#help'
   get 'version' => 'static_pages#version'
   get 'api_documentation' => 'static_pages#api_documentation'
+  get 'api_documentation_v0' => 'static_pages#api_documentation_v0'
+  get 'api_documentation_v1' => 'static_pages#api_documentation_v1'
   get 'terms' => 'static_pages#termsuse'
   get 'privacy' => 'static_pages#privacy'
   get 'public_plans' => 'public_pages#plan_index'

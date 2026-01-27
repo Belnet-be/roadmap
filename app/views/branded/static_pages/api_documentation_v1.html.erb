@@ -1,0 +1,19 @@
+<% title _('API Documentation v1') %>
+<div class="row">
+  <div class="col-md-12">
+    <h1><%= _('DMPonline API Documentation') %></h1>
+  </div>
+</div>
+
+<%= render partial: 'api_navigation' %>
+
+<% content_for :api_documentation_tab_body do %>
+  <h2>
+    <%= _('API v1') %>
+  </h2>
+  <p>
+    <%= _("This version of the DMPRoadmap API complies with the RDA Common Standard Metadata schema v1.0. This schema is a recommendation for the transfer of DMP metadata between systems. The specification was created by the RDA Common Standard Working Group") %>
+  </p>
+<% end %>
+
+

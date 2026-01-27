@@ -1,0 +1,18 @@
+<% title _('API Documentation v0') %>
+<div class="row">
+  <div class="col-md-12">
+    <h1><%= _('DMPonline API Documentation') %></h1>
+  </div>
+</div>
+
+<%= render partial: 'api_navigation' %>
+
+<% content_for :api_documentation_tab_body do %>
+  <h2>
+    <%= _('API v0') %>
+  </h2>
+  <p>
+    <%= _("The API currently has 5 endpoints: Plans, Guidance, Templates, Departments and Statistics. In order to use the API, permissions for each endpoint must be given to your organization, and an API token must display on your 'Edit Profile' page. This token is used to authenticate, and is passed through as an Authorization Token header in calls made to the API. The API will always respond in JSON, and arguments to the Plans endpoint will also be in JSON.") %>
+  </p>
+<% end %>
+
