@@ -1,8 +1,8 @@
 <ul class="nav nav-tabs" role="tablist">
   <li role="presentation"
-      class="nav-item <%= active_page?(api_documentation_path) ? 'active' : '' %>">
+      class="nav-item <%= active_page?(api_documentation_overview_path) ? 'active' : '' %>">
     <%= link_to _('Overview'),
-                api_documentation_path,
+                api_documentation_overview_path,
                 role: 'tab',
                 aria: { controls: 'content' },
                 class: 'nav-link' %>

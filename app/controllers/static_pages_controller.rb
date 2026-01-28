@@ -33,7 +33,7 @@ class StaticPagesController < ApplicationController
     end.sort_by { |gem| gem[:name].downcase }
   end
 
-  def api_documentation
+  def api_documentation_overview
   end
 
   def api_documentation_v0

@@ -5,15 +5,163 @@
   </div>
 </div>
 
-<%= render partial: 'api_navigation' %>
-
 <% content_for :api_documentation_tab_body do %>
-  <h2>
-    <%= _('API v1') %>
-  </h2>
+  <h2><%= _('API v1') %></h2>
   <p>
-    <%= _("This version of the DMPRoadmap API complies with the RDA Common Standard Metadata schema v1.0. This schema is a recommendation for the transfer of DMP metadata between systems. The specification was created by the RDA Common Standard Working Group") %>
+    <%= _("This version of the DMPRoadmap API complies with the RDA Common Standard Metadata schema v1.0. This schema is a recommendation for the transfer of DMP metadata between systems. The specification was created by the RDA Common Standard Working Group.") %>
   </p>
+
+  <h2 class="mt-4"><%= _('Authentication and Setup') %></h2>
+  <p><%= _('To interact with the API, you must first generate a valid Client ID and Client Secret or an API Token. You have two options to get these credentials:') %></p>
+
+  <div class="row">
+    <div class="col-md-12">
+      
+      <div class="card mb-4">
+        <div class="card-header bg-light">
+          <h3 class="fontsize-h4 mb-0"><%= _('1: Generating API Credentials using API Client') %></h3>
+        </div>
+        <div class="card-body">
+          <ol>
+            <li><%= _('Log in to your DMPonline instance with administrator privileges.') %></li>
+            <li><%= _('Navigate to the API Clients management page:') %>
+              <ul>
+                <li><%= _('Local Development:') %> <code>http://localhost:3000/super_admin/api_clients</code></li>
+                <li><%= _('Production:') %> <code>https://[Your-Domain]/super_admin/api_clients</code></li>
+              </ul>
+            </li>
+            <li><%= _('Click the "Create API Client" button in the top right corner.') %></li>
+            <li><%= _('Fill in the obligatory fields (Name and Contact Email) and click Save.') %></li>
+          </ol>
+        </div>
+      </div>
+
+      <div class="card mb-4">
+        <div class="card-header bg-light">
+          <h3 class="fontsize-h4 mb-0"><%= _('2: Generating API Credentials as Org Admin') %></h3>
+        </div>
+        <div class="card-body">
+          <p><%= _('Login as an Org Admin and visit your profile edit page:') %> <code>http://localhost:3000/users/edit</code></p>
+          <p><%= _('Go to the "API Access" tab. Here you will see your "Access token". If one does not exist, click "Regenerate token".') %></p>
+        </div>
+      </div>
+
+      <h3 class="mt-4"><%= _('Retrieving Credentials') %></h3>
+      <p><%= _('Once the client is created, the system will generate a client_id and client_secret. These are sent via email to the address you provided.') %></p>
+      
+      <p><strong><%= _('Note for Local Development:') %></strong> <%= _('If running locally, emails are captured by') %> <a href="http://localhost:8025/" target="_blank">Mailhog</a>. <%= _('The email will contain a JSON object like this:') %></p>
+      <div class="container my-1 position-relative">
+        <pre class="p-3 bg-light"><code>{
+  "grant_type": "client_credentials",
+  "client_id": "long_string_with_client_id",
+  "client_secret": "long_string_with_client_secret"
+}</code></pre>
+      </div>
+              
+
+      <div class="card mb-4">
+        <div class="card-header bg-light">
+          <h3 class="fontsize-h4 mb-0"><%= _('Setting up Postman') %></h3>
+        </div>
+        <div class="card-body">
+          <p><%= _('We recommend organizing your requests into a Postman Collection. Set up environment variables for {{BASE_URL}} to switch between environments easily.') %></p>
+          <ul>
+            <li><strong><%= _('Local:') %></strong> <code>http://localhost:3000/</code></li>
+            <li><strong><%= _('Production:') %></strong> <code>https://[Your-Domain]/</code></li>
+          </ul>
+          <h3 class="mt-4"><%= _('Setting up a Collection in Postman (completely optional)') %></h3>
+          <p><%= _('Just a folder in Postman to organize your requests.') %></p>
+          <ol>
+            <li><%= _('Open Postman.') %></li>
+            <li><%= _('Create a new Collection (e.g., named "Belnet" or "DMPonline").') %></li>
+            <li><%= _('(Optional) Setup environment variables for {{BASE_URL}} to easily switch between local and production environments.') %></li>
+          </ol>
+
+          <h3 class="mt-4"><%= _('Adding Requests') %></h3>
+          <ol>
+            <li><%= _('Hover over your new Collection folder.') %></li>
+            <li><%= _('Select Add Request.') %></li>
+            <li><%= _('Create a separate “Request” for each endpoint you intend to test. (Can be in the same folder)') %></li>
+          </ol>
+        </div>
+
+      </div>
+
+
+      <h2 class="mt-4"><%= _('Using the API') %></h2>
+      <p><%= _('There are a couple endpoints out of the box from DMPonline, below will be a detailed guide to use these endpoints given the information we already know and have set up above. ') %></p>
+
+      <div class="card mb-4">
+        <div class="card-body">
+          <h3 class="fontsize-h4"><%= _('Heartbeat (Status Check)') %></h3>
+          <p><code>GET {{BASE_URL}}/api/v1/heartbeat</code></p>
+          <p><%= _('Informative call to check server status. Does not require authentication.') %></p>
+        </div>
+      </div>
+
+      <div class="card mb-4">
+        <div class="card-header">
+          <h3 class="fontsize-h4 mb-0"><%= _('Authentication / Login') %></h3>
+        </div>
+        <div class="card-body">
+          <h5><%= _('Option A: API Client Login') %></h5>
+          <p><code>POST {{BASE_URL}}/api/v1/authenticate</code></p>
+          <p><%= _('Use the JSON body received in your email (client_id, client_secret, and grant_type: client_credentials).') %></p>
+
+          <h5 class="mt-4"><%= _('Option B: Org Admin Login') %></h5>
+          <p><code>POST {{BASE_URL}}/api/v1/authenticate</code></p>
+          <div class="container my-1 position-relative">
+<pre class="p-3 bg-light"><code>{
+  "grant_type": "authorization_code",
+  "email": "YOUR_ADMIN_EMAIL",
+  "code": "YOUR_PERSONAL_API_TOKEN"
+}</code></pre>
+</div>
+          <p><strong><%= _('Important:') %></strong> <%= _('Both methods return an access_token. You must use this as a Bearer Token in the Authorization header for all subsequent requests.') %></p>
+        </div>
+      </div>
+
+      <div class="card mb-4">
+        <div class="card-header bg-light">
+          <h3 class="fontsize-h4 mb-0"><%= _('Templates and Plans') %></h3>
+        </div>
+        <div class="card-body">
+          <h5><%= _('Get Templates') %></h5>
+          <p><code>GET {{BASE_URL}}/api/v1/templates</code></p>
+          <p><%= _('Retrieves publicly visible funder templates or organizational templates.') %></p>
+
+          <h5 class="mt-4"><%= _('Get All Plans') %></h5>
+          <p><code>GET {{BASE_URL}}/api/v1/plans</code></p>
+          <p><%= _('Retrieves a list of plans you have access to. Supports pagination via page=[n] and per_page=[n].') %></p>
+
+          <h5 class="mt-4"><%= _('Get Specific Plan') %></h5>
+          <p><code>GET {{BASE_URL}}/api/v1/plans/PLAN_ID</code></p>
+        </div>
+      </div>
+
+      <div class="card mb-4">
+        <div class="card-header bg-light">
+          <h3 class="fontsize-h4 mb-0"><%= _('Creating a Plan') %></h3>
+        </div>
+        <div class="card-body">
+          <p><code>POST {{BASE_URL}}/api/v1/plans</code></p>
+          <p><%= _('Expects an RDA Common Standard JSON representation. Minimum requirement: title and contact email.') %></p>
+                    <div class="container my-1 position-relative">
+<pre class="p-3 bg-light"><code>{
+  "total_items": 1,
+  "items": [{
+    "dmp": {
+      "title": "Project Title",
+      "contact": { "mbox": "user@example.com", "name": "User Name" }
+    }
+  }]
+}</code></pre>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
 <% end %>
 
-
+<%= render partial: 'api_navigation' %>
