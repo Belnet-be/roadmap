@@ -16,6 +16,17 @@ module ApplicationHelper
     @devise_mapping ||= Devise.mappings[:user]
   end
 
+  def render_markdown(filename)
+    filepath = Rails.root.join(filename)
+    if File.exist?(filepath)
+      content = File.read(filepath)
+      # Parse markdown and make HTML safe
+      Kramdown::Document.new(content).to_html.html_safe
+    else
+      'Content not found.'
+    end
+  end
+
   # Determines whether or not the URL path passed matches with the full path (including
   # params) of the last URL requested. See
   # http://api.rubyonrails.org/classes/ActionDispatch/Request.html#method-i-fullpath

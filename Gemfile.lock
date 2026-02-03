@@ -697,6 +697,7 @@ DEPENDENCIES
   jsbundling-rails
   jwt
   kaminari
+  kramdown
   ledermann-rails-settings
   listen
   mail (= 2.7.1)

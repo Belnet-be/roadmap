@@ -203,6 +203,10 @@ gem 'httparty'
 # Autoload dotenv in Rails. (https://github.com/bkeepers/dotenv)
 gem 'dotenv-rails'
 
+# kramdown is yet-another-markdown-parser but fast, pure Ruby, using a strict syntax
+# definition and supporting several common extensions.
+gem 'kramdown'
+
 gem 'activerecord_json_validator'
 
 # We need to freeze the mail gem version as the recently released 2.8.0 triggers an exception

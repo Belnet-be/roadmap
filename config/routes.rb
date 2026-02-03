@@ -56,6 +56,7 @@ Rails.application.routes.draw do
   get 'api_documentation_overview' => 'static_pages#api_documentation_overview'
   get 'api_documentation_v0' => 'static_pages#api_documentation_v0'
   get 'api_documentation_v1' => 'static_pages#api_documentation_v1'
+  get 'belnet_changelog' => 'static_pages#belnet_changelog'
   get 'terms' => 'static_pages#termsuse'
   get 'privacy' => 'static_pages#privacy'
   get 'public_plans' => 'public_pages#plan_index'

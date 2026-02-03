@@ -42,6 +42,9 @@ class StaticPagesController < ApplicationController
   def api_documentation_v1
   end
 
+  def belnet_changelog
+  end
+
   private
 
   def parse_package_json
