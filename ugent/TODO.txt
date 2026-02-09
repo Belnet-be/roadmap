@@ -14,6 +14,10 @@
   data contact and principal investigator not recognisable
   in plan.roles
 
+  - remove config/custom.yml?
+
+  in that case, also remove load statement from config/initializers/ugent.rb
+
 - show archived notes?
 
   https://github.com/DMPRoadmap/roadmap/issues/2817

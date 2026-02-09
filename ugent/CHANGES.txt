@@ -320,6 +320,18 @@
     
     * completely overrides callback phase of authentication with orcid (`handle_orcid`)
 
+     * adds relation question_options_themes to QuestionOption
+
+    this reuses an old (custom!) generated table options_themes,
+    that was not part of DMPOnline_v4, but which we added ourselves.
+
+    this way we can attach themes to question options
+
+    These associations can only be read/updated in the RailsAdmin controller
+    http://localhost:3000/admin/question_option
+
+    This is only needed for the specialized GDPR export
+
   * adds methods to model User:
 
     * alternative_accounts
@@ -334,6 +346,32 @@
 
     * prevent someone from editing email attribute
     * change attribute org_id based on old table organisation_domains (now: table ugent_org_domains)
+
+* adds method gdpr? to model Template:
+
+    a template contains privacy related data
+    if one of the questions contains the theme "UGENT:DATA"
+
+    only needed for gdpr export
+
+  * adds methods Plan.ld_uri and Plan.ld
+
+    See also:
+      - app/controllers/ugent/internal/exports_controller.rb
+      - app/models/ugent/rest_user.rb
+
+    only needed for gdpr export
+
+  * adds method Plan#old_project_groups
+
+    only used in Plan.ld (see above)
+
+  * adds methods Org.internal_export_dir and Org.internal_export_url
+
+    internal_export_dir: returns the directory for that organisation where its JSON exports are stored
+    internal_export_url: return the base_url for that organisation's JSON exports
+
+    only used in Plan.ld and Ugent::Internal::ExportsController
 
   * add hook User.after_save:
 
@@ -403,6 +441,29 @@
     * only the OTHER users accounts are shown in the select box
     * happens when already logged in
 
+    app/controllers/ugent/internal/exports_controller.rb
+
+  added controller (deprecated), only for gdpr export
+
+  provides access to JSON exports of plans per organisation in /opt/dmponline_internal
+
+  authenticates with basic auth
+
+  username and password is drawn from attributes "code" and "token" of model Ugent::RestUser respectively
+
+  When removed, remove also:
+    - methods Plan.ld_uri and Plan.ld_uri in config/initializers/ugent.rb
+    - file lib/tasks/ugent_deprecated.rake
+    - routes starting with /internal from config/routes/ugent.rb
+    - model Ugent::RestUser
+
+  See also:
+
+    - app/models/ugent/rest_user.rb
+    - config/routes/ugent.rb
+    - config/initializers/ugent.rb
+    - lib/tasks/ugent_deprecated.rake
+
 - app/controllers/ugent/roles_controller.rb
 
   added controller
@@ -419,6 +480,63 @@
 
   remove when fixed upstream
 
+  app/models/ugent/rest_user.rb
+
+  ugent specific model
+
+  only used for gdpr export
+
+  Stores authentication information for REST users that want to access Ugent::Internal::ExportsController
+
+  Attributes:
+
+    org_id
+    code
+    token
+
+  See also:
+
+    - app/controllers/ugent/internal/exports_controller.rb
+    - config/routes/ugent.rb
+    - config/initializers/ugent.rb
+    - lib/tasks/ugent_deprecated.rake
+
+- lib/tasks/ugent.rake
+
+  ugent specific rake tasks
+
+  deprecated
+
+  to remove?
+
+- lib/tasks/ugent_deprecated.rake
+
+  ugent specific rake tasks
+
+  only used for gdpr export
+
+  generates JSON export of plans per organisation, and stores them in /opt/dmponline_internal
+
+  See also:
+    - app/controllers/ugent/internal/exports_controller.rb
+    - config/routes/ugent.rb
+    - app/models/ugent/rest_user.rb
+    - config/initializers/ugent.rb
+    - lib/tasks/ugent_deprecated.rake
+
+- app/models/ugent/log.rb
+
+  reuse old table "logs", now under the name "ugent_logs"
+  Used in the past to track deleted "projects"
+
+  Now one cannot delete plans anymore: the "remove" button
+    simply removes all collaborators (plan.roles = [])
+  Of course a plan can be removed in the CLI
+
+  Still usefull?
+
+  Can be removed
+
 - app/models/ugent/org_domain.rb
 
   reuse old table "organisation_domains",
@@ -428,6 +546,15 @@
 
   See also:
     - rails_admin
+
+    config/custom.yml
+
+  adds ugent specific configuration toe
+
+  not used at the moment
+
+  if removed, also remove load statement from config/initializers/ugent.rb
+
 
 - app/views/branded/orgs/_profile_form.html.erb
 
@@ -585,6 +712,23 @@
   overrides app/views/user_mailer/_email_signature.html.erb
 
   just changes the team name
+
+  ugent/etc/systemd/roadmap.service
+
+  Systemd Service file
+
+  Copied to /etc/systemd/system at rpm build time
+
+  Deprecated, now it is deployed with docker
+
+- ugent/etc/systemd/roadmap.conf
+
+  Default EnvironmentFile, to be used in /etc/systemd/system/roadmap.service.
+  Overrides must be put in /etc/sysconfig/roadmap.conf at the server.
+
+  Note that `env.sh` in the root folder is also used.
+
+  Deprecated, now it is deployed with docker
 
 - ugent/public/packs and ugent/public/assets
 
