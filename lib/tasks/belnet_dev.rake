@@ -17,9 +17,10 @@ namespace :belnet_dev do
 
       kul_org = Org.where(managed: true, abbreviation: 'KUL').first
       liege_org = Org.where(managed: true, abbreviation: 'ULiege').first
+      ugent_org = Org.where(managed: true, abbreviation: 'UGent').first
 
-      unless kul_org || liege_org
-        puts 'KUL or ULiege organisation not found. Please ensure these organisations exist before running this task.'
+      unless kul_org || liege_org || ugent_org
+        puts 'KUL or ULiege or UGent organisation not found. Please ensure these organisations exist before running this task.'
         exit
       end
 
@@ -45,6 +46,13 @@ namespace :belnet_dev do
         testuser_liege_org_domain = Ugent::OrgDomain.new(name: 'testuser.be', org_id: liege_org.id)
         testuser_liege_org_domain.save!
         puts 'Created org domain testuser.be'
+      end
+
+      unless Ugent::OrgDomain.exists?(name: 'testuser-ugent.be')
+        puts 'Creating org domain testuser-ugent.be'
+        testuser_ugent_org_domain = Ugent::OrgDomain.new(name: 'testuser-ugent.be', org_id: ugent_org.id)
+        testuser_ugent_org_domain.save!
+        puts 'Created org domain testuser-ugent.be'
       end
 
       # Create default users
@@ -99,8 +107,20 @@ namespace :belnet_dev do
         puts 'Created Super Admin Liege'
       end
 
+      # Superadmin for UGent
+      unless User.exists?(email: 'superadmin.ugent@testuser-ugent.be')
+        puts 'Creating Super Admin UGent'
+        super_admin_ugent = User.new(email: 'superadmin.ugent@testuser-ugent.be', firstname: 'David', surname: 'Wilson')
+        super_admin_ugent.perms = Perm.all
+        super_admin_ugent.password = super_admin_ugent.email
+        super_admin_ugent.password_confirmation = super_admin_ugent.email
+        super_admin_ugent.save!
+        puts 'Created Super Admin UGent'
+      end
+
       puts 'Setting up test users & org domains completed.'
     end
+
     task destroy_test_users: :environment do
       puts 'Destroying test users in the environment...'
 
@@ -111,6 +131,7 @@ namespace :belnet_dev do
       data_steward_liege = User.find_by(email: 'datasteward@testuser.be')
       organisational_admin_liege = User.find_by(email: 'orgadmin@testuser.be')
       super_admin_liege = User.find_by(email: 'superadmin@testuser.be')
+      super_admin_ugent = User.find_by(email: 'superadmin.ugent@testuser-ugent.be')
 
       # Destroy dummy users
 
@@ -139,11 +160,17 @@ namespace :belnet_dev do
         puts 'Destroyed super_admin_liege'
       end
 
+      if super_admin_ugent
+        super_admin_ugent.destroy!
+        puts 'Destroyed super_admin_ugent'
+      end
+
       # Remove org domains via name
 
       researcher_kul_org_domain = Ugent::OrgDomain.find_by(name: 'testuser-kul.be')
       researcher_liege_org_domain = Ugent::OrgDomain.find_by(name: 'testuser-liege.be')
       testuser_liege_org_domain = Ugent::OrgDomain.find_by(name: 'testuser.be')
+      testuser_ugent_org_domain = Ugent::OrgDomain.find_by(name: 'testuser-ugent.be')
 
       # Destroy org domains
 
@@ -160,6 +187,11 @@ namespace :belnet_dev do
       if testuser_liege_org_domain
         testuser_liege_org_domain.destroy!
         puts 'Destroyed testuser_liege_org_domain'
+      end
+
+      if testuser_ugent_org_domain
+        testuser_ugent_org_domain.destroy!
+        puts 'Destroyed testuser_ugent_org_domain'
       end
 
       puts 'Destroying test users completed.'
