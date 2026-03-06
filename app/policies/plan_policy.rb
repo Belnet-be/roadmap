@@ -82,4 +82,8 @@ class PlanPolicy < ApplicationPolicy
   def organisationally_or_publicly_visible?
     @user.present?
   end
+
+  def create_new_version?
+    @record.editable_by?(@user.id)
+  end
 end

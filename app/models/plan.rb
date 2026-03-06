@@ -152,6 +152,12 @@ class Plan < ApplicationRecord
 
   validates :complete, inclusion: { in: BOOLEAN_VALUES }
 
+  validates :belnet_version, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
+
+  validates :belnet_version, presence: { message: PRESENCE_MESSAGE }
+
+  validates :belnet_family_id, numericality: { only_integer: true, greater_than_or_equal_to: 0 }, allow_nil: true
+
   validate :end_date_after_start_date
 
   # ==========
@@ -434,6 +440,35 @@ class Plan < ApplicationRecord
       reviewer.present? &&
       reviewer.org_id == owner&.org_id &&
       reviewer.can_review_plans?
+  end
+
+  def latest_belnet_version
+    # family_id can be nil so in that case it is just 0
+    return 0 if belnet_family_id.nil?
+
+    Plan.where(belnet_family_id: belnet_family_id).maximum(:belnet_version)
+  end
+
+  # Creates a new version of the plan with the same family_id and an incremented version number.
+  # The original plan will have its family_id set if it doesn't already have one.
+  # Returns the new version of the plan.
+  def create_plan_with_new_version!
+    # Transaction to ensure that the original plan and the new version are updated/created together
+    transaction do
+      # Handle family_id logic on the original
+      update!(belnet_family_id: id) if belnet_family_id.nil?
+
+      # Build the new version
+      new_version = dup
+      new_version.assign_attributes(
+        belnet_version: latest_belnet_version + 1,
+        belnet_family_id: belnet_family_id || id
+      )
+
+      new_version.save!
+      # Return the new version
+      new_version
+    end
   end
 
   # the datetime for the latest update of this plan

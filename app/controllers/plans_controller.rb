@@ -214,6 +214,8 @@ class PlansController < ApplicationController
 
     @research_domains = ResearchDomain.all.order(:label)
 
+    @latest_belnet_version = @plan.latest_belnet_version
+
     respond_to :html
   end
   # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
@@ -462,6 +464,21 @@ class PlansController < ApplicationController
   rescue ActiveRecord::RecordNotFound
     flash[:alert] = format(_('There is no plan associated with id %{<id}>s'), id: params[:id])
     redirect_to(action: :index)
+  end
+
+  # POST /plans/:id/create_new_version
+
+  def create_new_version
+    original_plan = Plan.find(params[:id])
+    authorize original_plan
+
+    new_version = original_plan.create_plan_with_new_version!
+
+    flash[:notice] = "Version #{new_version.belnet_version} has been created and is awaiting review."
+    redirect_to action: :index
+  rescue ActiveRecord::RecordInvalid => e
+    flash[:alert] = "Failed to create version: #{e.message}"
+    redirect_to action: :index
   end
 
   # ============================
