@@ -82,6 +82,9 @@ import './src/superAdmin/notifications/edit';
 import './src/superAdmin/themes/newEdit';
 import './src/superAdmin/users/edit';
 
+// Stimulus controllers
+import "./controllers"
+
 // We need to startup Rails' Unobtrusive JS and Turbo.
 // ActiveStorage and ActionCable would also need
 // to be in here if we decide to implement either.

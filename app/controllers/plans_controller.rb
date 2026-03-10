@@ -472,7 +472,11 @@ class PlansController < ApplicationController
     original_plan = Plan.find(params[:id])
     authorize original_plan
 
-    new_version = original_plan.create_plan_with_new_version!
+    # Capture reason from the Stimulus modal
+    new_version = original_plan.create_plan_with_new_version!(
+      reason: params[:belnet_reason],
+      current_user: current_user
+    )
 
     flash[:notice] = "Version #{new_version.belnet_version} has been created and is awaiting review."
     redirect_to action: :index

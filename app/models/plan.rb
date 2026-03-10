@@ -452,7 +452,7 @@ class Plan < ApplicationRecord
   # Creates a new version of the plan with the same family_id and an incremented version number.
   # The original plan will have its family_id set if it doesn't already have one.
   # Returns the new version of the plan.
-  def create_plan_with_new_version!
+  def create_plan_with_new_version!(reason: nil, current_user: nil)
     # Transaction to ensure that the original plan and the new version are updated/created together
     transaction do
       # Handle family_id logic on the original
@@ -462,7 +462,9 @@ class Plan < ApplicationRecord
       new_version = dup
       new_version.assign_attributes(
         belnet_version: latest_belnet_version + 1,
-        belnet_family_id: belnet_family_id || id
+        belnet_family_id: belnet_family_id || id,
+        belnet_reason: reason || '',
+        belnet_created_by: current_user&.id
       )
 
       new_version.save!
