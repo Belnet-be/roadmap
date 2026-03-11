@@ -442,6 +442,24 @@ class Plan < ApplicationRecord
       reviewer.can_review_plans?
   end
 
+  # determines if the plan is submittable by the specified user
+  #
+  # user_id - The Integer id for the user
+  #
+  # Returns Boolean
+  def submittable_by?(user_id)
+    # # a plan is submittable by everyone in the organisation, and all super admins
+    submitter = User.find_by(id: user_id)
+    # return false if submitter.blank?
+
+    # # True if the user is a super admin
+    # return true if submitter.can_super_admin?
+
+    # # True if the user belongs to the same organization as the plan
+    # submitter.org_id == org_id
+    editable_by?(user_id) || submitter.can_super_admin? || (submitter.can_org_admin? && submitter.org_id == org_id)
+  end
+
   def latest_belnet_version
     # family_id can be nil so in that case it is just 0
     return 0 if belnet_family_id.nil?

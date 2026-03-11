@@ -84,6 +84,6 @@ class PlanPolicy < ApplicationPolicy
   end
 
   def create_new_version?
-    @record.editable_by?(@user.id)
+    @record.submittable_by?(@user.id)
   end
 end
