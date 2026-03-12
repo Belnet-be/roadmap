@@ -158,6 +158,12 @@ class Plan < ApplicationRecord
 
   validates :belnet_family_id, numericality: { only_integer: true, greater_than_or_equal_to: 0 }, allow_nil: true
 
+  # belnet_reason cannot be nil or empty if the belnet_version is greater than 0
+  # length between 10 and 1000 characters if present and show message if not valid
+  validates :belnet_reason, length: { minimum: 10, maximum: 500 },
+                            presence: { message: 'Reason must be present and between 10 and 500 characters.' },
+                            if: :belnet_version_larger_than_zero?
+
   validate :end_date_after_start_date
 
   # ==========
@@ -260,6 +266,10 @@ class Plan < ApplicationRecord
     plan_copy = plan.dup
     plan_copy.title = "Copy of #{plan.title}"
     plan_copy.feedback_requested = false
+    # Reset Belnet versioning fields for the copy
+    plan_copy.belnet_version = 0
+    plan_copy.belnet_family_id = nil
+
     plan_copy.save!
     # Copy newly generated Id to the identifier
     plan_copy.identifier = plan_copy.id.to_s
@@ -277,6 +287,14 @@ class Plan < ApplicationRecord
   # ===========================
   # = Public instance methods =
   # ===========================
+
+  # Returns true if the belnet_version is present and greater than 0, otherwise false
+  # This is used to determine if the belnet_reason is required for the plan.
+  #
+  # Returns Boolean
+  def belnet_version_larger_than_zero?
+    belnet_version.present? && belnet_version > 0
+  end
 
   ##
   # Proxy through to the template settings (or defaults if this plan doesn't
@@ -651,7 +669,7 @@ class Plan < ApplicationRecord
 
   # Helper method to convert the grant id value entered by the user into an Identifier
   # works with both controller params or an instance of Identifier
-  # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity
+  # rubocop:disable Metrics/CyclomaticComplexity
   def grant=(params)
     val = params.present? ? params[:value] : nil
     current = grant
@@ -667,7 +685,7 @@ class Plan < ApplicationRecord
     current = Identifier.create(identifiable: self, value: val)
     self.grant_id = current.id
   end
-  # rubocop:enable Metrics/AbcSize, Metrics/CyclomaticComplexity
+  # rubocop:enable Metrics/CyclomaticComplexity
 
   private
 

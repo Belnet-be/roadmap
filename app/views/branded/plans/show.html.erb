@@ -5,7 +5,7 @@
       <div class="d-flex justify-content-between align-items-center">
         <h1><%= @plan.title %></h1>
         <% if @plan.submittable_by?(current_user.id) %>
-        <%= button_to "Submit For Review (Create Version #{@latest_belnet_version + 1})", 
+        <%= button_to _("Create Snapshot (Version #{@latest_belnet_version + 1})"), 
                       create_new_version_plan_path(@plan), 
                       method: :post, 
                       class: "btn btn-primary",
@@ -28,7 +28,7 @@
                 <textarea class="form-control" 
                           rows="5" 
                           data-confirm-modal-target="input"
-                          placeholder="<%= _('Provide a reason...') %>"></textarea>
+                          placeholder="<%= _('Provide a valid reason... (10-500 characters)') %>"></textarea>
                 
                 <div data-confirm-modal-target="errorMessage" 
                     class="text-danger d-none" 
@@ -47,7 +47,7 @@
             <button type="button" 
                     class="btn btn-primary" 
                     data-action="confirm-modal#submitWithReason">
-              <%= _('Submit For Review') %>
+              <%= _('Create Snapshot') %>
             </button>
           </div>
         </div>
