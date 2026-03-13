@@ -17,6 +17,21 @@ module Paginable
       )
     end
 
+    def history
+      @plan = Plan.find(params[:id])
+      authorize @plan
+
+      scope = Plan.where(belnet_family_id: @plan.id)
+
+      paginable_renderise(
+        partial: 'history',
+        scope: scope,
+        locals: { plan: @plan },
+        query_params: { sort_field: 'plans.updated_at', sort_direction: :desc },
+        format: :json
+      )
+    end
+
     # GET /paginable/plans/organisationally_or_publicly_visible/:page
     def organisationally_or_publicly_visible
       authorize Plan

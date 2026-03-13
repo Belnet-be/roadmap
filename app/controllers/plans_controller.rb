@@ -384,6 +384,13 @@ class PlansController < ApplicationController
     render 'download'
   end
 
+  def history
+    @plan = Plan.find(params[:id])
+    authorize @plan
+    @versions = Plan.where(belnet_family_id: @plan.id).order(belnet_version: :desc)
+    render 'history'
+  end
+
   # POST /plans/:id/duplicate
   # rubocop:disable Metrics/AbcSize
   def duplicate
@@ -458,7 +465,6 @@ class PlansController < ApplicationController
   def overview
     plan = Plan.includes(template: [:org, { phases: { sections: :questions } }])
                .find(params[:id])
-
     authorize plan
     render(:overview, locals: { plan: plan })
   rescue ActiveRecord::RecordNotFound

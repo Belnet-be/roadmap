@@ -1,0 +1,32 @@
+<div class="table-responsive">
+  <table class="table table-hover tablesorter">
+    <thead>
+      <tr>
+        <th scope="col" class="text-center"><%= _('Version') %></th>
+        <th scope="col" class="text-center"><%= _('Owners') %></th>
+        <th scope="col" class="date-column"><%= _('Snapshot Date') %><%= paginable_sort_link('plans.updated_at') %></th>
+        <th scope="col" class="text-center sorter-false"><%= _('Actions') %></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% scope.each do |plan_version| %>
+        <tr>
+          <td>
+            <% if plan_version.is_plan_live_version? %>
+              <%= _('LIVE') %>
+            <% else %>
+              <%= plan_version.belnet_version %>
+            <% end %>
+          </td>
+          <td class="text-center"><%= _('Coming soon') %></td>
+          <td data-toggle="tooltip" title="<%= l plan_version.created_at, format: :long %>">
+            <%= _('%{time} ago') % { time: time_ago_in_words(plan_version.created_at) } %>
+          </td>
+          <td class="text-center">
+            <%= link_to plan_version.is_plan_live_version? ? _('Edit') : _('View'), plan_path(plan_version), class: "dmp_table_link" %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

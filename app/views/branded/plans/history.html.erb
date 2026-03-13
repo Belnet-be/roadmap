@@ -1,0 +1,30 @@
+<% title "#{@plan.title} - #{_('History')}" %>
+
+<div class="row">
+  <div class="col-md-12">
+    <h1><%= @plan.title %></h1>
+  </div>
+</div>
+
+<% content_for :plan_tab_body do %>
+  <h2><%= _('Plan History') %></h2>
+  <p><%= _('Here you can view snapshots of this plan. These can no longer be modified.') %></p>
+
+  <%= paginable_renderise(
+    partial: '/branded/paginable/plans/history', 
+    controller: 'paginable/plans',
+    action: 'history',
+    id: @plan.id,
+    remote: true,
+    scope: Plan.where(belnet_family_id: @plan.id),
+    query_params: { id: @plan.id },
+    locals: { plan: @plan }
+  ) %>
+<% end %>
+
+<div class="row">
+  <div class="col-md-12">
+    <%= render layout: 'navigation', locals: { plan: @plan } do %>
+    <% end %>
+  </div>
+</div>

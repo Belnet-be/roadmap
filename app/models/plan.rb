@@ -162,7 +162,7 @@ class Plan < ApplicationRecord
   # length between 10 and 1000 characters if present and show message if not valid
   validates :belnet_reason, length: { minimum: 10, maximum: 500 },
                             presence: { message: 'Reason must be present and between 10 and 500 characters.' },
-                            if: :belnet_version_larger_than_zero?
+                            if: :is_plan_live_version?
 
   validate :end_date_after_start_date
 
@@ -287,14 +287,6 @@ class Plan < ApplicationRecord
   # ===========================
   # = Public instance methods =
   # ===========================
-
-  # Returns true if the belnet_version is present and greater than 0, otherwise false
-  # This is used to determine if the belnet_reason is required for the plan.
-  #
-  # Returns Boolean
-  def belnet_version_larger_than_zero?
-    belnet_version.present? && belnet_version > 0
-  end
 
   ##
   # Proxy through to the template settings (or defaults if this plan doesn't
@@ -466,16 +458,14 @@ class Plan < ApplicationRecord
   #
   # Returns Boolean
   def submittable_by?(user_id)
-    # # a plan is submittable by everyone in the organisation, and all super admins
     submitter = User.find_by(id: user_id)
-    # return false if submitter.blank?
+    return false if submitter.blank?
 
-    # # True if the user is a super admin
-    # return true if submitter.can_super_admin?
+    is_authorized_user = editable_by?(user_id) ||
+                         submitter.can_super_admin? ||
+                         (submitter.can_org_admin? && submitter.org_id == org_id)
 
-    # # True if the user belongs to the same organization as the plan
-    # submitter.org_id == org_id
-    editable_by?(user_id) || submitter.can_super_admin? || (submitter.can_org_admin? && submitter.org_id == org_id)
+    is_authorized_user && is_plan_live_version?
   end
 
   def latest_belnet_version
@@ -483,6 +473,10 @@ class Plan < ApplicationRecord
     return 0 if belnet_family_id.nil?
 
     Plan.where(belnet_family_id: belnet_family_id).maximum(:belnet_version)
+  end
+
+  def is_plan_live_version?
+    belnet_version == 0
   end
 
   # Creates a new version of the plan with the same family_id and an incremented version number.

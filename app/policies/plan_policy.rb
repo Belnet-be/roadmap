@@ -86,4 +86,8 @@ class PlanPolicy < ApplicationPolicy
   def create_new_version?
     @record.submittable_by?(@user.id)
   end
+
+  def history?
+    @record.readable_by?(@user.id)
+  end
 end

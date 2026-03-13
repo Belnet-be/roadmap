@@ -141,6 +141,7 @@ Rails.application.routes.draw do
       post 'visibility', constraints: { format: [:json] }
       post 'set_test', constraints: { format: [:json] }
       get 'overview'
+      get 'history'
     end
 
     # Ajax endpoint for ResearchOutput.output_type selection
@@ -222,6 +223,8 @@ Rails.application.routes.draw do
     end
     # Paginable actions for plans
     resources :plans, only: [] do
+      get ':id/history/:page', action: :history, on: :collection, as: :history
+
       get 'privately_visible/:page',
           action: :privately_visible, on: :collection, as: :privately_visible
 
