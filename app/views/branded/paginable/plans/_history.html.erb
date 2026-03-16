@@ -2,27 +2,31 @@
   <table class="table table-hover tablesorter">
     <thead>
       <tr>
-        <th scope="col" class="text-center"><%= _('Version') %></th>
-        <th scope="col" class="text-center"><%= _('Owners') %></th>
-        <th scope="col" class="date-column"><%= _('Snapshot Date') %><%= paginable_sort_link('plans.updated_at') %></th>
-        <th scope="col" class="text-center sorter-false"><%= _('Actions') %></th>
+        <th scope="col" class="text-center text-nowrap">
+          <span class="d-inline-flex align-items-center gap-1"><%= _('Version') %><%= paginable_sort_link('plans.belnet_version') %></span>
+        </th>
+        <th scope="col" class="text-nowrap"><%= _('Snapshot Date') %></th>
+        <th scope="col" class="text-center sorter-false"><%= _('Reason') %></th>
+        <th scope="col" class="text-center text-nowrap sorter-false"><%= _('Actions') %></th>
       </tr>
     </thead>
     <tbody>
       <% scope.each do |plan_version| %>
         <tr>
-          <td>
+          <td class="text-nowrap text-center">
             <% if plan_version.is_plan_live_version? %>
-              <%= _('LIVE') %>
+              <%= _("#{plan_version.belnet_version} (LIVE)") %>
             <% else %>
               <%= plan_version.belnet_version %>
             <% end %>
           </td>
-          <td class="text-center"><%= _('Coming soon') %></td>
-          <td data-toggle="tooltip" title="<%= l plan_version.created_at, format: :long %>">
+          <td class="text-nowrap" data-toggle="tooltip" title="<%= l plan_version.created_at, format: :long %>">
             <%= _('%{time} ago') % { time: time_ago_in_words(plan_version.created_at) } %>
           </td>
-          <td class="text-center">
+          <td title="<%= plan_version.belnet_reason %>">
+            <%= plan_version.belnet_reason %>
+          </td>
+          <td class="text-center text-nowrap">
             <%= link_to plan_version.is_plan_live_version? ? _('Edit') : _('View'), plan_path(plan_version), class: "dmp_table_link" %>
           </td>
         </tr>

@@ -18,9 +18,11 @@ module OrgAdmin
       @super_admin = current_user.can_super_admin?
       @clicked_through = params[:click_through].present?
       @plans = if @super_admin
-                 Plan.all.page(1).includes(:template, roles: { user: :org })
+                 puts 'Super admin access: showing all live versions of plans'
+                 Plan.live_versions.page(1).includes(:template, roles: { user: :org })
                else
-                 current_user.org.org_admin_plans.page(1)
+                 puts "Org admin access: showing live versions of plans for org #{current_user.org.name}"
+                 current_user.org.org_admin_plans.where(belnet_version: 0).page(1)
                end
     end
     # rubocop:enable Metrics/AbcSize

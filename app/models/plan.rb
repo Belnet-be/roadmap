@@ -160,9 +160,10 @@ class Plan < ApplicationRecord
 
   # belnet_reason cannot be nil or empty if the belnet_version is greater than 0
   # length between 10 and 1000 characters if present and show message if not valid
-  validates :belnet_reason, length: { minimum: 10, maximum: 500 },
-                            presence: { message: 'Reason must be present and between 10 and 500 characters.' },
-                            if: :is_plan_live_version?
+  validates :belnet_reason,
+            length: { minimum: 10, maximum: 500 },
+            presence: { message: 'Reason must be present and between 10 and 500 characters.' },
+            on: :versioning
 
   validate :end_date_after_start_date
 
@@ -222,6 +223,8 @@ class Plan < ApplicationRecord
   scope :overview, lambda { |id|
     includes(:phases, :sections, :questions, template: [:org]).find(id)
   }
+
+  scope :live_versions, -> { where(belnet_version: 0) }
 
   ##
   # Settings for the template
@@ -488,6 +491,9 @@ class Plan < ApplicationRecord
       # Handle family_id logic on the original
       update!(belnet_family_id: id) if belnet_family_id.nil?
 
+      # TODO: disallow the saving of new version if a plan in an array of the same
+      # family_ids already has a plan with belnet_version 0
+
       # Build the new version
       new_version = dup
       new_version.assign_attributes(
@@ -497,7 +503,7 @@ class Plan < ApplicationRecord
         belnet_created_by: current_user&.id
       )
 
-      new_version.save!
+      new_version.save!(context: :versioning)
       # Return the new version
       new_version
     end
