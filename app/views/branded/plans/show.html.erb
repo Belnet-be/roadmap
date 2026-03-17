@@ -3,7 +3,15 @@
   <div class="row">
     <div class="col-md-12">
       <div class="d-flex justify-content-between align-items-center">
-        <h1><%= @plan.title %></h1>
+        <div>
+          <h1><%= @plan.title %></h1>
+          <% if @plan.belnet_version == 0 %>
+            <h4 class="fs-5"><%= _('LIVE version') %></h4>
+          <% else %>
+            <h4 class="fs-5">Version <%= @plan.belnet_version %></h4>
+          <% end %>
+        </div>
+        
         <% if @plan.submittable_by?(current_user.id) %>
         <%= button_to _("Create Snapshot (Version #{@latest_belnet_version + 1})"), 
                       create_new_version_plan_path(@plan), 

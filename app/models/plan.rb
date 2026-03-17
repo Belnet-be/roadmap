@@ -504,6 +504,9 @@ class Plan < ApplicationRecord
       )
 
       new_version.save!(context: :versioning)
+
+      # Add the current user as the creator of the new version
+      new_version.add_user!(current_user.id, :creator) if current_user.present?
       # Return the new version
       new_version
     end
