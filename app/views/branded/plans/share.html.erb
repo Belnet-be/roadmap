@@ -1,0 +1,8 @@
+<%= render partial: 'header', locals: { plan: @plan, title_suffix: _('Share') } %>
+
+
+<div class="row">
+  <div class="col-md-12">
+    <%= render partial: 'share_form', layout: 'navigation', locals: { plan: @plan } %>
+  </div>
+</div>

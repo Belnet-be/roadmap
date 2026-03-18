@@ -15,7 +15,7 @@ class PlansController < ApplicationController
   # rubocop:disable Metrics/AbcSize
   def index
     authorize Plan
-    @plans = Plan.includes(:roles).active(current_user).page(1)
+    @plans = Plan.live_versions.includes(:roles).active(current_user).page(1)
     @organisationally_or_publicly_visible = if current_user.org.is_other?
                                               []
                                             else
@@ -166,6 +166,11 @@ class PlansController < ApplicationController
     ).find(params[:id])
     authorize @plan
 
+    @partial = if @plan.editable_by?(current_user.id) && @plan.is_plan_live_version?
+                 'edit_details'
+               else
+                 'show_details'
+               end
     @visibility = if @plan.visibility.present?
                     @plan.visibility.to_s
                   else
@@ -213,8 +218,6 @@ class PlansController < ApplicationController
                 end
 
     @research_domains = ResearchDomain.all.order(:label)
-
-    @latest_belnet_version = @plan.latest_belnet_version
 
     respond_to :html
   end
@@ -463,10 +466,10 @@ class PlansController < ApplicationController
 
   # GET /plans/:id/overview
   def overview
-    plan = Plan.includes(template: [:org, { phases: { sections: :questions } }])
-               .find(params[:id])
-    authorize plan
-    render(:overview, locals: { plan: plan })
+    @plan = Plan.includes(template: [:org, { phases: { sections: :questions } }])
+                .find(params[:id])
+    authorize @plan
+    render(:overview, locals: { plan: @plan })
   rescue ActiveRecord::RecordNotFound
     flash[:alert] = format(_('There is no plan associated with id %{<id}>s'), id: params[:id])
     redirect_to(action: :index)
@@ -550,7 +553,7 @@ class PlansController < ApplicationController
   end
 
   def render_phases_edit(plan, phase, guidance_groups)
-    readonly = !plan.editable_by?(current_user.id)
+    readonly = !plan.editable_by?(current_user.id) || !plan.is_plan_live_version?
     # Since the answers have been pre-fetched through plan (see Plan.load_for_phase)
     # we create a hash whose keys are question id and value is the answer associated
     answers = plan.answers.each_with_object({}) { |a, m| m[a.question_id] = a }
