@@ -390,7 +390,7 @@ class PlansController < ApplicationController
   def history
     @plan = Plan.find(params[:id])
     authorize @plan
-    @versions = Plan.where(belnet_family_id: @plan.id).order(belnet_version: :desc)
+    @versions = @plan.plan_versions.order(belnet_version: :desc)
     render 'history'
   end
 
@@ -484,7 +484,8 @@ class PlansController < ApplicationController
     # Capture reason from the Stimulus modal
     new_version = original_plan.create_plan_with_new_version!(
       reason: params[:belnet_reason],
-      current_user: current_user
+      current_user: current_user,
+      original_plan: original_plan
     )
 
     flash[:notice] = "Version #{new_version.belnet_version} has been created and is awaiting review."

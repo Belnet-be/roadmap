@@ -40,8 +40,8 @@
     </li>
   <% end %>
   <% if plan.readable_by?(current_user.id) %>
-    <li role="presentation" class="nav-item <%= (active_page?(history_plan_path(plan.belnet_family_id || plan.id)) ? 'active' : '') %>">
-      <%= link_to _('History'), history_plan_path(plan.belnet_family_id || plan.id), role: 'tab', 
+    <li role="presentation" class="nav-item <%= (active_page?(history_plan_path(plan.id)) ? 'active' : '') %>">
+      <%= link_to _('History'), history_plan_path(plan.id), role: 'tab', 
                   aria: { controls: "content" }, class: 'nav-link' %>
     </li>
   <% end %>

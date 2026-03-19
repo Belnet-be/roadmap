@@ -478,6 +478,12 @@ class Plan < ApplicationRecord
     Plan.where(belnet_family_id: belnet_family_id).maximum(:belnet_version)
   end
 
+  def plan_versions
+    return [] if belnet_family_id.nil?
+
+    Plan.where(belnet_family_id: belnet_family_id).where('belnet_version > ?', 0)
+  end
+
   def is_plan_live_version?
     belnet_version == 0
   end
@@ -485,7 +491,7 @@ class Plan < ApplicationRecord
   # Creates a new version of the plan with the same family_id and an incremented version number.
   # The original plan will have its family_id set if it doesn't already have one.
   # Returns the new version of the plan.
-  def create_plan_with_new_version!(reason: nil, current_user: nil)
+  def create_plan_with_new_version!(reason: nil, current_user: nil, original_plan: nil)
     # Transaction to ensure that the original plan and the new version are updated/created together
     transaction do
       # Handle family_id logic on the original
@@ -502,6 +508,19 @@ class Plan < ApplicationRecord
         belnet_reason: reason || '',
         belnet_created_by: current_user&.id
       )
+
+      # Copy over the answers, guidance groups and roles (users) to the new version
+      original_plan.answers.each do |answer|
+        answer_copy = Answer.deep_copy(answer)
+        new_version.answers << answer_copy
+      end
+      original_plan.guidance_groups.each do |guidance_group|
+        new_version.guidance_groups << guidance_group if guidance_group.present?
+      end
+      original_plan.roles.each do |role|
+        role_copy = role.dup
+        new_version.roles << role_copy
+      end
 
       new_version.save!(context: :versioning)
 

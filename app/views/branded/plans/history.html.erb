@@ -1,8 +1,8 @@
-<%= render partial: 'header', locals: { plan: @plan, title_suffix: _('History') } %>
+<%= render partial: 'shared/header', locals: { plan: @plan, title_suffix: _('History') } %>
 
 <% content_for :plan_tab_body do %>
   <h2><%= _('Plan History') %></h2>
-  <p><%= _('Here you can view snapshots of this plan. These can no longer be modified.') %></p>
+  <p><%= _('Here you can view versions of this plan. These can no longer be modified.') %></p>
 
   <%= paginable_renderise(
     partial: '/branded/paginable/plans/history', 
@@ -10,7 +10,7 @@
     action: 'history',
     id: @plan.id,
     remote: true,
-    scope: Plan.where(belnet_family_id: @plan.id),
+    scope: @versions,
     query_params: { id: @plan.id },
     locals: { plan: @plan }
   ) %>

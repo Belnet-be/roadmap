@@ -11,14 +11,18 @@
             <h4 class="fs-5">Version <%= plan.belnet_version %></h4>
           <% end %>
         </div>
-        
-        <% if plan.submittable_by?(current_user.id) %>
-        <%= button_to _("Create Snapshot (Version #{plan.latest_belnet_version + 1})"), 
-                      create_new_version_plan_path(plan), 
-                      method: :post, 
-                      class: "btn btn-primary",
-                      data: { action: "click->confirm-modal#confirm" } %>
-        <% end %>
+        <div class="d-flex gap-2">
+          <% if plan.editable_by?(current_user.id) && !plan.is_plan_live_version? %>
+            <%= link_to "Edit", plan_path(plan.belnet_family_id), class: "btn btn-secondary" %>
+          <% end %>
+          <% if plan.submittable_by?(current_user.id) %>
+            <%= button_to _("Create Version (V#{plan.latest_belnet_version + 1})"), 
+                          create_new_version_plan_path(plan), 
+                          method: :post, 
+                          class: "btn btn-primary",
+                          data: { action: "click->confirm-modal#confirm" } %>
+          <% end %>
+        </div>
       </div>
     </div>
   </div>
@@ -45,6 +49,9 @@
                 </div>
               </div>
             </div>
+            <div>
+              <p><%= _("Don't forget to save your changes before creating a version!") %></p>
+            </div>
           </div>
           <div class="modal-footer">
             <button type="button" 
@@ -55,7 +62,7 @@
             <button type="button" 
                     class="btn btn-primary" 
                     data-action="confirm-modal#submitWithReason">
-              <%= _('Create Snapshot') %>
+              <%= _('Create Version') %>
             </button>
           </div>
         </div>

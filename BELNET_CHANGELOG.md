@@ -15,7 +15,7 @@
 - /version page that shows technical information about DMPonline & versions of dependencies
 - /api_documentation page with tabs that outlines the usecases for the API's that are available in DMPonline
 - /belnet_changelog page with changes from Belnet to DMPonline
-- versioning of DMP's, create snapshots of your DMP's and view a DMP's history at /plans/:id/history
+- versioning of DMP's, create versions of your DMP's and view a DMP's history at /plans/:id/history
 
 ### Resolved issues
 - Admin panel is now accessible. Caused by timestamptz (Time Stamp Time Zone) not correctly being able to be read
@@ -27,7 +27,7 @@
 - Added script (task) for creating and removing test users from the database in 5 roles
 
 ### Known limitations
-- Versioning does not yet include any reviewingprocesses, simply a static snapshot of a DMP in readonly format
+- Versioning does not yet include any reviewingprocesses, simply a static version of a DMP in readonly format
 
 </div>
 </div>
