@@ -1,0 +1,25 @@
+<% title _('Compare Plans') %>
+<div data-controller="confirm-modal">
+  <div class="row">
+    <div class="col-md-12">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <h1><%= base_plan.title %></h1>
+          <% if base_plan.belnet_version == 0 %>
+            <h4 class="fs-5"><%= _('LIVE version') %></h4>
+          <% else %>
+            <h4 class="fs-5">Version <%= base_plan.belnet_version %></h4>
+          <% end %>
+        </div>
+        <div>
+          <h1><%= secondary_plan.title %></h1>
+          <% if secondary_plan.belnet_version == 0 %>
+            <h4 class="fs-5"><%= _('LIVE version') %></h4>
+          <% else %>
+            <h4 class="fs-5">Version <%= secondary_plan.belnet_version %></h4>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

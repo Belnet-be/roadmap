@@ -1,0 +1,24 @@
+<%= render partial: 'shared/header', locals: { plan: @plan, title_suffix: _('History') } %>
+
+<% content_for :plan_tab_body do %>
+  <h2><%= _('Plan History') %></h2>
+  <p><%= _('Here you can view versions of this plan. These can no longer be modified.') %></p>
+
+  <%= paginable_renderise(
+    partial: '/branded/paginable/plans/history', 
+    controller: 'paginable/plans',
+    action: 'history',
+    id: @plan.id,
+    remote: true,
+    scope: @versions,
+    query_params: { id: @plan.id },
+    locals: { plan: @plan }
+  ) %>
+<% end %>
+
+<div class="row">
+  <div class="col-md-12">
+    <%= render layout: 'navigation', locals: { plan: @plan } do %>
+    <% end %>
+  </div>
+</div>

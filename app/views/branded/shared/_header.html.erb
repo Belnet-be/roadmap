@@ -12,6 +12,22 @@
           <% end %>
         </div>
         <div class="d-flex gap-2">
+          <% if plan.readable_by?(current_user.id) %>
+            <div class="dropdown">
+              <a href="#" class="dropdown-toggle align-center btn btn-secondary text-white" role="button" id="reference-menu" data-bs-toggle="dropdown" data-bs-display="static" aria-haspopup="true" aria-expanded="false">
+                <%= _("Compare") %>
+                <span class="caret"></span>
+              </a>
+              <ul class="dropdown-menu dropdown-menu-end" 
+                  aria-labelledby="reference-menu">
+                <% plan.plan_versions.each do |version| %>
+                  <li>
+                    <%= link_to version.belnet_version, diff_show_plan_path(head_plan: version, base_plan: plan), class: 'dropdown-item' %>
+                  </li>
+                <% end %>
+              </ul>
+            </div>
+          <% end %>
           <% if plan.editable_by?(current_user.id) && !plan.is_plan_live_version? %>
             <%= link_to "Edit", plan_path(plan.belnet_family_id), class: "btn btn-secondary" %>
           <% end %>

@@ -133,6 +133,13 @@ Rails.application.routes.draw do
     resources :research_outputs, except: %i[show]
 
     member do
+      # Diff routes for custom Belnet implementation of the plans diff feature.
+      get 'diff/show', to: 'plans/diff#show', as: :diff_show
+      get 'diff/share', to: 'plans/diff#share', as: :diff_share
+      get 'diff/download', to: 'plans/diff#download', as: :diff_download
+      get 'diff/overview', to: 'plans/diff#overview', as: :diff_overview
+      get 'diff/history', to: 'plans/diff#history', as: :diff_history
+
       get 'answer'
       get 'share'
       get 'request_feedback'
