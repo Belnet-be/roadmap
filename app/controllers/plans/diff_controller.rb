@@ -125,7 +125,7 @@ module Plans
                                  end
 
       @secondary_plan_research_domains = ResearchDomain.all.order(:label)
-
+      @navigation_button = diff_show_plan_path(head_plan: @secondary_plan, base_plan: @base_plan)
       respond_to :html
     end
 
