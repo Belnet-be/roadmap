@@ -3,20 +3,42 @@
   <div class="row">
     <div class="col-md-12">
       <div class="d-flex justify-content-between align-items-center">
-        <div>
+        <div class="d-flex flex-column align-items-start">
           <h1><%= base_plan.title %></h1>
-          <% if base_plan.belnet_version == 0 %>
-            <h4 class="fs-5"><%= _('LIVE version') %></h4>
-          <% else %>
-            <h4 class="fs-5">Version <%= base_plan.belnet_version %></h4>
+          <% if base_plan.readable_by?(current_user.id) %>
+            <div class="dropdown">
+              <a href="#" class="dropdown-toggle align-center btn btn-secondary text-white" role="button" id="reference-menu" data-bs-toggle="dropdown" data-bs-display="static" aria-haspopup="true" aria-expanded="false">
+                <%= base_plan.is_plan_live_version? ? _('LIVE') : _("Version #{base_plan.belnet_version}") %>
+                <span class="caret"></span>
+              </a>
+              <ul class="dropdown-menu" 
+                  aria-labelledby="reference-menu">
+                <% base_plan.plan_versions_with_live_version.each do |version| %>
+                  <li>
+                    <%= link_to version.is_plan_live_version? ? _('LIVE') : version.belnet_version, diff_show_plan_path(head_plan: base_plan, base_plan: version), class: 'dropdown-item' %>
+                  </li>
+                <% end %>
+              </ul>
+            </div>
           <% end %>
         </div>
-        <div>
+        <div class="d-flex flex-column align-items-end">
           <h1><%= secondary_plan.title %></h1>
-          <% if secondary_plan.belnet_version == 0 %>
-            <h4 class="fs-5"><%= _('LIVE version') %></h4>
-          <% else %>
-            <h4 class="fs-5">Version <%= secondary_plan.belnet_version %></h4>
+          <% if secondary_plan.readable_by?(current_user.id) %>
+            <div class="dropdown">
+              <a href="#" class="dropdown-toggle align-center btn btn-secondary text-white" role="button" id="reference-menu" data-bs-toggle="dropdown" data-bs-display="static" aria-haspopup="true" aria-expanded="false">
+                <%= secondary_plan.is_plan_live_version? ? _('LIVE') : _("Version #{secondary_plan.belnet_version}") %>
+                <span class="caret"></span>
+              </a>
+              <ul class="dropdown-menu dropdown-menu-end" 
+                  aria-labelledby="reference-menu">
+                <% secondary_plan.plan_versions_with_live_version.each do |version| %>
+                  <li>
+                    <%= link_to version.is_plan_live_version? ? _('LIVE') : version.belnet_version, diff_show_plan_path(head_plan: version, base_plan: secondary_plan), class: 'dropdown-item' %>
+                  </li>
+                <% end %>
+              </ul>
+            </div>
           <% end %>
         </div>
       </div>
