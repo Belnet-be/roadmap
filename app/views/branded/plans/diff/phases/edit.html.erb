@@ -1,0 +1,31 @@
+<%= render partial: 'header', locals: { secondary_plan: @secondary_plan, base_plan: @base_plan } %>
+
+<div class="row">
+  <div class="col-md-6 pe-md-4">
+    <% puts "sjamala" %>
+    <%= render partial: 'plans/diff/phases/edit_plan_answers',
+               layout: 'plans/diff/navigation',
+               locals: {
+                 plan: base_plan,
+                 phase: base_plan_phase,
+                 answers: base_plan_answers,
+                 readonly: base_plan_readonly,
+                 base_template_org: base_plan_base_template_org,
+                 guidance_presenter: base_plan_guidance_presenter,
+                 supposed_base_plan: @base_plan, 
+                 supposed_head_plan: @secondary_plan,
+               } %>
+  </div>
+  <div class="col-md-6">
+    <%= render partial: 'plans/diff/phases/edit_plan_answers',
+               layout: 'plans/diff/navigation',
+               locals: {
+                 plan: secondary_plan,
+                 phase: secondary_plan_phase,
+                 answers: secondary_plan_answers,
+                 readonly: secondary_plan_readonly,
+                 base_template_org: secondary_plan_base_template_org,
+                 guidance_presenter: secondary_plan_guidance_presenter,supposed_base_plan: @secondary_plan, supposed_head_plan: @base_plan,
+               } %>
+  </div>
+</div>

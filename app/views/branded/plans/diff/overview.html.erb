@@ -1,9 +1,12 @@
 <%# locals: { plan } %>
 
-<%= render partial: 'shared/header', locals: { plan: @plan, title_suffix: _('Overview') } %>
+<%= render partial: 'header', locals: { secondary_plan: @secondary_plan, base_plan: @base_plan } %>
 
 <div class="row">
-  <div class="col-md-12">
-    <%= render partial: 'overview_details', layout: 'navigation', locals: { plan: plan } %>
+  <div class="col-md-6 pe-md-4">
+    <%= render partial: 'overview_details', layout: 'navigation', locals: { supposed_base_plan: @secondary_plan, supposed_head_plan: @base_plan, plan: @base_plan } %>
+  </div>
+    <div class="col-md-6">
+    <%= render partial: 'overview_details', layout: 'navigation', locals: { supposed_base_plan: @base_plan, supposed_head_plan: @secondary_plan, plan: @secondary_plan } %>
   </div>
 </div>

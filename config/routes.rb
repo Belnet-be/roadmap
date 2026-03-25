@@ -135,10 +135,8 @@ Rails.application.routes.draw do
     member do
       # Diff routes for custom Belnet implementation of the plans diff feature.
       get 'diff/show', to: 'plans/diff#show', as: :diff_show
-      get 'diff/share', to: 'plans/diff#share', as: :diff_share
-      get 'diff/download', to: 'plans/diff#download', as: :diff_download
       get 'diff/overview', to: 'plans/diff#overview', as: :diff_overview
-      get 'diff/history', to: 'plans/diff#history', as: :diff_history
+      get 'diff/edit', to: 'plans/diff#edit', as: :diff_edit
 
       get 'answer'
       get 'share'

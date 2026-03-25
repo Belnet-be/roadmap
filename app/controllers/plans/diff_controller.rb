@@ -11,6 +11,7 @@ module Plans
 
     after_action :verify_authorized, except: [:overview]
     before_action :set_plans
+    before_action :set_navigation_buttons
 
     # GET /plans
     def show
@@ -125,8 +126,60 @@ module Plans
                                  end
 
       @secondary_plan_research_domains = ResearchDomain.all.order(:label)
-      @navigation_button = diff_show_plan_path(head_plan: @secondary_plan, base_plan: @base_plan)
       respond_to :html
+    end
+
+    def overview
+      authorize @base_plan
+
+      render(:overview, locals: { plan: @base_plan })
+    rescue ActiveRecord::RecordNotFound
+      flash[:alert] = format(_('There is no plan associated with id %{<id}>s'), id: params[:id])
+      redirect_to(action: :index)
+    end
+
+    def edit
+      # Base plan
+      puts 'sjamala'
+      @base_plan = Plan.includes(
+        { template: {
+          phases: {
+            sections: {
+              questions: %i[question_format annotations]
+            }
+          }
+        } },
+        { answers: :notes }
+      )
+                       .find(params[:base_plan])
+      authorize @base_plan
+      base_plan_phase_id = params[:phase_id].to_i
+      base_plan_phase = @base_plan.template.phases.find { |p| p.id == base_plan_phase_id }
+      raise ActiveRecord::RecordNotFound if base_plan_phase.nil?
+
+      base_plan_guidance_groups = GuidanceGroup.where(published: true, id: @base_plan.guidance_group_ids)
+
+      # Secondary plan
+      @secondary_plan = Plan.includes(
+        { template: {
+          phases: {
+            sections: {
+              questions: %i[question_format annotations]
+            }
+          }
+        } },
+        { answers: :notes }
+      )
+                            .find(params[:head_plan])
+      authorize @secondary_plan
+      secondary_plan_phase_id = params[:phase_id].to_i
+      secondary_plan_phase = @secondary_plan.template.phases.find { |p| p.id == secondary_plan_phase_id }
+      raise ActiveRecord::RecordNotFound if secondary_plan_phase.nil?
+
+      secondary_plan_guidance_groups = GuidanceGroup.where(published: true, id: @secondary_plan.guidance_group_ids)
+
+      render_phases_edit(@base_plan, base_plan_phase, base_plan_guidance_groups, @secondary_plan, secondary_plan_phase,
+                         secondary_plan_guidance_groups)
     end
 
     private
@@ -138,6 +191,41 @@ module Plans
       @base_plan = Plan.includes(
         :guidance_groups, template: [:phases]
       ).find(params[:base_plan])
+    end
+
+    def set_navigation_buttons
+      @navigation_button_show = diff_show_plan_path(head_plan: @secondary_plan, base_plan: @base_plan)
+      @navigation_button_overview = diff_overview_plan_path(head_plan: @secondary_plan, base_plan: @base_plan)
+      @navigation_button_edit = diff_edit_plan_path(head_plan: @secondary_plan, base_plan: @base_plan,
+                                                    phase_id: @base_plan.template.phases.first.id)
+    end
+
+    def render_phases_edit(base_plan, base_plan_phase, base_plan_guidance_groups, secondary_plan, secondary_plan_phase,
+                           secondary_plan_guidance_groups)
+      base_plan_readonly = !base_plan.editable_by?(current_user.id) || !base_plan.is_plan_live_version?
+      secondary_plan_readonly = !secondary_plan.editable_by?(current_user.id) || !secondary_plan.is_plan_live_version?
+      # Since the answers have been pre-fetched through plan (see Plan.load_for_phase)
+      # we create a hash whose keys are question id and value is the answer associated
+      base_plan_answers = base_plan.answers.each_with_object({}) { |a, m| m[a.question_id] = a }
+      secondary_plan_answers = secondary_plan.answers.each_with_object({}) { |a, m| m[a.question_id] = a }
+
+      render('plans/diff/phases/edit', locals: {
+               base_plan_base_template_org: base_plan_phase.template.base_org,
+               base_plan: base_plan,
+               base_plan_phase: base_plan_phase,
+               base_plan_readonly: base_plan_readonly,
+               base_plan_guidance_groups: base_plan_guidance_groups,
+               base_plan_answers: base_plan_answers,
+               base_plan_guidance_presenter: GuidancePresenter.new(base_plan),
+               secondary_plan_base_template_org: secondary_plan_phase.template.base_org,
+               secondary_plan: secondary_plan,
+               secondary_plan_phase: secondary_plan_phase,
+               secondary_plan_readonly: secondary_plan_readonly,
+               secondary_plan_guidance_groups: secondary_plan_guidance_groups,
+               secondary_plan_answers: secondary_plan_answers,
+               secondary_plan_guidance_presenter: GuidancePresenter.new(secondary_plan)
+
+             })
     end
   end
 end

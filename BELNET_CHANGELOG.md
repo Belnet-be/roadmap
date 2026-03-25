@@ -16,6 +16,7 @@
 - /api_documentation page with tabs that outlines the usecases for the API's that are available in DMPonline
 - /belnet_changelog page with changes from Belnet to DMPonline
 - versioning of DMP's, create versions of your DMP's and view a DMP's history at /plans/:id/history
+- DMP comparing logic, you are now able to compare DMP versions from the same family with eachother, and directly edit the LIVE version.
 
 ### Resolved issues
 - Admin panel is now accessible. Caused by timestamptz (Time Stamp Time Zone) not correctly being able to be read
