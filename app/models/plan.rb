@@ -479,13 +479,13 @@ class Plan < ApplicationRecord
   end
 
   def plan_versions
-    return [] if belnet_family_id.nil?
+    return Plan.none if belnet_family_id.nil?
 
     Plan.where(belnet_family_id: belnet_family_id).where('belnet_version > ?', 0)
   end
 
   def plan_versions_with_live_version
-    return [] if belnet_family_id.nil?
+    return Plan.none if belnet_family_id.nil?
 
     Plan.where(belnet_family_id: belnet_family_id)
   end
