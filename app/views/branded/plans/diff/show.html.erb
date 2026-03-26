@@ -1,11 +1,11 @@
 <%= render partial: 'header', locals: { secondary_plan: @secondary_plan, base_plan: @base_plan } %>
 
 <div class="row">
-  <div class="col-md-6 pe-md-4">
+  <div class="col-md-6 pe-2">
     <%= render partial: @base_plan_partial, layout: 'navigation',
                locals: { plan: @base_plan, supposed_base_plan: @base_plan, supposed_head_plan: @secondary_plan, visibility: @base_plan_visibility, orgs: @base_plan_funders, org_partial: @base_plan_org_partial, research_domains: @base_plan_research_domains, all_guidance_groups: @base_plan_all_guidance_groups, important_ggs: @base_plan_important_ggs, selected_guidance_groups: @base_plan_selected_guidance_groups, all_ggs_grouped_by_org: @base_plan_all_ggs_grouped_by_org } %>
   </div>
-  <div class="col-md-6">
+  <div class="col-md-6 ps-2">
     <%= render partial: @secondary_plan_partial, layout: 'navigation',
                locals: { plan: @secondary_plan, supposed_base_plan: @base_plan, supposed_head_plan: @secondary_plan, visibility: @secondary_plan_visibility, orgs: @secondary_plan_funders, org_partial: @secondary_plan_org_partial, research_domains: @secondary_plan_research_domains, all_guidance_groups: @secondary_plan_all_guidance_groups, important_ggs: @secondary_plan_important_ggs, selected_guidance_groups: @secondary_plan_selected_guidance_groups, all_ggs_grouped_by_org: @secondary_plan_all_ggs_grouped_by_org } %>
   </div>

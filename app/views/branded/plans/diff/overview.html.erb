@@ -3,10 +3,10 @@
 <%= render partial: 'header', locals: { secondary_plan: @secondary_plan, base_plan: @base_plan } %>
 
 <div class="row">
-  <div class="col-md-6 pe-md-4">
+  <div class="col-md-6 pe-2">
     <%= render partial: 'overview_details', layout: 'navigation', locals: { supposed_base_plan: @base_plan, supposed_head_plan: @secondary_plan, plan: @base_plan } %>
   </div>
-    <div class="col-md-6">
+    <div class="col-md-6 ps-2">
     <%= render partial: 'overview_details', layout: 'navigation', locals: { supposed_base_plan: @base_plan, supposed_head_plan: @secondary_plan, plan: @secondary_plan } %>
   </div>
 </div>
