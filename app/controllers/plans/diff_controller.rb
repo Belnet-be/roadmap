@@ -140,7 +140,6 @@ module Plans
 
     def edit
       # Base plan
-      puts 'sjamala'
       @base_plan = Plan.includes(
         { template: {
           phases: {
