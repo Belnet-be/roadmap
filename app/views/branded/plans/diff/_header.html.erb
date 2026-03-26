@@ -22,6 +22,9 @@
             </div>
           <% end %>
         </div>
+        <%= link_to diff_show_plan_path(head_plan: base_plan, base_plan: secondary_plan), class: 'btn btn-secondary' do %>
+          <i class="bi bi-arrow-left-right"></i>
+        <% end %>
         <div class="d-flex flex-column align-items-end">
           <h1><%= secondary_plan.title %></h1>
           <% if secondary_plan.readable_by?(current_user.id) %>

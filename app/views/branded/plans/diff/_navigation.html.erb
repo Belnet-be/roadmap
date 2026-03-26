@@ -1,14 +1,14 @@
 <% phases = plan.template.phases %>
 <ul class="nav nav-tabs" role="tablist">
-  <li role="presentation" class="nav-item <%= (active_page?(plan_path(plan), true) ? 'active' : '') %>">
+  <li role="presentation" class="nav-item <%= (active_page?(@navigation_button_show) ? 'active' : '') %>">
     <a href="<%= @navigation_button_show %>" role="tab" 
     class="nav-link" aria-controls="content"><%= _('Project Details') %></a>
   </li>
-  <li role="presentation" class="nav-item <%= (active_page?(overview_plan_path(plan)) ? 'active' : '') %>">
+  <li role="presentation" class="nav-item <%= (active_page?(@navigation_button_overview) ? 'active' : '') %>">
     <%= link_to _('Plan overview'), @navigation_button_overview, role: 'tab', 
                 aria: { controls: "content" }, class: 'nav-link' %>
   <% phases.each do |phase| %>
-    <li role="presentation" class="nav-item <%= (active_page?(edit_plan_path(plan.id, phase_id: phase.id)) ? 'active' : '') %>">
+    <li role="presentation" class="nav-item <%= (active_page?(diff_edit_plan_path(base_plan: supposed_base_plan, head_plan: supposed_head_plan, phase_id: phase.id)) ? 'active' : '') %>">
       <a href="<%= diff_edit_plan_path(base_plan: supposed_base_plan, head_plan: supposed_head_plan, phase_id: phase.id) %>" role="tab" 
          class="nav-link" aria-controls="content">
         <%= (phases.size > 1 ? phase.title : _('Write Plan')) %>

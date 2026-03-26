@@ -195,8 +195,6 @@ module Plans
     def set_navigation_buttons
       @navigation_button_show = diff_show_plan_path(head_plan: @secondary_plan, base_plan: @base_plan)
       @navigation_button_overview = diff_overview_plan_path(head_plan: @secondary_plan, base_plan: @base_plan)
-      @navigation_button_edit = diff_edit_plan_path(head_plan: @secondary_plan, base_plan: @base_plan,
-                                                    phase_id: @base_plan.template.phases.first.id)
     end
 
     def render_phases_edit(base_plan, base_plan_phase, base_plan_guidance_groups, secondary_plan, secondary_plan_phase,
