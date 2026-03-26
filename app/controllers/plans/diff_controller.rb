@@ -11,6 +11,7 @@ module Plans
 
     after_action :verify_authorized, except: [:overview]
     before_action :set_plans
+    before_action :validate_plan_family
     before_action :set_navigation_buttons
 
     # GET /plans
@@ -195,6 +196,12 @@ module Plans
     def set_navigation_buttons
       @navigation_button_show = diff_show_plan_path(head_plan: @secondary_plan, base_plan: @base_plan)
       @navigation_button_overview = diff_overview_plan_path(head_plan: @secondary_plan, base_plan: @base_plan)
+    end
+
+    def validate_plan_family
+      return if @base_plan.belnet_family_id == @secondary_plan.belnet_family_id
+
+      raise ActiveRecord::RecordNotFound
     end
 
     def render_phases_edit(base_plan, base_plan_phase, base_plan_guidance_groups, secondary_plan, secondary_plan_phase,

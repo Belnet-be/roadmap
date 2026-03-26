@@ -488,7 +488,7 @@ class PlansController < ApplicationController
       original_plan: original_plan
     )
 
-    flash[:notice] = "Version #{new_version.belnet_version} has been created and is awaiting review."
+    flash[:notice] = "Version #{new_version.belnet_version} has been created."
     redirect_to action: :index
   rescue ActiveRecord::RecordInvalid => e
     flash[:alert] = "Failed to create version: #{e.message}"

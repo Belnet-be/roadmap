@@ -7,6 +7,6 @@
   </div>
   <div class="col-md-6">
     <%= render partial: @secondary_plan_partial, layout: 'navigation',
-               locals: { plan: @secondary_plan, supposed_base_plan: @secondary_plan, supposed_head_plan: @base_plan, visibility: @secondary_plan_visibility, orgs: @secondary_plan_funders, org_partial: @secondary_plan_org_partial, research_domains: @secondary_plan_research_domains, all_guidance_groups: @secondary_plan_all_guidance_groups, important_ggs: @secondary_plan_important_ggs, selected_guidance_groups: @secondary_plan_selected_guidance_groups, all_ggs_grouped_by_org: @secondary_plan_all_ggs_grouped_by_org } %>
+               locals: { plan: @secondary_plan, supposed_base_plan: @base_plan, supposed_head_plan: @secondary_plan, visibility: @secondary_plan_visibility, orgs: @secondary_plan_funders, org_partial: @secondary_plan_org_partial, research_domains: @secondary_plan_research_domains, all_guidance_groups: @secondary_plan_all_guidance_groups, important_ggs: @secondary_plan_important_ggs, selected_guidance_groups: @secondary_plan_selected_guidance_groups, all_ggs_grouped_by_org: @secondary_plan_all_ggs_grouped_by_org } %>
   </div>
 </div>

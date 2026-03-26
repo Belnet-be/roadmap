@@ -4,7 +4,7 @@
 
 <div class="row">
   <div class="col-md-6 pe-md-4">
-    <%= render partial: 'overview_details', layout: 'navigation', locals: { supposed_base_plan: @secondary_plan, supposed_head_plan: @base_plan, plan: @base_plan } %>
+    <%= render partial: 'overview_details', layout: 'navigation', locals: { supposed_base_plan: @base_plan, supposed_head_plan: @secondary_plan, plan: @base_plan } %>
   </div>
     <div class="col-md-6">
     <%= render partial: 'overview_details', layout: 'navigation', locals: { supposed_base_plan: @base_plan, supposed_head_plan: @secondary_plan, plan: @secondary_plan } %>
