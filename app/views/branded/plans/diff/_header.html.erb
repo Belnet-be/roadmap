@@ -18,7 +18,7 @@
                   aria-labelledby="reference-menu">
                 <% base_plan.plan_versions_with_live_version.each do |version| %>
                   <li>
-                    <%= link_to version.is_plan_live_version? ? _('LIVE') : version.belnet_version, diff_show_plan_path(head_plan: secondary_plan, base_plan: version), class: 'dropdown-item' %>
+                    <%= link_to version.is_plan_live_version? ? _('LIVE') : version.belnet_version, diff_show_plan_path(head_plan: secondary_plan, base_plan: version), class: "dropdown-item #{'active' if version == base_plan}" %>
                   </li>
                 <% end %>
               </ul>
@@ -40,7 +40,7 @@
                   aria-labelledby="reference-menu">
                 <% secondary_plan.plan_versions_with_live_version.each do |version| %>
                   <li>
-                    <%= link_to version.is_plan_live_version? ? _('LIVE') : version.belnet_version, diff_show_plan_path(head_plan: version, base_plan: base_plan), class: 'dropdown-item' %>
+                    <%= link_to version.is_plan_live_version? ? _('LIVE') : version.belnet_version, diff_show_plan_path(head_plan: version, base_plan: base_plan), class: "dropdown-item #{'active' if version == secondary_plan}" %>
                   </li>
                 <% end %>
               </ul>
