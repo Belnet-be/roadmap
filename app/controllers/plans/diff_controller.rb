@@ -206,10 +206,9 @@ module Plans
 
     def render_phases_edit(base_plan, base_plan_phase, base_plan_guidance_groups, secondary_plan, secondary_plan_phase,
                            secondary_plan_guidance_groups)
-      base_plan_readonly = !base_plan.editable_by?(current_user.id) || !base_plan.is_plan_live_version?
-      secondary_plan_readonly = !secondary_plan.editable_by?(current_user.id) || !secondary_plan.is_plan_live_version?
       # Since the answers have been pre-fetched through plan (see Plan.load_for_phase)
       # we create a hash whose keys are question id and value is the answer associated
+      # For the Diff we set readonly to true, the answer fields don't get correctly rendered
       base_plan_answers = base_plan.answers.each_with_object({}) { |a, m| m[a.question_id] = a }
       secondary_plan_answers = secondary_plan.answers.each_with_object({}) { |a, m| m[a.question_id] = a }
 
@@ -217,14 +216,14 @@ module Plans
                base_plan_base_template_org: base_plan_phase.template.base_org,
                base_plan: base_plan,
                base_plan_phase: base_plan_phase,
-               base_plan_readonly: base_plan_readonly,
+               base_plan_readonly: true,
                base_plan_guidance_groups: base_plan_guidance_groups,
                base_plan_answers: base_plan_answers,
                base_plan_guidance_presenter: GuidancePresenter.new(base_plan),
                secondary_plan_base_template_org: secondary_plan_phase.template.base_org,
                secondary_plan: secondary_plan,
                secondary_plan_phase: secondary_plan_phase,
-               secondary_plan_readonly: secondary_plan_readonly,
+               secondary_plan_readonly: true,
                secondary_plan_guidance_groups: secondary_plan_guidance_groups,
                secondary_plan_answers: secondary_plan_answers,
                secondary_plan_guidance_presenter: GuidancePresenter.new(secondary_plan)
