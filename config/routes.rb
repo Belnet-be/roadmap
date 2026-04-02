@@ -214,6 +214,16 @@ Rails.application.routes.draw do
       resources :plans, only: %i[create show index]
       resources :templates, only: [:index]
     end
+
+    namespace :belnet do
+      namespace :v1 do
+        get :heartbeat, controller: 'base_api'
+        post :authenticate, controller: 'authentication'
+
+        resources :plans, only: %i[create show index]
+        resources :templates, only: [:index]
+      end
+    end
   end
 
   resources :plans do
