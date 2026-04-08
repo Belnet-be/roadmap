@@ -4,17 +4,36 @@ module Api
   module Belnet
     module V1
       # Handles CRUD operations for plans in API V1
-      class PlansController < BaseApiController
+      class VersionController < BaseApiController
         respond_to :json
 
-        # GET /api/belnet/v1/plans/:id
+        # GET /api/belnet/v1/plans/:id/versions
         def show
-          plans = Api::V1::PlansPolicy::Scope.new(client, Plan).resolve
-                                             .where(id: params[:id]).limit(1)
+          # This endpoint should return a collection of plans that are associated to the given plan
+          # by their family_id (column: belnet_family_id).
+          plans = Plan.find(params[:id]).plan_versions_with_live_version
 
           if plans.present? && plans.any?
             @items = paginate_response(results: plans)
             render '/api/belnet/v1/plans/index', status: :ok
+          else
+            render_error(errors: [_('Plan not found')], status: :not_found)
+          end
+        end
+
+        # GET /api/belnet/v1/plans/:id/versions/:version_number
+        def index # rubocop:disable Metrics/AbcSize
+          plans = Plan.find(params[:id]).plan_versions_with_live_version
+
+          if plans.present? && plans.any?
+            plan = plans.find { |p| p.belnet_version.to_i == params[:version_number].to_i }
+
+            if plan
+              @items = paginate_response(results: [plan])
+              render '/api/belnet/v1/plans/index', status: :ok
+            else
+              render_error(errors: [_('Plan not found')], status: :not_found)
+            end
           else
             render_error(errors: [_('Plan not found')], status: :not_found)
           end

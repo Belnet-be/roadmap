@@ -220,7 +220,16 @@ Rails.application.routes.draw do
         get :heartbeat, controller: 'base_api'
         post :authenticate, controller: 'authentication'
 
-        resources :plans, only: %i[create show index]
+        resources :plans, only: %i[create index] do
+          member do
+            # GET /api/belnet/v1/plans/:id/versions
+            get :versions, action: :index
+            # GET /api/belnet/v1/plans/:id/versions/:version_number
+            # returns a specific version of a plan (a plan)
+            # In Postman: GET http://localhost:3000/api/belnet/v1/plans/1/versions/2
+            get 'versions/:version_number', action: :version, as: :version
+          end
+        end
         resources :templates, only: [:index]
       end
     end
