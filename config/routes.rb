@@ -218,10 +218,11 @@ Rails.application.routes.draw do
     namespace :belnet do
       namespace :v1 do
         get :heartbeat, controller: 'base_api'
-        post :authenticate, controller: 'authentication'
-
-        resources :versions, only: %i[create index]
-        resources :templates, only: [:index]
+        resources :plans, only: [] do
+          # THese endpoints are for the custom Belnet implementation of the plans versioning feature.
+          # They are nested under plans as they require a plan_id to function.
+          resources :versions, only: %i[index show create]
+        end
       end
     end
   end
