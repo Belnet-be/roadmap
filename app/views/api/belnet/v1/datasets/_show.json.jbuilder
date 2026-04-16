@@ -17,7 +17,7 @@ if output.is_a?(ResearchOutput)
   json.data_quality_assurance presenter.data_quality_assurance
 
   json.dataset_id do
-    json.partial! "api/v1/identifiers/show", identifier: presenter.dataset_id
+    json.partial! "api/belnet/v1/identifiers/show", identifier: presenter.dataset_id
   end
 
   json.distribution output.repositories do |repository|

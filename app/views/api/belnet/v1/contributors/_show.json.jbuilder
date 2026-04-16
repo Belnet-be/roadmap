@@ -16,7 +16,7 @@ end
 
 if contributor.org.present?
   json.affiliation do
-    json.partial! 'api/v1/orgs/show', org: contributor.org
+    json.partial! 'api/belnet/v1/orgs/show', org: contributor.org
   end
 end
 
@@ -27,11 +27,11 @@ if orcid.present?
   )
   if is_contact
     json.contact_id do
-      json.partial! 'api/v1/identifiers/show', identifier: id
+      json.partial! 'api/belnet/v1/identifiers/show', identifier: id
     end
   else
     json.contributor_id do
-      json.partial! 'api/v1/identifiers/show', identifier: id
+      json.partial! 'api/belnet/v1/identifiers/show', identifier: id
     end
   end
 end
