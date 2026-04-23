@@ -56,13 +56,16 @@
               <div class="col-lg-12">
                 <textarea class="form-control" 
                           rows="5" 
+                          required
                           data-confirm-modal-target="input"
-                          placeholder="<%= _('Provide a description... (10-500 characters)') %>"></textarea>
+                          placeholder="<%= _('Provide a description... (10-500 characters)') %>"
+                          minlength="10"
+                          maxlength="500"></textarea>
                 
                 <div data-confirm-modal-target="errorMessage" 
                     class="text-danger d-none" 
                     style="margin-top: 5px;">
-                  <strong><%= _('A reason is required.') %></strong>
+                  <strong><%= _('Reason must be between 10 and 500 characters.') %></strong>
                 </div>
               </div>
             </div>
@@ -75,7 +78,7 @@
                       data-action="click->confirm-modal#close">
                 <%= _('Cancel') %>
               </button>
-              <button type="button" 
+              <button type="submit" 
                       class="btn btn-primary" 
                       data-action="confirm-modal#submitWithReason">
                 <%= _('Create Version') %>

@@ -21,10 +21,12 @@ export default class extends Controller {
   }
 
   submitWithReason(event) {
-    const reason = this.inputTarget.value.trim()
+    const input = this.inputTarget
+    const reason = input.value.trim()
 
-    if (reason === "") {
+    if (!input.checkValidity() || reason === "") {
       this.errorMessageTarget.classList.remove('d-none')
+      
       this.inputTarget.classList.add('is-invalid')
       this.inputTarget.focus()
       return
@@ -37,7 +39,7 @@ export default class extends Controller {
     hiddenInput.name = "belnet_reason"
     hiddenInput.value = reason
     form.appendChild(hiddenInput)
-
+    
     $(this.modalTarget).modal('hide')
     form.submit()
   }

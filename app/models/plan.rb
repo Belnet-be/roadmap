@@ -159,7 +159,7 @@ class Plan < ApplicationRecord
   validates :belnet_family_id, numericality: { only_integer: true, greater_than_or_equal_to: 0 }, allow_nil: true
 
   # belnet_reason cannot be nil or empty if the belnet_version is greater than 0
-  # length between 10 and 1000 characters if present and show message if not valid
+  # length between 10 and 500 characters if present and show message if not valid
   validates :belnet_reason,
             length: { minimum: 10, maximum: 500 },
             presence: { message: 'Reason must be present and between 10 and 500 characters.' },

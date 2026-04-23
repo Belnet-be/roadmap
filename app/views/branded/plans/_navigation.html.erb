@@ -21,7 +21,7 @@
                   aria: { controls: "content" }, class: 'nav-link' %>
     </li>
   <% end %>
-  <% if plan.administerable_by?(current_user.id) || (current_user.can_org_admin? && current_user.org.plans.include?(plan)) %>
+  <% if plan.is_plan_live_version? && (plan.administerable_by?(current_user.id) || (current_user.can_org_admin? && current_user.org.plans.include?(plan))) %>
     <li role="presentation" class="nav-item <%= (active_page?(share_plan_path(plan)) ? 'active' : '') %>">
       <a href="<%= share_plan_path(plan) %>" role="tab" 
          class="nav-link" aria-controls="content"><%= _('Share') %></a>
