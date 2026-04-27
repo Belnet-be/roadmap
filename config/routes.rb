@@ -56,6 +56,7 @@ Rails.application.routes.draw do
   get 'api_documentation_overview' => 'static_pages#api_documentation_overview'
   get 'api_documentation_v0' => 'static_pages#api_documentation_v0'
   get 'api_documentation_v1' => 'static_pages#api_documentation_v1'
+  get 'api_documentation_belnet_v1' => 'static_pages#api_documentation_belnet_v1'
   get 'belnet_changelog' => 'static_pages#belnet_changelog'
   get 'terms' => 'static_pages#termsuse'
   get 'privacy' => 'static_pages#privacy'
@@ -213,6 +214,17 @@ Rails.application.routes.draw do
 
       resources :plans, only: %i[create show index]
       resources :templates, only: [:index]
+    end
+
+    namespace :belnet do
+      namespace :v1 do
+        get :heartbeat, controller: 'base_api'
+        resources :plans, only: [] do
+          # THese endpoints are for the custom Belnet implementation of the plans versioning feature.
+          # They are nested under plans as they require a plan_id to function.
+          resources :versions, only: %i[index show create]
+        end
+      end
     end
   end
 

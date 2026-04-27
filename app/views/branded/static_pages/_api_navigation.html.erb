@@ -23,6 +23,14 @@
                 aria: { controls: 'content' },
                 class: 'nav-link' %>
   </li>
+  <li role="presentation"
+      class="nav-item <%= active_page?(api_documentation_belnet_v1_path) ? 'active' : '' %>">
+    <%= link_to _('API Belnet v1'),
+                api_documentation_belnet_v1_path,
+                role: 'tab',
+                aria: { controls: 'content' },
+                class: 'nav-link' %>
+  </li>
 </ul>
 <div class="tab-content">
   <div id="content" role="tabpanel" class="tab-pane active">

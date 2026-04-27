@@ -17,6 +17,7 @@
 - /belnet_changelog page with changes from Belnet to DMPonline
 - versioning of DMP's, create versions of your DMP's and view a DMP's history at /plans/:id/history
 - DMP comparing logic, you are now able to compare DMP versions from the same plan. (Visual Diff)
+- Three API endpoints to interact with versioning logic.
 
 ### Resolved issues
 - Admin panel is now accessible. Caused by timestamptz (Time Stamp Time Zone) not correctly being able to be read

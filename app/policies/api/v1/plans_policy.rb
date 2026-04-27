@@ -25,6 +25,7 @@ module Api
         def plans_for_client
           return [] unless @user.present?
 
+          puts "user: #{@user.org.plans.count}"
           ids = @user.plans.pluck(:id)
           ids += @user.org.plans.pluck(:id) if @user.org.present?
           ids.uniq
