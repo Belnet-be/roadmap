@@ -70,6 +70,8 @@ module Api
           else
             render_error(errors: [_('Plan not found or not eligible for versioning')], status: :not_found)
           end
+        rescue ActiveRecord::RecordInvalid => e
+          render_error(errors: [_("Failed to create version: #{e.message}")], status: :unprocessable_entity)
         end
       end
     end

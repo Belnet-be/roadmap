@@ -13,7 +13,7 @@
 </p>
 
 <h2 class="mt-4"><%= _('Authentication and Setup') %></h2>
-<p><%= _('To interact with the API, you must first generate a valid Client ID and Client Secret or an API Token. You can follow the Authentication guide in the tab ') %><%= link_to 'API V1', api_documentation_v1_path %><%= _(". You have two options, either using the API Client or your user's client secret.") %></p>
+<p><%= _('To interact with the API, you must first generate a valid Client ID and Client Secret or an API Token. You can follow the Authentication guide in the tab ') %><%= link_to 'API V1', api_documentation_v1_path %><%= _(". You have two options, either using the API Client or your user's access token.") %></p>
 <h2 class="mt-4"><%= _('Using the API') %></h2>
 <p><%= _('There are three API endpoints to interact with the versioning system of a plan. Below is a description of each endpoint.') %></p>
 
@@ -22,7 +22,7 @@
     <div class="card-body">
         <h5><%= _('Get Versions') %></h5>
         <p><code>GET {{BASE_URL}}/api/belnet/v1/plans/PLAN_ID/versions</code></p>
-        <p><%= _('Retrieves all versions of a specific plan by the ID of any of the plans in the list of versions.') %></p>
+        <p><%= _('Retrieves all versions of a specific plan by the ID of any of the plans in the list of versions. Supports pagination via page=[n] and per_page=[n].') %></p>
         <p><%= _('Headers') %></p>
         <table class="table table-bordered">
             <thead>
