@@ -15,7 +15,7 @@ module Api
                                                     .where(id: params[:plan_id])
                                                     .first
           if plan
-            plans = plan.plan_versions_with_live_version
+            plans = plan.plan_versions
                         .order(belnet_version: :desc)
 
             @items = if plans.present? && plans.any?
@@ -37,7 +37,7 @@ module Api
                                                       .where(id: params[:plan_id])
                                                       .first
             if plan
-              version = plan.plan_versions_with_live_version
+              version = plan.plan_versions
                             .where(belnet_version: params[:id])
                             .first
 

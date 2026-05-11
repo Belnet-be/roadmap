@@ -198,12 +198,12 @@ class Org < ApplicationRecord
 
   # Scope used in several controllers
   scope :with_template_and_user_counts, lambda {
-    joins('LEFT OUTER JOIN templates ON orgs.id = templates.org_id')
-      .joins('LEFT OUTER JOIN users ON orgs.id = users.org_id')
-      .group('orgs.id')
+    from('orgs')
+      .joins("LEFT JOIN (#{User.group(:org_id).select('org_id, count(id) as user_count').to_sql}) AS user_stats ON orgs.id = user_stats.org_id")
+      .joins("LEFT JOIN (#{Template.group(:org_id).select('org_id, count(id) as template_count').to_sql}) AS template_stats ON orgs.id = template_stats.org_id")
       .select("orgs.*,
-              count(distinct templates.family_id) as template_count,
-              count(users.id) as user_count")
+             COALESCE(template_stats.template_count, 0) as template_count,
+             COALESCE(user_stats.user_count, 0) as user_count")
   }
 
   # EVALUATE CLASS AND INSTANCE METHODS BELOW

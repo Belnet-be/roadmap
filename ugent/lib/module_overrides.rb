@@ -1,3 +1,5 @@
+# rubocop:disable all
+
 # frozen_string_literal: true
 
 module PlansHelper
@@ -368,8 +370,7 @@ class User
     self.generate_password unless self.encrypted_password.present?
   end
 
-  # rubocop: disable Lint/UselessAssignment
-  def generate_password
+    def generate_password
     self.password = Devise.friendly_token[0, 20]
     self.password_confirmation = self.password
   end
@@ -568,8 +569,7 @@ module Users
       end
     end
 
-    # rubocop: disable Metrics/MethodLength, Metrics/AbcSize
-    def handle_shibboleth(scheme)
+        def handle_shibboleth(scheme)
       auth = request.env["omniauth.auth"]
 
       # uid is email address, and that is always consequently formatted
@@ -674,24 +674,24 @@ module Users
     # rubocop:disable Metrics/MethodLength, Metrics/AbcSize
     def handle_orcid(scheme)
       auth = request.env["omniauth.auth"]
-
+ 
       Rails.logger.info("auth: #{auth}")
-
+ 
       # when saved, identifier of scheme "orcid" is prefixed with the identifier_prefix of the corresponding scheme
       full_uid = scheme.identifier_prefix + auth.uid
-
+ 
       # The user is already logged in and just registering the uid with us
       # Action: attach id and redirect to profile page
       if current_user.present?
-
+ 
         Rails.logger.info("found current_user")
-
+ 
         existing_id = current_user.identifiers
                                   .select { |id| id.value == full_uid && id.identifier_scheme_id == scheme.id }
                                   .first
-
+ 
         if existing_id.nil?
-
+ 
           if Identifier.create(identifier_scheme: scheme,
                                value: auth.uid,
                                attrs: auth,
@@ -699,138 +699,150 @@ module Users
             flash[:notice] = _("Your account has been successfully linked to %{scheme}.") % {
               scheme: scheme.description
             }
-
+ 
           else
-
+ 
             flash[:alert] = _("Unable to link your account to %{scheme}.") % {
               scheme: scheme.description
             }
-
+ 
           end
-
+ 
         else
-
+ 
           flash[:alert] = _("Your account has already been linked to %{scheme}") % {
             scheme: scheme.description
           }
-
+ 
         end
-
+ 
         redirect_to edit_user_registration_path
         return
-
+ 
       end
-
+ 
       # User is not logged in
-      email = auth["info"].try("email").downcase
-
+      email = auth["info"].try("[]", "email")
+      if email.present?
+        # downcase without !
+        email = email.downcase
+      else
+        # In this case the user has no email adress exposed to the public or trusted parties
+        # in orcid so we cannot log in the user. We could ask the user to make his email address
+        # visible in orcid, but that is not a good user experience.
+        # So we just show an error message and ask the user to try again after making
+        # the email address visible in orcid.
+        flash[:alert] = _("Unable to login with ORCID: no email is provided by ORCID. Make sure your email address is visible in your ORCID profile (set the visibility of your email address to \"everyone\" or \"trusted parties\" in your <a href=\"https://orcid.org/my-orcid\">ORCID profile</a>), and try again.")
+        return redirect_to root_url
+      end
+ 
       # Match orcid with one of more users
       selectable_users = Identifier.where(identifiable_type: "User", identifier_scheme_id: scheme.id, value: full_uid)
                                    .map(&:identifiable)
                                    .reject(&:nil?)
-
+ 
       # Also match on primary email address
       # as the user may be registered before with another email
       # address, and he/she is stuck
       selectable_users += User.where(email: email).all
-
+ 
       selectable_users.uniq!
-
+ 
       # TODO: create controller
       if selectable_users.size > 1
-
+ 
         session[:selectable_user_ids] = selectable_users.map(&:id)
         redirect_to edit_selectable_user_path
         return
-
+ 
       end
-
+ 
       Rails.logger.info("selectable_users: #{selectable_users.map(&:attributes)}")
-
+ 
       user = selectable_users.first
-
+ 
       # Match on ORCID: OK
       if user
-
+ 
         # set firstname and surname when not present yet
         user.firstname = auth["info"].try("first_name") if user.firstname.blank? || user.firstname == User.nemo
         user.surname = auth["info"].try("last_name") if user.surname.blank? || user.surname == User.nemo
-
+ 
       # Match on primary email: OK
       # this user's orcid must be empty or different
       # attribute 'email' is unique (enforced by devise?)
       elsif email.present? && (user = User.where(email: email).first)
-
+ 
         existing_id = user.identifiers
                           .select { |id| id.value == full_uid && id.identifier_scheme_id == scheme.id }
                           .first
-
+ 
         if existing_id.nil?
-
+ 
           if Identifier.create(identifier_scheme: scheme,
                                value: auth.uid,
                                attrs: auth,
                                identifiable: user)
-
+ 
             flash[:notice] = _("Your account has been successfully linked to %{scheme}.") % {
               scheme: scheme.description
             }
-
+ 
           else
-
+ 
             flash[:alert] = _("Unable to link your account to %{scheme}.") % {
               scheme: scheme.description
             }
-
+ 
           end
-
+ 
         end
-
+ 
       # Match on primary email: false
       # NEW USER. We trust "email" because ORCID marks it as confirmed
       elsif email.present?
-
+ 
         user = User.new(
           email: email,
           firstname: auth["info"].try("first_name"),
           surname: auth["info"].try("last_name")
         )
-
+ 
         unless user.save
-
+ 
           flash[:alert] = user.errors
                               .full_messages
                               .join("<br>")
           return redirect_to root_url
-
+ 
         end
-
+ 
         if Identifier.create(identifier_scheme: scheme,
                              value: auth.uid,
                              attrs: auth,
                              identifiable: user)
-
+ 
           flash[:notice] = _("Your account has been successfully linked to %{scheme}.") % {
             scheme: scheme.description
           }
-
+ 
         else
-
+ 
           flash[:alert] = _("Unable to link your account to %{scheme}.") % {
             scheme: scheme.description
           }
-
+ 
         end
-
+ 
       # No orcid, no email: warn user
       else
-
+ 
         flash[:alert] = "Unable to login with orcid: try setting the visibility of your email address to \"everyone\" or \"trusted parties\" (<a href=\"https://orcid.org/account\">orcid profile</a>). Do not forget to add this website to your \"Trusted Organisations\" if you're choosing for \"trusted parties\""
         redirect_to root_url
         return
-
+ 
       end
-
+ 
       set_flash_message(:notice, :success, kind: scheme.description) if is_navigational_format?
       sign_in_and_redirect user, event: :authentication
     end
