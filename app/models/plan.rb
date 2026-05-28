@@ -130,6 +130,16 @@ class Plan < ApplicationRecord
 
   has_many :research_outputs, dependent: :destroy
 
+  belongs_to :belnet_stage_updated_by, class_name: 'User', optional: true
+
+  enum :belnet_stage, {
+    initial_draft: 'Initial Draft',
+    working_draft: 'Working Draft',
+    intermediate: 'Intermediate',
+    finalized: 'Finalized',
+    archived: 'Archived'
+  }, validates: { presence: true }, if: -> { !is_plan_live_version? && belnet_family_id.present? }
+
   # =====================
   # = Nested Attributes =
   # =====================
@@ -166,6 +176,11 @@ class Plan < ApplicationRecord
             on: :versioning
 
   validate :end_date_after_start_date
+
+  # statuses
+  validates :belnet_stage, presence: true, if: -> { !is_plan_live_version? && belnet_family_id.present? }
+  validates :belnet_stage, absence: true, if: -> { is_plan_live_version? }
+  validates :belnet_stage_updated_by, presence: true, if: -> { !is_plan_live_version? && belnet_family_id.present? }
 
   # ==========
   # = Scopes =
@@ -494,10 +509,16 @@ class Plan < ApplicationRecord
     belnet_version == 0
   end
 
+  def update_stage(new_stage, current_user)
+    return false if is_plan_live_version? || !Plan.belnet_stages.keys.include?(new_stage) || belnet_stage == new_stage
+
+    update(belnet_stage: new_stage, belnet_stage_updated_by: current_user)
+  end
+
   # Creates a new version of the plan with the same family_id and an incremented version number.
   # The original plan will have its family_id set if it doesn't already have one.
   # Returns the new version of the plan.
-  def create_plan_with_new_version!(reason: nil, current_user: nil, original_plan: nil)
+  def create_plan_with_new_version!(reason: nil, current_user: nil, original_plan: nil, new_stage: nil)
     # Transaction to ensure that the original plan and the new version are updated/created together
     transaction do
       # Handle family_id logic on the original
@@ -512,7 +533,9 @@ class Plan < ApplicationRecord
         belnet_version: latest_belnet_version + 1,
         belnet_family_id: belnet_family_id || id,
         belnet_reason: reason || '',
-        belnet_created_by: current_user&.id
+        belnet_created_by: current_user&.id,
+        belnet_stage: new_stage,
+        belnet_stage_updated_by: current_user
       )
 
       # Copy over the answers, guidance groups and roles (users) to the new version

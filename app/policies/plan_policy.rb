@@ -90,4 +90,8 @@ class PlanPolicy < ApplicationPolicy
   def history?
     @record.readable_by?(@user.id)
   end
+
+  def update_stage?
+    @record.readable_by?(@user.id)
+  end
 end

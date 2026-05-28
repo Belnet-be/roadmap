@@ -51,22 +51,33 @@
         <div class="modal-content">
           <div class="modal-body">
             <p><%= _('Reason for version') %> <strong><%= plan.latest_belnet_version + 1 %></strong>:</p>
-            <P class="alert alert-primary"><%= _("Use versioning to mark important milestones in your DMP. Please add a brief description of the changes or the stage reached, to follow this DMP's history. Please avoid excessive versioning for optimal workspace and storage management.") %></p>
-            <div class="form-control mb-3">
-              <div class="col-lg-12">
-                <textarea class="form-control" 
-                          rows="5" 
-                          required
-                          data-confirm-modal-target="input"
-                          placeholder="<%= _('Provide a description... (10-500 characters)') %>"
-                          minlength="10"
-                          maxlength="500"></textarea>
+            <p class="alert alert-primary"><%= _("Use versioning to mark important milestones in your DMP. Please add a brief description of the changes or the stage reached, to follow this DMP's history. Please avoid excessive versioning for optimal workspace and storage management.") %></p>
+            <div class="form-control d-flex flex-column gap-2">
+              <textarea class="form-control" 
+                        rows="5" 
+                        required
+                        data-confirm-modal-target="input"
+                        placeholder="<%= _('Provide a description... (10-500 characters)') %>"
+                        minlength="10"
+                        maxlength="500"></textarea>
+              <p class="alert alert-primary mb-0"><%= _("Select the stage of this version of the DMP.") %></p>
+              <select class="form-select" 
+                      data-confirm-modal-target="stage"
+                      required>
+                <option value="" disabled <%= 'selected' if plan.belnet_stage.blank? %>>
+                  <%= _("Select a Stage...") %>
+                </option>
                 
-                <div data-confirm-modal-target="errorMessage" 
-                    class="text-danger d-none" 
-                    style="margin-top: 5px;">
-                  <strong><%= _('Reason must be between 10 and 500 characters.') %></strong>
-                </div>
+                <% Plan.belnet_stages.keys.each do |stage| %>
+                  <option value="<%= stage %>" <%= 'selected' if plan.belnet_stage == stage %>>
+                    <%= stage.humanize %>
+                  </option>
+                <% end %>
+              </select>
+              <div data-confirm-modal-target="errorMessage" 
+                  class="text-danger d-none" 
+                  style="margin-top: 5px;">
+                <strong><%= _('Reason must be between 10 and 500 characters.') %></strong>
               </div>
             </div>
           </div>

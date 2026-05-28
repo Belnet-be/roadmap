@@ -485,7 +485,8 @@ class PlansController < ApplicationController
     new_version = original_plan.create_plan_with_new_version!(
       reason: params[:belnet_reason],
       current_user: current_user,
-      original_plan: original_plan
+      original_plan: original_plan,
+      new_stage: params[:belnet_stage]
     )
 
     flash[:notice] = "Version #{new_version.belnet_version} has been created."
@@ -493,6 +494,19 @@ class PlansController < ApplicationController
   rescue ActiveRecord::RecordInvalid => e
     flash[:alert] = "Failed to create version: #{e.message}"
     redirect_to action: :index
+  end
+
+  def update_stage
+    plan = Plan.find(params[:id])
+    authorize plan
+
+    old_stage = plan.belnet_stage
+    if plan.update_stage(params[:belnet_stage], current_user)
+      redirect_to history_plan_path(plan),
+                  notice: "(Version #{plan.belnet_version}): Stage updated from #{old_stage.humanize} to #{plan.belnet_stage.humanize}."
+    else
+      redirect_to history_plan_path(plan), alert: 'Failed to update stage.'
+    end
   end
 
   # ============================

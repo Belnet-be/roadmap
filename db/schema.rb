@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_03_02_151604) do
+ActiveRecord::Schema[7.1].define(version: 2026_05_26_115825) do
 # Could not dump table "annotations" because of following ActiveRecord::StatementInvalid
 #   Mysql2::Error: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'NULL' at line 1
 
@@ -258,6 +258,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_03_02_151604) do
   add_foreign_key "phases", "templates"
   add_foreign_key "plans", "orgs"
   add_foreign_key "plans", "templates"
+  add_foreign_key "plans", "users", column: "belnet_stage_updated_by_id"
   add_foreign_key "plans_guidance_groups", "guidance_groups"
   add_foreign_key "plans_guidance_groups", "plans"
   add_foreign_key "question_options", "questions"
