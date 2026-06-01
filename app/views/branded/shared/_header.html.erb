@@ -60,7 +60,7 @@
                         placeholder="<%= _('Provide a description... (10-500 characters)') %>"
                         minlength="10"
                         maxlength="500"></textarea>
-              <p class="alert alert-primary mb-0"><%= _("Select the stage of this version of the DMP.") %></p>
+              <p class="alert alert-primary mb-0"><%= _("You can change the stage of this new version, if not, it will remain the stage of your last version, this can be updated at anytime in the History tab.") %></p>
               <select class="form-select" 
                       data-confirm-modal-target="stage"
                       required>
@@ -69,15 +69,20 @@
                 </option>
                 
                 <% Plan.belnet_stages.keys.each do |stage| %>
-                  <option value="<%= stage %>" <%= 'selected' if plan.belnet_stage == stage %>>
+                  <option value="<%= stage %>" <%= 'selected' if plan.plan_versions.any? && plan.plan_versions.last.belnet_stage == stage %>>
                     <%= stage.humanize %>
                   </option>
                 <% end %>
               </select>
-              <div data-confirm-modal-target="errorMessage" 
-                  class="text-danger d-none" 
-                  style="margin-top: 5px;">
-                <strong><%= _('Reason must be between 10 and 500 characters.') %></strong>
+              <div data-confirm-modal-target="errorMessage" class="text-danger d-none" style="margin-top: 5px;">
+                <ul class="mb-0 ps-3">
+                  <li data-confirm-modal-target="reasonError" class="d-none">
+                    <%= _('Reason must be between 10 and 500 characters.') %>
+                  </li>
+                  <li data-confirm-modal-target="stageError" class="d-none">
+                    <%= _('Stage is required.') %>
+                  </li>
+                </ul>
               </div>
             </div>
           </div>
