@@ -16,7 +16,7 @@ threads threads_count, threads_count
 port ENV.fetch('PORT', 3000)
 
 # --- Environment ---
-environment ENV.fetch('RAILS_ENV', 'production')
+environment ENV.fetch('RAILS_ENV', 'development')
 
 # --- Workers (Cluster mode) ---
 # Formule: aantal vCPU's - 1 (laat 1 CPU vrij voor OS/Postgres)
