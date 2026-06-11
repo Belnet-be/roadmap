@@ -18,7 +18,7 @@ gem 'rails', '~> 7.1'
 gem 'mimemagic'
 
 # Use Puma as the app server
-gem 'puma', group: :puma, require: false
+gem 'puma', '>= 8.0', group: :puma, require: false
 
 # Use esbuild, rollup.js, or Webpack to bundle your JavaScript, then deliver it via the asset pipeline in Rails
 # Read more: https://github.com/rails/jsbundling-rails
