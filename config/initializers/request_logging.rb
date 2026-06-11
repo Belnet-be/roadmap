@@ -14,6 +14,8 @@
 # status een String of wrapped object is (Dragonfly/OmniAuth).
 # ============================================================
 
+return unless ENV["BELNET_SPLITTED_LOGS"].present?
+
 class RequestLogger
   def initialize(app)
     @app = app

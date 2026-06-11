@@ -19,6 +19,8 @@
 #   log/security.log — Rack::Attack events (WARN+)
 # ============================================================
 
+return unless ENV["BELNET_SPLITTED_LOGS"].present?
+
 module DmpRoadmap
   module Logging
     # --------------------------------------------------------

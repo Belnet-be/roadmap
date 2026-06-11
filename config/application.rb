@@ -77,13 +77,10 @@ module DMPRoadmap
     #   client.log — alle HTTP requests
     #   error.log  — alle 4xx/5xx en exceptions
     config.after_initialize do
-      if Rails.logger && defined?(CLIENT_LOGGER) && defined?(ERROR_LOGGER)
-        Rails.logger = ActiveSupport::BroadcastLogger.new(
-          Rails.logger,
-          CLIENT_LOGGER,
-          ERROR_LOGGER
-        )
-        Rails.logger.info '[Logging] BroadcastLogger actief — stdout + client.log + error.log'
+      if ENV["BELNET_SPLITTED_LOGS"].present?
+        Rails.logger.broadcast_to(CLIENT_LOGGER)
+        Rails.logger.broadcast_to(ERROR_LOGGER)
+        Rails.logger.info '[Logging] Splitted log files active'
       end
     end
   end
