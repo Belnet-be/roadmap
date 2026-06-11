@@ -4,7 +4,7 @@
 # Exception logging naar error.log via ActiveSupport::Notifications
 # ============================================================
 
-return unless ENV["BELNET_SPLITTED_LOGS"].present?
+return unless ENV["BELNET_SPLITTED_LOGS"].to_s == "true"
 
 ActiveSupport::Notifications.subscribe('process_action.action_controller') do |*args|
   event     = ActiveSupport::Notifications::Event.new(*args)
