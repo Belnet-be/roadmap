@@ -26,6 +26,7 @@ services:
       - BUNDLE_PATH=vendor/bundle
       - BUNDLE_WITH=mysql:puma:development:test:ci
       - BUNDLE_WITHOUT=aws
+      - BELNET_SPLITTED_LOGS=${BELNET_SPLITTED_LOGS:-false}
     entrypoint: "./entrypoint-dev.sh"
     depends_on:
       - mysql
