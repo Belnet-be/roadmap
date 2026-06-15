@@ -10,16 +10,12 @@ trix-toolbar * {
   box-sizing: border-box; }
 
 trix-toolbar .trix-button-row {
-  display: -ms-flexbox;
   display: flex;
-  -ms-flex-wrap: nowrap;
-      flex-wrap: nowrap;
-  -ms-flex-pack: justify;
-      justify-content: space-between;
+  flex-wrap: nowrap;
+  justify-content: space-between;
   overflow-x: auto; }
 
 trix-toolbar .trix-button-group {
-  display: -ms-flexbox;
   display: flex;
   margin-bottom: 10px;
   border: 1px solid #bbb;
@@ -33,8 +29,7 @@ trix-toolbar .trix-button-group {
         margin-left: 0; } }
 
 trix-toolbar .trix-button-group-spacer {
-  -ms-flex-positive: 1;
-      flex-grow: 1; }
+  flex-grow: 1; }
   @media (max-width: 768px) {
     trix-toolbar .trix-button-group-spacer {
       display: none; } }
@@ -182,22 +177,17 @@ trix-toolbar .trix-dialog--link {
   max-width: 600px; }
 
 trix-toolbar .trix-dialog__link-fields {
-  display: -ms-flexbox;
   display: flex;
-  -ms-flex-align: baseline;
-      align-items: baseline; }
+  align-items: baseline; }
   trix-toolbar .trix-dialog__link-fields .trix-input {
-    -ms-flex: 1;
-        flex: 1; }
+    flex: 1; }
   trix-toolbar .trix-dialog__link-fields .trix-button-group {
-    -ms-flex: 0 0 content;
-        flex: 0 0 content;
+    flex: 0 0 content;
     margin: 0; }
 
 trix-editor [data-trix-mutable]:not(.attachment__caption-editor) {
   -webkit-user-select: none;
   -moz-user-select: none;
-  -ms-user-select: none;
   user-select: none; }
 
 trix-editor [data-trix-mutable]::-moz-selection,
@@ -269,7 +259,6 @@ trix-editor .attachment__toolbar {
   text-align: center; }
 
 trix-editor .trix-button-group {
-  display: -ms-inline-flexbox;
   display: inline-flex; }
 
 trix-editor .trix-button {
@@ -413,17 +402,13 @@ trix-editor .attachment__metadata {
     border: 1px solid #bbb;
     border-radius: 5px; }
   .trix-content .attachment-gallery {
-    display: -ms-flexbox;
     display: flex;
-    -ms-flex-wrap: wrap;
-        flex-wrap: wrap;
+    flex-wrap: wrap;
     position: relative; }
     .trix-content .attachment-gallery .attachment {
-      -ms-flex: 1 0 33%;
-          flex: 1 0 33%;
+      flex: 1 0 33%;
       padding: 0 0.5em;
       max-width: 33%; }
     .trix-content .attachment-gallery.attachment-gallery--2 .attachment, .trix-content .attachment-gallery.attachment-gallery--4 .attachment {
-      -ms-flex-preferred-size: 50%;
-          flex-basis: 50%;
+      flex-basis: 50%;
       max-width: 50%; }
