@@ -28,17 +28,23 @@
             <%= "#{plan_version.num_answered_questions}/#{plan_version.num_questions} (#{plan_version.percent_answered.to_i}%)" %>
           </td>
           <td class="text-center text-nowrap align-middle">
-            <%= button_to plan_version.belnet_stage.humanize,
+            <% stage_history = plan_version.belnet_stage_histories.map do |history|
+                 {
+                   stage: history.belnet_stage&.description,
+                   user: history.user&.name(false),
+                   date: l(history.created_at, format: :long),
+                   motivation: history.motivation
+                 }
+               end %>
+            <%= button_to plan_version.belnet_stage&.description || _('Select stage'),
               update_stage_plan_path(plan_version),
               class: "btn btn-secondary w-100 color-white dropdown-toggle",
               data: { action: "change-stage-modal#open",
                 plan_id: plan_version.id,
-                plan_path: update_stage_plan_path(plan_version), 
-                stage_modal_stage_param: plan_version.belnet_stage,
-                stage_modal_url_param: update_stage_plan_path(plan_version),
-                stage_modal_last_updated_by_param: plan_version.belnet_stage_updated_by&.name || _("Unknown"),
+                plan_path: update_stage_plan_path(plan_version),
+                stage_modal_stage_param: plan_version.belnet_stage_id,
                 stage_modal_version_param: plan_version.belnet_version,
-                stage_modal_last_updated_at_param: time_ago_in_words(plan_version.updated_at)
+                stage_modal_history_param: stage_history.to_json
               },
               method: :put %>
           </td>
@@ -61,17 +67,33 @@
               <%= _("Select the new stage for this version of the DMP.") %>
             </p>
             <div class="form-control d-flex flex-column gap-2">
-              <select class="form-select" 
-                      name="belnet_stage" 
-                      data-change-stage-modal-target="stageSelect" 
-                      required>
-                <option value="" disabled><%= _("Select a Stage...") %></option>
-                <% Plan.belnet_stages.keys.each do |stage| %>
-                  <option value="<%= stage %>"><%= stage.humanize %></option>
+              <% stages = plan.org.belnet_stages %>
+              <select class="form-select"
+                      name="belnet_stage"
+                      data-change-stage-modal-target="stageSelect"
+                      required
+                      <%= 'disabled' if stages.empty? %>>
+                <% if stages.empty? %>
+                  <option value="" disabled selected>
+                    <%= _("No stages available for your organization") %>
+                  </option>
+                <% else %>
+                  <option value="" disabled><%= _("Select a Stage...") %></option>
+                  <% stages.each do |stage| %>
+                    <option value="<%= stage.id %>"><%= stage.description %></option>
+                  <% end %>
                 <% end %>
               </select>
-              <p data-change-stage-modal-target="lastUpdatedBy" class="mb-0"></p>
+            </div>
 
+            <div class="mt-3">
+              <h6 class="mb-2"><%= _('Stage change history') %></h6>
+              <ul class="list-group list-group-flush border rounded"
+                  data-change-stage-modal-target="historyList"></ul>
+              <p data-change-stage-modal-target="historyEmpty"
+                 class="text-muted mb-0 mt-2">
+                <%= _('No stage changes recorded yet.') %>
+              </p>
             </div>
           </div>
           

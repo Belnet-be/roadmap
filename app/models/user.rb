@@ -99,10 +99,8 @@ class User < ApplicationRecord
                                           join_table: 'notification_acknowledgements'
 
   # Nullify makes sure we dont delete the plan if the user is deleted, but we do want to remove the reference to the user
-  has_many :stage_updated_plans,
-           class_name: 'Plan',
-           foreign_key: :belnet_stage_updated_by_id,
-           dependent: :nullify
+
+  has_many :belnet_stage_histories, dependent: :nullify
 
   # ===============
   # = Validations =

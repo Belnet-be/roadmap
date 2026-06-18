@@ -21,7 +21,7 @@ module Paginable
       @plan = Plan.find(params[:id])
       authorize @plan
 
-      scope = @plan.plan_versions
+      scope = @plan.plan_versions.includes(belnet_stage_histories: %i[belnet_stage user])
 
       paginable_renderise(
         partial: 'history',
