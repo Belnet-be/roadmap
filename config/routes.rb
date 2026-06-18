@@ -231,6 +231,7 @@ Rails.application.routes.draw do
   resources :plans do
     member do
       post :create_new_version
+      put :update_stage
     end
   end
 

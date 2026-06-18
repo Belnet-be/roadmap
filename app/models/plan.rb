@@ -130,6 +130,10 @@ class Plan < ApplicationRecord
 
   has_many :research_outputs, dependent: :destroy
 
+  belongs_to :belnet_stage, optional: true
+
+  has_many :belnet_stage_histories, -> { order(created_at: :desc) }, dependent: :destroy
+
   # =====================
   # = Nested Attributes =
   # =====================
@@ -494,10 +498,37 @@ class Plan < ApplicationRecord
     belnet_version == 0
   end
 
+  def update_stage(new_stage_id, current_user)
+    return false if is_plan_live_version?
+
+    new_stage = org.belnet_stages.find_by(id: new_stage_id)
+    return false if new_stage.nil? || belnet_stage_id == new_stage.id
+
+    old_description = belnet_stage&.description
+    motivation = if old_description.present?
+                   "Stage changed from #{old_description} to #{new_stage.description}"
+                 else
+                   "Stage set to #{new_stage.description}"
+                 end
+
+    transaction do
+      update!(belnet_stage: new_stage)
+      BelnetStageHistory.create!(
+        plan: self,
+        belnet_stage: new_stage,
+        user: current_user,
+        motivation: motivation
+      )
+    end
+    true
+  rescue ActiveRecord::RecordInvalid, ActiveRecord::RecordNotSaved
+    false
+  end
+
   # Creates a new version of the plan with the same family_id and an incremented version number.
   # The original plan will have its family_id set if it doesn't already have one.
   # Returns the new version of the plan.
-  def create_plan_with_new_version!(reason: nil, current_user: nil, original_plan: nil)
+  def create_plan_with_new_version!(reason: nil, current_user: nil, original_plan: nil, new_stage: nil)
     # Transaction to ensure that the original plan and the new version are updated/created together
     transaction do
       # Handle family_id logic on the original
@@ -512,7 +543,8 @@ class Plan < ApplicationRecord
         belnet_version: latest_belnet_version + 1,
         belnet_family_id: belnet_family_id || id,
         belnet_reason: reason || '',
-        belnet_created_by: current_user&.id
+        belnet_created_by: current_user&.id,
+        belnet_stage: new_stage
       )
 
       # Copy over the answers, guidance groups and roles (users) to the new version

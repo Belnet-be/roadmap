@@ -51,22 +51,55 @@
         <div class="modal-content">
           <div class="modal-body">
             <p><%= _('Reason for version') %> <strong><%= plan.latest_belnet_version + 1 %></strong>:</p>
-            <P class="alert alert-primary"><%= _("Use versioning to mark important milestones in your DMP. Please add a brief description of the changes or the stage reached, to follow this DMP's history. Please avoid excessive versioning for optimal workspace and storage management.") %></p>
-            <div class="form-control mb-3">
-              <div class="col-lg-12">
-                <textarea class="form-control" 
-                          rows="5" 
-                          required
-                          data-confirm-modal-target="input"
-                          placeholder="<%= _('Provide a description... (10-500 characters)') %>"
-                          minlength="10"
-                          maxlength="500"></textarea>
+            <p class="alert alert-primary"><%= _("Use versioning to mark important milestones in your DMP. Please add a brief description of the changes or the stage reached, to follow this DMP's history. Please avoid excessive versioning for optimal workspace and storage management.") %></p>
+            <div class="form-control d-flex flex-column gap-2">
+              
+              <label for="version_reason" class="form-label fw-bold mb-0"><%= _('Version Description') %></label>
+              <textarea id="version_reason"
+                        class="form-control" 
+                        rows="5" 
+                        required
+                        data-confirm-modal-target="input"
+                        placeholder="<%= _('Provide a description... (10-500 characters)') %>"
+                        minlength="10"
+                        maxlength="500"></textarea>
+              
+              <p class="alert alert-primary mb-0 mt-2"><%= _("You can choose to change the stage for this new version, if not, it will remain the stage of your last version, this can be updated at anytime in the History tab.") %></p>
+              
+              <label for="version_stage" class="form-label fw-bold mb-0"><%= _('Plan Stage') %></label>
+              <% stages = plan.org.belnet_stages %>
+              <select id="version_stage"
+                      class="form-select" 
+                      data-confirm-modal-target="stage"
+                      required
+                      <%= 'disabled' if stages.empty? %>>
                 
-                <div data-confirm-modal-target="errorMessage" 
-                    class="text-danger d-none" 
-                    style="margin-top: 5px;">
-                  <strong><%= _('Reason must be between 10 and 500 characters.') %></strong>
-                </div>
+                <% if stages.empty? %>
+                  <option value="" disabled selected>
+                    <%= _("No stages available for your organization") %>
+                  </option>
+                <% else %>
+                  <option value="" disabled <%= 'selected' if plan.belnet_stage_id.blank? %>>
+                    <%= _("Select a Stage...") %>
+                  </option>
+                  
+                  <% stages.each do |stage| %>
+                    <option value="<%= stage.id %>" <%= 'selected' if plan.plan_versions.any? && plan.plan_versions.last.belnet_stage_id == stage.id %>>
+                      <%= stage.description %>
+                    </option>
+                  <% end %>
+                <% end %>
+                
+              </select>
+              <div data-confirm-modal-target="errorMessage" class="text-danger d-none" style="margin-top: 5px;">
+                <ul class="mb-0 ps-3">
+                  <li data-confirm-modal-target="reasonError" class="d-none">
+                    <%= _('Reason must be between 10 and 500 characters.') %>
+                  </li>
+                  <li data-confirm-modal-target="stageError" class="d-none">
+                    <%= _('Stage is required.') %>
+                  </li>
+                </ul>
               </div>
             </div>
           </div>
@@ -80,7 +113,8 @@
               </button>
               <button type="submit" 
                       class="btn btn-primary" 
-                      data-action="confirm-modal#submitWithReason">
+                      data-action="confirm-modal#submitWithReason"
+                      <%= 'disabled' if stages.empty? %>>
                 <%= _('Create Version') %>
               </button>
             </div>

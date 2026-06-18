@@ -89,6 +89,10 @@ class Org < ApplicationRecord
 
   has_many :departments
 
+  has_many :belnet_stages, dependent: :destroy
+
+  has_many :belnet_stage_histories, through: :belnet_stages
+
   # ===============
   # = Validations =
   # ===============

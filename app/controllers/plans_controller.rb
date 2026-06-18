@@ -390,7 +390,7 @@ class PlansController < ApplicationController
   def history
     @plan = Plan.find(params[:id])
     authorize @plan
-    @versions = @plan.plan_versions.order(belnet_version: :desc)
+    @versions = @plan.plan_versions.includes(belnet_stage_histories: %i[belnet_stage user]).order(belnet_version: :desc)
     render 'history'
   end
 
@@ -480,12 +480,14 @@ class PlansController < ApplicationController
   def create_new_version
     original_plan = Plan.find(params[:id])
     authorize original_plan
+    stage = original_plan.org.belnet_stages.find_by(id: params[:belnet_stage])
 
     # Capture reason from the Stimulus modal
     new_version = original_plan.create_plan_with_new_version!(
       reason: params[:belnet_reason],
       current_user: current_user,
-      original_plan: original_plan
+      original_plan: original_plan,
+      new_stage: stage
     )
 
     flash[:notice] = "Version #{new_version.belnet_version} has been created."
@@ -493,6 +495,21 @@ class PlansController < ApplicationController
   rescue ActiveRecord::RecordInvalid => e
     flash[:alert] = "Failed to create version: #{e.message}"
     redirect_to action: :index
+  end
+
+  def update_stage
+    plan = Plan.find(params[:id])
+    authorize plan
+
+    old_stage_description = plan.belnet_stage&.description || _('None')
+    if plan.update_stage(params[:belnet_stage], current_user)
+      live_plan = Plan.find_by(belnet_family_id: plan.belnet_family_id, belnet_version: 0) || plan
+      redirect_to history_plan_path(live_plan),
+                  notice: "(Version #{plan.belnet_version}): Stage updated from #{old_stage_description} to #{plan.belnet_stage.description}."
+    else
+      live_plan = Plan.find_by(belnet_family_id: plan.belnet_family_id, belnet_version: 0) || plan
+      redirect_to history_plan_path(live_plan), alert: 'Failed to update stage.'
+    end
   end
 
   # ============================

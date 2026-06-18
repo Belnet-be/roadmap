@@ -62,10 +62,10 @@ module Api
           plan = Api::Belnet::V1::PlansPolicy::Scope.new(client, Plan).resolve
                                                     .where(id: params[:plan_id])
                                                     .first
-
-          if plan.present? && plan.is_plan_live_version?
+          stage = plan.org.belnet_stages.find_by(code: params[:stage_code])
+          if plan.present? && plan.is_plan_live_version? && stage.present?
             new_version = plan.create_plan_with_new_version!(reason: params[:reason], current_user: current_user,
-                                                             original_plan: plan)
+                                                             original_plan: plan, new_stage: stage)
             render 'api/belnet/v1/plans/show', status: :created, locals: { plan: new_version }
           else
             render_error(errors: [_('Plan not found or not eligible for versioning')], status: :not_found)
