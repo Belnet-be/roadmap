@@ -52,7 +52,7 @@ db/test.sqlite3-journal
 coverage
 
 # Ignore database configuration and token secrets
-config/database.yml
+# config/database.yml
 config/secrets.yml
 config/branding.yml
 

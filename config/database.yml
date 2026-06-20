@@ -1,0 +1,19 @@
+x-defaults: &defaults
+  adapter: <%= ENV['DB_ADAPTER'] || 'postgresql' %>
+  encoding: <%= ENV['DB_ADAPTER'] == "mysql2" ? "utf8mb4" : "" %>
+  username: root
+  password: <%= ENV["DB_PASSWORD"] %>
+  host: mysql
+  pool: 16
+
+development:
+  <<: *defaults
+  database: roadmap_development
+
+test:
+  <<: *defaults
+  database: roadmap_test
+
+production:
+  <<: *defaults
+  database: roadmap_development
