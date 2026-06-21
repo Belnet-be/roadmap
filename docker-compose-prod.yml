@@ -2,11 +2,11 @@ services:
   web:
     build:
       context: .
-      dockerfile: Dockerfile.dev
-    image: dmponline-dev
-    container_name: dmponline-dev
+      dockerfile: Dockerfile
+    image: dmponline
+    container_name: dmponline
     volumes:
-      - .:/opt/roadmap
+      - ./log:/opt/roadmap/log
     environment:
       - MALLOC_ARENA_MAX=${MALLOC_ARENA_MAX:-2}
       - RAILS_LOG_TO_STDOUT=${RAILS_LOG_TO_STDOUT:-true}
