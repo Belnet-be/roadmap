@@ -2,18 +2,18 @@ services:
   web:
     build:
       context: .
-      dockerfile: Dockerfile.dev
-    image: dmponline-dev
-    container_name: dmponline-dev
+      dockerfile: Dockerfile
+    image: dmponline
+    container_name: dmponline
     volumes:
-      - .:/opt/roadmap
+      - ./log:/opt/roadmap/log
     environment:
       - DB_ADAPTER=${DB_ADAPTER:-mysql2}
       - DB_NAME=${DB_NAME:?DB_NAME must be set}
       - DB_USERNAME=${DB_USERNAME:?DB_USERNAME must be set}
       - DB_PASSWORD=${DB_PASSWORD:?DB_PASSWORD must be set}
       - DB_HOST=${DB_HOST:-mysql}
-      - DB_POOL=${DB_POOL:-5}
+      - DB_POOL=${DB_POOL:-16}
       - MALLOC_ARENA_MAX=${MALLOC_ARENA_MAX:-2}
       - RAILS_LOG_TO_STDOUT=${RAILS_LOG_TO_STDOUT:-true}
       - DMP_LOCAL_LOGIN=${DMP_LOCAL_LOGIN:-true}

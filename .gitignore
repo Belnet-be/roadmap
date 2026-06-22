@@ -1,9 +1,16 @@
 # Ignore bundler config
 /.bundle
 
-# Ignore all logfiles, tempfiles, public assets,
-/log/*.log
-/tmp
+# Ignore all logfiles and tempfiles.
+/log/*
+/tmp/*
+!/log/.gitkeep
+!/tmp/.gitkeep
+
+# Ignore pidfiles, but keep the directory.
+/tmp/pids/*
+!/tmp/pids/
+!/tmp/pids/.gitkeep
 
 # Ignore public subdirectories
 public/apidocs/*
@@ -45,7 +52,7 @@ db/test.sqlite3-journal
 coverage
 
 # Ignore database configuration and token secrets
-config/database.yml
+# config/database.yml
 config/secrets.yml
 config/branding.yml
 
@@ -120,6 +127,13 @@ yarn-debug.log*
 
 # Ignore briley AWS cloud9 script to start the application
 cloud9-start.sh
+
+# Ignore storage (uploaded files in development and any SQLite databases).
+/storage/*
+!/storage/.gitkeep
+/tmp/storage/*
+!/tmp/storage/
+!/tmp/storage/.gitkeep
 
 #ugent - start
 vendor/bundle
