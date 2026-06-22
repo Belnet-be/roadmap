@@ -1,10 +1,13 @@
 x-defaults: &defaults
-  adapter: <%= ENV['DB_ADAPTER'] || 'postgresql' %>
+  # DB_ADAPTER values can be mysql2 or postgresql
+  adapter: <%= ENV['DB_ADAPTER'] || 'mysql2' %>
+  # Default encoding is utf8
   encoding: <%= ENV['DB_ADAPTER'] == "mysql2" ? "utf8mb4" : "" %>
-  username: root
+  username: <%= ENV.fetch('DB_USERNAME', 'root') %>
   password: <%= ENV["DB_PASSWORD"] %>
-  host: mysql
-  pool: 16
+  # DB_HOST values can be mysql, postgres or haproxy (Docker compose service names)
+  host: <%= ENV.fetch('DB_HOST', 'mysql') %>
+  pool: <%= ENV.fetch('DB_POOL', 5).to_i %>
 
 development:
   <<: *defaults
@@ -16,4 +19,4 @@ test:
 
 production:
   <<: *defaults
-  database: roadmap_development
+  database: <%= ENV["DB_NAME"] %>
