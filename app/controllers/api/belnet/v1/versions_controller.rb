@@ -11,23 +11,21 @@ module Api
         def index # rubocop:disable Metrics/AbcSize
           # This endpoint should return a collection of plans that are associated to the given plan
           # by their family_id (column: belnet_family_id).
-          plan = Api::Belnet::V1::PlansPolicy::Scope.new(client, Plan).resolve
-                                                    .where(id: params[:plan_id])
-                                                    .first
-          if plan
-            plans = plan.plan_versions
-                        .order(belnet_version: :desc)
+          scope = Api::Belnet::V1::PlansPolicy::Scope.new(client, Plan).resolve
+          plan = scope.where(id: params[:plan_id]).first
 
-            @items = if plans.present? && plans.any?
-                       paginate_response(results: plans)
-                     else
-                       paginate_response(results: Plan.none)
-                     end
-            render '/api/belnet/v1/plans/index', status: :ok
-
-          else
+          unless plan
             render_error(errors: [_('Plan not found')], status: :not_found)
+            return
           end
+
+          versions = scope.where(belnet_family_id: params[:plan_id])
+                          .where('belnet_version > ?', 0)
+                          .order(belnet_version: :desc)
+
+          @view = params.fetch(:view, 'summary')
+          @items = paginate_response(results: versions)
+          render 'api/belnet/v1/versions/index', status: :ok
         end
 
         # GET /api/belnet/v1/plans/:plan_id/versions/:id (:id means version number in this case)

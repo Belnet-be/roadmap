@@ -1,0 +1,11 @@
+# frozen_string_literal: true
+
+json.partial! 'api/belnet/v1/standard_response', total_items: @total_items
+
+json.items @items do |version|
+  if @view == 'detail'
+    json.partial! 'api/belnet/v1/versions/detail', version: version
+  else
+    json.partial! 'api/belnet/v1/versions/summary', version: version
+  end
+end
