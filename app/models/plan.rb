@@ -134,6 +134,10 @@ class Plan < ApplicationRecord
 
   has_many :belnet_stage_histories, -> { order(created_at: :desc) }, dependent: :destroy
 
+  has_many :governance_validations, class_name: 'BelnetValidation', foreign_key: :plan_id
+
+  has_many :snapshot_validations, class_name: 'BelnetValidation', foreign_key: :validated_plan_id
+
   # =====================
   # = Nested Attributes =
   # =====================
@@ -720,6 +724,16 @@ class Plan < ApplicationRecord
   # Returns the plan's identifier (either a DOI/ARK)
   def landing_page
     identifiers.find { |i| DMP_ID_TYPES.include?(i.identifier_format) }
+  end
+
+  def validation_summary
+    governance_validations
+      .includes(:belnet_validation_topic, :belnet_validation_status)
+      .order(created_at: :desc)
+      .each_with_object({}) do |validation, summary|
+        topic_code = validation.belnet_validation_topic.code
+        summary[topic_code] ||= validation.belnet_validation_status.code
+      end
   end
 
   # Since the Grant is not a normal AR association, override the getter and setter

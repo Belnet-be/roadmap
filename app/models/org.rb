@@ -93,6 +93,14 @@ class Org < ApplicationRecord
 
   has_many :belnet_stage_histories, through: :belnet_stages
 
+  has_many :belnet_validation_topics
+
+  has_many :belnet_validation_statuses
+
+  has_many :belnet_validation_topics
+
+  has_many :belnet_validation_statuses
+
   # ===============
   # = Validations =
   # ===============
