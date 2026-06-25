@@ -1,40 +1,12 @@
-#!/bin/bash
+#!/bin/bash -e
 
-bundle install
+# cleans up previous shutdown, if not done properly
+rm -f ./tmp/pids/server.pid
 
-# cleans up previous shutdown
-rm -f /opt/roadmap/tmp/pids/server.pid
+# If running the rails server then migrate existing database if needed
+### DON'T use db:prepare, we use one database per db container for now.
+if [ "${@: -1:1}" == "./bin/dev" ]; then
+  ./bin/rails db:migrate
+fi
 
-# Setup credentials
-EDITOR='tee' bin/rails credentials:edit <<EOF
-recaptcha:
-  site_key: ""
-  secret_key: ""
-devise_pepper: KJIJUIOJJeioejrerjerijrjerzerae__
-dragonfly_secret: eorizjerjrzeurJJJIEI
-secret_key_base: 12EJJJEHHEHEHHHEHZZYYYY9993JJDEHH__
-EOF
-
-# Configures database
-cat <<EOF1 > config/database.yml
-production: &defaults
-  adapter: <%= ENV['DB_ADAPTER'] || 'postgresql' %>
-  encoding: <%= ENV['DB_ADAPTER'] == "mysql2" ? "utf8mb4" : "" %>
-  username: root
-  password: <%= ENV["DB_PASSWORD"] %>
-  host: mysql
-  database: roadmap_development
-  pool: 16
-
-development:
-  <<: *defaults
-
-test:
-  <<: *defaults
-  database: roadmap_test
-EOF1
-
-yarnpkg install
-[ -f /usr/bin/yarn ] || ln -s /usr/bin/yarnpkg /usr/bin/yarn
-bin/rails db:migrate
-bin/dev
+exec "${@}"

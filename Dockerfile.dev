@@ -1,0 +1,52 @@
+# syntax=docker/dockerfile:1
+
+# Make sure RUBY_VERSION matches the Ruby version in .ruby-version and Gemfile
+ARG RUBY_VERSION=3.1.4
+
+### base image
+FROM docker.io/library/ruby:${RUBY_VERSION}-slim
+
+WORKDIR /opt/roadmap
+
+# Update RubyGems to a specific version, latest valid for Ruby version 3.1.x
+ARG RUBYGEMS_VERSION=3.6.9
+# Install base packages & packages needed to build gems
+RUN apt-get update -qq && \
+  gem update --system ${RUBYGEMS_VERSION} --no-document --silent && \
+  apt-get install --no-install-recommends -y \
+  curl libjemalloc2 libpq-dev libmariadb-dev libvips openssl libjpeg62-turbo libpng16-16 imagemagick libxrender1 libxext6 \
+  build-essential git pkg-config libyaml-dev libxml2-dev libssl-dev vim bison && \
+  rm -rf /var/lib/apt/lists /var/cache/apt/archives
+
+# Set production environment variables
+ENV RAILS_ENV="development" \
+  BUNDLE_PATH="/usr/local/bundle" \
+  BUNDLE_WITH="pgsql:mysql:puma" \
+  BUNDLE_WITHOUT="aws"
+
+# Install Node.js and JavaScript dependencies for asset compilation
+ARG NODE_VERSION=22.22.3
+ARG YARN_VERSION=1.22.22
+ENV PATH=/usr/local/node/bin:$PATH
+RUN curl -sL https://github.com/nodenv/node-build/archive/master.tar.gz | tar xz -C /tmp && \
+  /tmp/node-build-master/bin/node-build "${NODE_VERSION}" /usr/local/node && \
+  npm install -g yarn@${YARN_VERSION} && \
+  rm -rf /tmp/node-build-master
+
+# Install application gems
+### Includes trick via Gemfile.local to overwrite upstream code with Belnet specific one (UGent way).
+### But this creates problems to use ./bin/rails assets:precompile in the normal way.
+COPY Gemfile Gemfile.lock Gemfile.local ./
+RUN bundle install && \
+  rm -rf ~/.bundle/ "${BUNDLE_PATH}"/ruby/*/cache "${BUNDLE_PATH}"/ruby/*/bundler/gems/*/.git
+
+# Install node modules
+COPY package.json yarn.lock ./
+RUN yarn install
+
+# Entrypoint prepares the database.
+ENTRYPOINT [ "./entrypoint-dev.sh" ]
+# Expose ports
+EXPOSE 3000
+# Start the application server by default
+CMD [ "./bin/dev" ]

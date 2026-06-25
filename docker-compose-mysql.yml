@@ -1,0 +1,12 @@
+services:
+  mysql:
+    image: mysql
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_HOST: "0.0.0.0"
+      MYSQL_DATABASE: roadmap_development
+    ports:
+      - "127.0.0.1:3307:3306"
+    volumes:
+      - ./tmp/mysql:/var/lib/mysql

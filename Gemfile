@@ -18,7 +18,7 @@ gem 'rails', '~> 7.1'
 gem 'mimemagic'
 
 # Use Puma as the app server
-gem 'puma', group: :puma, require: false
+gem 'puma', '>= 8.0', group: :puma, require: false
 
 # Use esbuild, rollup.js, or Webpack to bundle your JavaScript, then deliver it via the asset pipeline in Rails
 # Read more: https://github.com/rails/jsbundling-rails
@@ -351,7 +351,14 @@ group :development do
 
   # TomDoc for YARD (http://rubyworks.github.com/yard-tomdoc)
   gem 'yard-tomdoc'
+
+  # Lock versions to stay compatible with Ruby 3.1.x
+  gem "error_highlight", "0.3.0", platforms: [:ruby]
 end
+
+# Lock versions to stay compatible with Ruby 3.1.x
+gem "psych", "~> 4.0.4"
+gem "stringio", "3.0.1" # Ruby 3.0.3..3.1.4, see https://stdgems.org/stringio/
 
 # ugent - start
 eval_gemfile 'Gemfile.local' if File.exist?('Gemfile.local')

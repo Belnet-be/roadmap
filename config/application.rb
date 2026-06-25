@@ -61,5 +61,28 @@ module DMPRoadmap
     end
     # ugent: end
 
+    # --------------------------------- #
+    # BROADCAST LOGGER                  #
+    # --------------------------------- #
+    # Voeg file loggers toe bovenop de bestaande stdout logger
+    # uit config/environments/production.rb.
+    #
+    # Waarom after_initialize?
+    # production.rb maakt Rails.logger aan tijdens de config fase.
+    # after_initialize loopt nadat ALLE config geladen is — pas dan
+    # kunnen we de BroadcastLogger erbovenop zetten zonder dat
+    # production.rb hem daarna nog overschrijft.
+    #
+    # Resultaat:
+    #   stdout    — blijft werken zoals voorheen (docker compose logs)
+    #   client.log — alle HTTP requests
+    #   error.log  — alle 4xx/5xx en exceptions
+    config.after_initialize do
+      if ENV["BELNET_SPLITTED_LOGS"].to_s == "true"
+        Rails.logger.broadcast_to(CLIENT_LOGGER)
+        Rails.logger.broadcast_to(ERROR_LOGGER)
+        Rails.logger.info '[Logging] Splitted log files active'
+      end
+    end
   end
 end
