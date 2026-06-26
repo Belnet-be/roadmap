@@ -4,7 +4,7 @@
 <div class="card mb-4" markdown="1">
 
 <div class="card-header" markdown="1">
-## Release Notes v5.0.0 Draft
+## Release Notes v5.0.0-alpha-spr0014.1
 </div>
 <div class="card-body" markdown="1">
 
@@ -21,6 +21,11 @@
 
 ### Resolved issues
 - Admin panel is now accessible. Caused by timestamptz (Time Stamp Time Zone) not correctly being able to be read
+- Fix typo API documentation
+- Fix record invalid error in create of version
+- Fix return only versions (non live) in API /versions
+- Fix Organizations index page items query
+- Fix crash when logging in via ORCID and no email is provided (email not made public)
 
 ### Other changes without functional impact
 - Upgrade to latest community version (from 4.2.0 to 5.0.2)
