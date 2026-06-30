@@ -1,0 +1,105 @@
+<% has_versions = available_validated_plans.any? %>
+
+<div class="panel panel-default">
+  <div class="panel-heading clearfix">
+    <h2 class="panel-title pull-left"><%= _('Governance Validations') %></h2>
+    <% if plan.editable_by?(current_user.id) %>
+      <button type="button"
+              class="btn btn-primary pull-right"
+              data-bs-toggle="modal"
+              data-bs-target="#request-governance-validation-modal"
+              <%= has_versions ? '' : 'disabled' %>>
+        <%= _('Request Validation') %>
+      </button>
+    <% end %>
+  </div>
+
+  <div class="panel-body">
+    <% if has_versions %>
+      <p><%= _("Request a governance validation for one of this plan's frozen version.") %></p>
+    <% else %>
+      <p><%= _('Create a version before requesting a governance validation.') %></p>
+    <% end %>
+
+    <% if governance_validations.any? %>
+      <div class="table-responsive">
+        <table class="table table-hover table-bordered">
+          <thead>
+            <tr>
+              <th scope="col"><%= _('Topic') %></th>
+              <th scope="col"><%= _('Version') %></th>
+              <th scope="col"><%= _('Status') %></th>
+              <th scope="col"><%= _('Requested by') %></th>
+              <th scope="col"><%= _('Requested at') %></th>
+              <th scope="col"><%= _('Reviewed by') %></th>
+              <th scope="col"><%= _('Reviewed at') %></th>
+              <th scope="col"><%= _('Rationale') %></th>
+              <th scope="col"><%= _('Conditions') %></th>
+              <th scope="col"><%= _('Actions') %></th>
+            </tr>
+          </thead>
+          <tbody>
+            <% governance_validations.each do |validation| %>
+              <% reviewable = validation.decided_at.blank? %>
+              <tr>
+                <td><%= validation.belnet_validation_topic.description.presence || validation.belnet_validation_topic.code %></td>
+                <td><%= _("Version #{validation.validated_plan.belnet_version}") %></td>
+                <td>
+                  <% if validation.belnet_validation_status.present? %>
+                    <span class="badge text-bg-secondary">
+                      <%= validation.belnet_validation_status.description.presence || validation.belnet_validation_status.code %>
+                    </span>
+                  <% else %>
+                    <span class="badge text-bg-light"><%= _('Pending review') %></span>
+                  <% end %>
+                </td>
+                <td><%= validation.requested_by&.name || _('Unknown') %></td>
+                <td><%= l(validation.requested_at, format: :long) if validation.requested_at.present? %></td>
+                <td><%= validation.decided_by&.name || _('Not reviewed') %></td>
+                <td><%= l(validation.decided_at, format: :long) if validation.decided_at.present? %></td>
+                <td><%= validation.rationale.presence || '' %></td>
+                <td><%= validation.conditions.presence || '' %></td>
+                <td>
+                  <% if plan.editable_by?(current_user.id) && reviewable %>
+                    <button type="button"
+                            class="btn btn-secondary btn-sm"
+                            data-bs-toggle="modal"
+                            data-bs-target="#review-governance-validation-<%= validation.id %>-modal">
+                      <%= _('Review') %>
+                    </button>
+                  <% else %>
+                    <span class="text-muted"><%= _('No actions') %></span>
+                  <% end %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% else %>
+      <p class="mb-0"><%= _('No governance validations have been requested for this plan yet.') %></p>
+    <% end %>
+  </div>
+</div>
+
+<% if plan.editable_by?(current_user.id) && has_versions %>
+  <%= render partial: 'plans/governance_validation_request_modal',
+             locals: {
+               plan: plan,
+               available_topics: available_topics,
+               available_validated_plans: available_validated_plans
+             } %>
+<% end %>
+
+<% if plan.editable_by?(current_user.id) %>
+  <% governance_validations.each do |validation| %>
+    <% if validation.decided_at.blank? %>
+      <%= render partial: 'plans/governance_validation_review_modal',
+                 locals: {
+                   plan: plan,
+                   validation: validation,
+                   available_validation_statuses: available_validation_statuses
+                 } %>
+    <% end %>
+  <% end %>
+<% end %>

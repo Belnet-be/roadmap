@@ -33,6 +33,15 @@
   </fieldset>
 <% end %>
 
+<%= render partial: 'plans/governance_validations_section',
+           locals: {
+             plan: @plan,
+             governance_validations: @governance_validations,
+             available_topics: @available_topics,
+             available_validation_statuses: @available_validation_statuses,
+             available_validated_plans: @available_validated_plans
+           } %>
+
 <h2><%= _('Manage collaborators')%></h2>
 <p><%= _('Invite specific people to read, edit, or administer your plan. Invitees will receive an email notification that they have access to this plan.') %></p>
 <p>Plan (co-)owners are listed as "creators" on plan exports, and "Principal investigators" are also included in some export formats. JSON exports include all types of contributors.</p>
@@ -200,4 +209,3 @@
   see app/javascript/src/ugent/plans/share_contributor.js
 */
 </script>
-

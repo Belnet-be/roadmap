@@ -129,6 +129,8 @@ Rails.application.routes.draw do
   resources :plans do
     resource :export, only: [:show], controller: 'plan_exports'
 
+    resources :belnet_validations, only: %i[create update]
+
     resources :contributors, except: %i[show]
 
     resources :research_outputs, except: %i[show]

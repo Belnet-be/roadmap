@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_05_26_115825) do
+ActiveRecord::Schema[7.1].define(version: 2026_06_22_130102) do
 # Could not dump table "annotations" because of following ActiveRecord::StatementInvalid
 #   Mysql2::Error: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'NULL' at line 1
 
@@ -31,6 +31,15 @@ ActiveRecord::Schema[7.1].define(version: 2026_05_26_115825) do
 #   Mysql2::Error: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'NULL' at line 1
 
 # Could not dump table "belnet_stages" because of following ActiveRecord::StatementInvalid
+#   Mysql2::Error: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'NULL' at line 1
+
+# Could not dump table "belnet_validation_statuses" because of following ActiveRecord::StatementInvalid
+#   Mysql2::Error: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'NULL' at line 1
+
+# Could not dump table "belnet_validation_topics" because of following ActiveRecord::StatementInvalid
+#   Mysql2::Error: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'NULL' at line 1
+
+# Could not dump table "belnet_validations" because of following ActiveRecord::StatementInvalid
 #   Mysql2::Error: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'NULL' at line 1
 
 # Could not dump table "conditions" because of following ActiveRecord::StatementInvalid
@@ -254,6 +263,14 @@ ActiveRecord::Schema[7.1].define(version: 2026_05_26_115825) do
   add_foreign_key "belnet_stage_histories", "plans"
   add_foreign_key "belnet_stage_histories", "users"
   add_foreign_key "belnet_stages", "orgs"
+  add_foreign_key "belnet_validation_statuses", "orgs"
+  add_foreign_key "belnet_validation_topics", "orgs"
+  add_foreign_key "belnet_validations", "belnet_validation_statuses"
+  add_foreign_key "belnet_validations", "belnet_validation_topics"
+  add_foreign_key "belnet_validations", "plans"
+  add_foreign_key "belnet_validations", "plans", column: "validated_plan_id"
+  add_foreign_key "belnet_validations", "users", column: "decided_by_id"
+  add_foreign_key "belnet_validations", "users", column: "requested_by_id"
   add_foreign_key "conditions", "questions"
   add_foreign_key "guidance_groups", "orgs"
   add_foreign_key "guidances", "guidance_groups"
