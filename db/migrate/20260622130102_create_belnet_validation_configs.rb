@@ -24,7 +24,7 @@ class CreateBelnetValidationConfigs < ActiveRecord::Migration[7.1]
       t.references :plan, type: :integer, foreign_key: true, null: false 
       t.references :validated_plan, type: :integer, foreign_key: { to_table: :plans }, null: false 
       t.references :belnet_validation_topic, foreign_key: true, null: false
-      t.references :belnet_validation_status, foreign_key: true, null: false
+      t.references :belnet_validation_status, foreign_key: true
       t.text :rationale
       t.text :conditions
       t.references :requested_by, type: :integer, foreign_key: { to_table: :users }

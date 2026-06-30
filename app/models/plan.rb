@@ -136,7 +136,7 @@ class Plan < ApplicationRecord
 
   has_many :governance_validations, class_name: 'BelnetValidation', foreign_key: :plan_id
 
-  has_many :snapshot_validations, class_name: 'BelnetValidation', foreign_key: :validated_plan_id
+  has_many :version_validations, class_name: 'BelnetValidation', foreign_key: :validated_plan_id
 
   # =====================
   # = Nested Attributes =
@@ -731,9 +731,17 @@ class Plan < ApplicationRecord
       .includes(:belnet_validation_topic, :belnet_validation_status)
       .order(created_at: :desc)
       .each_with_object({}) do |validation, summary|
+        next if validation.belnet_validation_status.blank?
+
         topic_code = validation.belnet_validation_topic.code
         summary[topic_code] ||= validation.belnet_validation_status.code
       end
+  end
+
+  def governance_validations_for_org_topics
+    governance_validations
+      .joins(:belnet_validation_topic)
+      .where(belnet_validation_topics: { org_id: org_id })
   end
 
   # Since the Grant is not a normal AR association, override the getter and setter

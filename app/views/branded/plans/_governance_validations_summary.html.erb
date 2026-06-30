@@ -1,0 +1,17 @@
+<% summary = plan.validation_summary %>
+
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h2 class="panel-title"><%= _('Governance Validations') %></h2>
+  </div>
+  <div class="panel-body">
+    <% if summary.present? %>
+      <p class="mb-3"><%= _('Latest governance validation status by topic.') %></p>
+      <% summary.each do |topic_code, status_code| %>
+        <span class="badge text-bg-secondary me-1"><%= topic_code %>: <%= status_code %></span>
+      <% end %>
+    <% else %>
+      <p class="mb-0"><%= _('No governance validations have been requested for this plan yet.') %></p>
+    <% end %>
+  </div>
+</div>

@@ -1,0 +1,36 @@
+<div class="modal fade" id="request-governance-validation-modal" tabindex="-1" role="dialog" aria-labelledby="request-governance-validation-title">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <%= form_with model: [plan, BelnetValidation.new], local: true do |f| %>
+        <div class="modal-body">
+          <p id="request-governance-validation-title">
+            <%= _('Request Governance Validation') %>
+          </p>
+          
+          <p class="alert alert-primary"><%= _('Governance Validation is a process to ensure that your plan meets the required standards and guidelines of the organization.') %></p>
+
+          <div class="form-control d-flex flex-column gap-2">
+            <%= f.label :belnet_validation_topic_id, _('Validation topic'), class: 'form-label fw-bold mb-0' %>
+            <%= f.select :belnet_validation_topic_id,
+                         options_for_select(available_topics.map { |topic| [topic.description.presence || topic.code, topic.id] }),
+                         { include_blank: _('Select a topic') },
+                         { class: 'form-select', required: true } %>
+
+            <%= f.label :validated_plan_id, _('version'), class: 'form-label fw-bold mb-0 mt-2' %>
+            <%= f.select :validated_plan_id,
+                         options_for_select(available_validated_plans.map { |validated_plan| ["#{_('Version')} #{validated_plan.belnet_version} - #{l(validated_plan.created_at.to_date, format: :readable)}", validated_plan.id] }),
+                         { include_blank: _('Select a version') },
+                         { class: 'form-select', required: true } %>
+          </div>
+        </div>
+
+        <div class="modal-footer justify-content-end">
+          <div>
+            <button type="button" class="btn btn-default" data-bs-dismiss="modal"><%= _('Cancel') %></button>
+            <%= f.submit _('Request validation'), class: 'btn btn-primary' %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

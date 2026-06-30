@@ -318,6 +318,7 @@ class PlansController < ApplicationController
     if @plan.present?
       authorize @plan
       @plan_roles = @plan.roles.where(active: true)
+      load_governance_validations
     else
       redirect_to(plans_path)
     end
@@ -584,6 +585,16 @@ class PlansController < ApplicationController
              answers: answers,
              guidance_presenter: GuidancePresenter.new(plan)
            })
+  end
+
+  def load_governance_validations
+    @governance_validations = @plan.governance_validations
+                                   .includes(:belnet_validation_topic, :belnet_validation_status,
+                                             :requested_by, :decided_by, :validated_plan)
+                                   .order(created_at: :desc)
+    @available_topics = @plan.org.active_belnet_validation_topics.order(:description, :code)
+    @available_validation_statuses = @plan.org.active_belnet_validation_statuses.order(:description, :code)
+    @available_validated_plans = @plan.plan_versions.order(belnet_version: :desc)
   end
 end
 # rubocop:enable Metrics/ClassLength

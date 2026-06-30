@@ -19,6 +19,7 @@
 - DMP comparing logic, you are now able to compare DMP versions from the same plan. (Visual Diff)
 - Three API endpoints to interact with versioning logic
 - Stages on a DMP version to distinguish their maturity
+- Governance Validation that allows you to request validations for versions of plans to be reviewed by your peers
 
 ### Resolved issues
 - Admin panel is now accessible. Caused by timestamptz (Time Stamp Time Zone) not correctly being able to be read

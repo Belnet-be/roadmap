@@ -97,9 +97,13 @@ class Org < ApplicationRecord
 
   has_many :belnet_validation_statuses
 
-  has_many :belnet_validation_topics
+  has_many :active_belnet_validation_topics,
+           -> { where(is_active: true) },
+           class_name: 'BelnetValidationTopic'
 
-  has_many :belnet_validation_statuses
+  has_many :active_belnet_validation_statuses,
+           -> { where(is_active: true) },
+           class_name: 'BelnetValidationStatus'
 
   # ===============
   # = Validations =
