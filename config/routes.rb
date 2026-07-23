@@ -218,9 +218,12 @@ Rails.application.routes.draw do
       resources :templates, only: [:index]
     end
 
-    namespace :belnet do
-      namespace :v1 do
+    namespace :belnet, path: '' do
+      namespace :v1, path: 'belnet-v1' do
         get :heartbeat, controller: 'base_api'
+        # Path cleared in namespace belnet to avoid belnet/v1 in route
+        # Path then set in namespace v1 to create belnet-v1 in route
+        # This will allow the controllers to function as wanted (app/controllers/api/belnet/v1)
         resources :plans, only: [] do
           # THese endpoints are for the custom Belnet implementation of the plans versioning feature.
           # They are nested under plans as they require a plan_id to function.

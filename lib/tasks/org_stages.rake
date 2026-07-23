@@ -14,7 +14,7 @@ namespace :org_stages do
     [
       { code: 'INITIAL_DRAFT', description: 'Initial Draft' },
       { code: 'WORKING_DRAFT', description: 'Working Draft' },
-      { code: 'INITIALIZED', description: 'Initialized' },
+      { code: 'INTERMEDIATE', description: 'Intermediate' },
       { code: 'FINALIZED', description: 'Finalized' },
       { code: 'ARCHIVED', description: 'Archived' }
     ]

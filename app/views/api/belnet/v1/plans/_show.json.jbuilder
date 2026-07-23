@@ -16,8 +16,6 @@ json.description plan.description
 json.language Api::V1::LanguagePresenter.three_char_code(
   lang: LocaleService.default_locale
 )
-json.version plan.belnet_version
-json.reason_for_version plan.belnet_reason
 json.created plan.created_at.to_formatted_s(:iso8601)
 json.modified plan.updated_at.to_formatted_s(:iso8601)
 
@@ -68,6 +66,15 @@ unless @minimal
       json.template do
         json.id template.id
         json.title template.title
+      end
+    end
+    json.set! :belnet do
+      json.set! :dmp_version do
+        json.created_at plan.created_at.to_formatted_s(:iso8601)
+        json.version plan.belnet_version
+        json.id plan.id
+        json.url plan_url(plan)
+        json.reason_for_version plan.belnet_reason
       end
     end
   end

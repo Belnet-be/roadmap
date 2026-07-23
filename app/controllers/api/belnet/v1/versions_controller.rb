@@ -61,6 +61,7 @@ module Api
                                                     .where(id: params[:plan_id])
                                                     .first
           stage = plan.org.belnet_stages.find_by(code: params[:stage_code])
+          stage ||= plan.plan_versions.sort_by(&:belnet_version).last&.belnet_stage
           if plan.present? && plan.is_plan_live_version? && stage.present?
             new_version = plan.create_plan_with_new_version!(reason: params[:reason], current_user: current_user,
                                                              original_plan: plan, new_stage: stage)
