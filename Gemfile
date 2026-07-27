@@ -2,7 +2,7 @@
 
 source 'https://rubygems.org'
 
-ruby '3.1.4'
+ruby '3.2.7'
 
 # ===========#
 # CORE RAILS #
