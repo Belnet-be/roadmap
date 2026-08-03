@@ -47,12 +47,12 @@ unless @minimal
 
   if presenter.costs.any?
     json.cost presenter.costs do |cost|
-      json.partial! 'api/belnet/v1/plans/cost', cost: cost
+      json.partial! 'api/belnet/v1/plans/versions/cost', cost: cost
     end
   end
 
   json.project [plan] do |pln|
-    json.partial! 'api/belnet/v1/plans/project', plan: pln
+    json.partial! 'api/belnet/v1/plans/versions/project', plan: pln
   end
 
   outputs = plan.research_outputs.any? ? plan.research_outputs : [plan]

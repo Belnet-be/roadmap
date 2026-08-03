@@ -28,21 +28,22 @@
             <%= "#{plan_version.num_answered_questions}/#{plan_version.num_questions} (#{plan_version.percent_answered.to_i}%)" %>
           </td>
           <td class="text-center text-nowrap align-middle">
+            <% current_stage = plan_version.current_belnet_stage %>
             <% stage_history = plan_version.belnet_stage_histories.map do |history|
                  {
-                   stage: history.belnet_stage&.description,
+                   stage: history.belnet_stage&.name_id,
                    user: history.user&.name(false),
                    date: l(history.created_at, format: :long),
                    motivation: history.motivation
                  }
                end %>
-            <%= button_to plan_version.belnet_stage&.description || _('Select stage'),
+            <%= button_to current_stage&.name_id || _('Select stage'),
               update_stage_plan_path(plan_version),
               class: "btn btn-secondary w-100 color-white dropdown-toggle",
               data: { action: "change-stage-modal#open",
                 plan_id: plan_version.id,
                 plan_path: update_stage_plan_path(plan_version),
-                stage_modal_stage_param: plan_version.belnet_stage_id,
+                stage_modal_stage_param: current_stage&.id,
                 stage_modal_version_param: plan_version.belnet_version,
                 stage_modal_history_param: stage_history.to_json
               },
@@ -67,7 +68,7 @@
               <%= _("Select the new stage for this version of the DMP.") %>
             </p>
             <div class="form-control d-flex flex-column gap-2">
-              <% stages = plan.org.belnet_stages %>
+              <% stages = plan.org.current_valid_belnet_stages %>
               <select class="form-select"
                       name="belnet_stage"
                       data-change-stage-modal-target="stageSelect"
@@ -80,7 +81,7 @@
                 <% else %>
                   <option value="" disabled><%= _("Select a Stage...") %></option>
                   <% stages.each do |stage| %>
-                    <option value="<%= stage.id %>"><%= stage.description %></option>
+                    <option value="<%= stage.id %>"><%= stage.name_id %></option>
                   <% end %>
                 <% end %>
               </select>

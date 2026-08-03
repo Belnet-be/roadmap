@@ -27,6 +27,12 @@ ActiveRecord::Schema[7.1].define(version: 2026_06_22_130102) do
 # Could not dump table "api_clients" because of following ActiveRecord::StatementInvalid
 #   Mysql2::Error: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'NULL' at line 1
 
+# Could not dump table "belnet_editable_plan_metadata" because of following ActiveRecord::StatementInvalid
+#   Mysql2::Error: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'NULL' at line 1
+
+# Could not dump table "belnet_plan_version_metadata" because of following ActiveRecord::StatementInvalid
+#   Mysql2::Error: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'NULL' at line 1
+
 # Could not dump table "belnet_stage_histories" because of following ActiveRecord::StatementInvalid
 #   Mysql2::Error: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'NULL' at line 1
 
@@ -259,6 +265,15 @@ ActiveRecord::Schema[7.1].define(version: 2026_06_22_130102) do
   add_foreign_key "answers", "users"
   add_foreign_key "answers_question_options", "answers"
   add_foreign_key "answers_question_options", "question_options"
+  add_foreign_key "belnet_editable_plan_metadata", "belnet_stages"
+  add_foreign_key "belnet_editable_plan_metadata", "plans"
+  add_foreign_key "belnet_editable_plan_metadata", "users", column: "created_by_id"
+  add_foreign_key "belnet_editable_plan_metadata", "users", column: "updated_by_id"
+  add_foreign_key "belnet_plan_version_metadata", "plans"
+  add_foreign_key "belnet_plan_version_metadata", "plans", column: "editable_plan_id"
+  add_foreign_key "belnet_plan_version_metadata", "plans", column: "versioned_plan_id"
+  add_foreign_key "belnet_plan_version_metadata", "users", column: "created_by_id"
+  add_foreign_key "belnet_plan_version_metadata", "users", column: "updated_by_id"
   add_foreign_key "belnet_stage_histories", "belnet_stages"
   add_foreign_key "belnet_stage_histories", "plans"
   add_foreign_key "belnet_stage_histories", "users"
@@ -283,7 +298,6 @@ ActiveRecord::Schema[7.1].define(version: 2026_06_22_130102) do
   add_foreign_key "orgs", "languages"
   add_foreign_key "orgs", "regions"
   add_foreign_key "phases", "templates"
-  add_foreign_key "plans", "belnet_stages"
   add_foreign_key "plans", "orgs"
   add_foreign_key "plans", "templates"
   add_foreign_key "plans_guidance_groups", "guidance_groups"

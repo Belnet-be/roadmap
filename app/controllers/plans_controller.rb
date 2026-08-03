@@ -140,6 +140,9 @@ class PlansController < ApplicationController
         @plan.identifier = @plan.id.to_s
         @plan.save
 
+        # Create the (initially empty) BelnetEditablePlanMetadata record
+        @plan.ensure_editable_metadata!(current_user: current_user)
+
         respond_to do |format|
           flash[:notice] = msg
           format.html { redirect_to plan_path(@plan) }
@@ -391,7 +394,10 @@ class PlansController < ApplicationController
   def history
     @plan = Plan.find(params[:id])
     authorize @plan
-    @versions = @plan.plan_versions.includes(belnet_stage_histories: %i[belnet_stage user]).order(belnet_version: :desc)
+    @versions = @plan.plan_versions
+                     .includes(:belnet_version_metadata,
+                               belnet_stage_histories: %i[belnet_stage user])
+                     .order(belnet_version: :desc)
     render 'history'
   end
 
@@ -481,7 +487,7 @@ class PlansController < ApplicationController
   def create_new_version
     original_plan = Plan.find(params[:id])
     authorize original_plan
-    stage = original_plan.org.belnet_stages.find_by(id: params[:belnet_stage])
+    stage = original_plan.org.current_valid_belnet_stages.find { |s| s.id.to_s == params[:belnet_stage].to_s }
 
     # Capture reason from the Stimulus modal
     new_version = original_plan.create_plan_with_new_version!(
@@ -502,11 +508,11 @@ class PlansController < ApplicationController
     plan = Plan.find(params[:id])
     authorize plan
 
-    old_stage_description = plan.belnet_stage&.description || _('None')
+    old_stage_description = plan.current_belnet_stage&.name_id || _('None')
     if plan.update_stage(params[:belnet_stage], current_user)
       live_plan = Plan.find_by(belnet_family_id: plan.belnet_family_id, belnet_version: 0) || plan
       redirect_to history_plan_path(live_plan),
-                  notice: "(Version #{plan.belnet_version}): Stage updated from #{old_stage_description} to #{plan.belnet_stage.description}."
+                  notice: "(Version #{plan.belnet_version}): Stage updated from #{old_stage_description} to #{plan.current_belnet_stage&.name_id}."
     else
       live_plan = Plan.find_by(belnet_family_id: plan.belnet_family_id, belnet_version: 0) || plan
       redirect_to history_plan_path(live_plan), alert: 'Failed to update stage.'
@@ -592,8 +598,8 @@ class PlansController < ApplicationController
                                    .includes(:belnet_validation_topic, :belnet_validation_status,
                                              :requested_by, :decided_by, :validated_plan)
                                    .order(created_at: :desc)
-    @available_topics = @plan.org.active_belnet_validation_topics.order(:description, :code)
-    @available_validation_statuses = @plan.org.active_belnet_validation_statuses.order(:description, :code)
+    @available_topics = @plan.org.active_belnet_validation_topics.order(:description, :name_id)
+    @available_validation_statuses = @plan.org.active_belnet_validation_statuses.order(:description, :name_id)
     @available_validated_plans = @plan.plan_versions.order(belnet_version: :desc)
   end
 end

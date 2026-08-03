@@ -130,9 +130,28 @@ class Plan < ApplicationRecord
 
   has_many :research_outputs, dependent: :destroy
 
-  belongs_to :belnet_stage, optional: true
-
   has_many :belnet_stage_histories, -> { order(created_at: :desc) }, dependent: :destroy
+
+  # Lookup table holding extra metadata for editable/live plans (belnet_version = 0)
+  # Only present on editable plans; nil on versions
+  has_one :belnet_editable_plan_metadata,
+          class_name: 'BelnetEditablePlanMetadata',
+          dependent: :destroy
+
+  # Connects metadata to plans using two foreign keys:
+  # - versioned_plan_id: points to the specific version (one to one)
+  # - editable_plan_id : points to the parent plan this version came from (one to many)
+  # #belnet_version_metadata when reading a versions own metadata
+  # #belnet_plan_version_metadata on the parent to clean up metadata on delete
+  has_one :belnet_version_metadata,
+          class_name: 'BelnetPlanVersionMetadata',
+          foreign_key: :versioned_plan_id,
+          dependent: :destroy
+
+  has_many :belnet_plan_version_metadata,
+           class_name: 'BelnetPlanVersionMetadata',
+           foreign_key: :editable_plan_id,
+           dependent: :destroy
 
   has_many :governance_validations, class_name: 'BelnetValidation', foreign_key: :plan_id
 
@@ -505,28 +524,31 @@ class Plan < ApplicationRecord
   def update_stage(new_stage_id, current_user)
     return false if is_plan_live_version?
 
-    new_stage = org.belnet_stages.find_by(id: new_stage_id)
-    return false if new_stage.nil? || belnet_stage_id == new_stage.id
+    new_stage = org.current_valid_belnet_stages.find { |s| s.id == new_stage_id.to_i }
+    apply_belnet_stage_change(new_stage, current_user)
+  end
 
-    old_description = belnet_stage&.description
-    motivation = if old_description.present?
-                   "Stage changed from #{old_description} to #{new_stage.description}"
-                 else
-                   "Stage set to #{new_stage.description}"
-                 end
+  def update_stage_by_name(name_id, current_user)
+    new_stage = org.current_valid_belnet_stages.find { |s| s.name_id == name_id.to_s }
+    apply_belnet_stage_change(new_stage, current_user)
+  end
 
-    transaction do
-      update!(belnet_stage: new_stage)
-      BelnetStageHistory.create!(
-        plan: self,
-        belnet_stage: new_stage,
-        user: current_user,
-        motivation: motivation
-      )
+  def current_belnet_stage
+    if is_plan_live_version?
+      belnet_editable_plan_metadata&.belnet_stage
+    else
+      snapshot = belnet_version_metadata&.lifecycle_stage
+      snapshot.present? ? lookup_stage_by_name(snapshot) : nil
     end
-    true
-  rescue ActiveRecord::RecordInvalid, ActiveRecord::RecordNotSaved
-    false
+  end
+
+  def current_lifecycle_stage_name
+    if is_plan_live_version?
+      belnet_editable_plan_metadata&.lifecycle_stage.presence ||
+        belnet_editable_plan_metadata&.belnet_stage&.name_id
+    else
+      belnet_version_metadata&.lifecycle_stage.presence
+    end
   end
 
   # Creates a new version of the plan with the same family_id and an incremented version number.
@@ -547,8 +569,7 @@ class Plan < ApplicationRecord
         belnet_version: latest_belnet_version + 1,
         belnet_family_id: belnet_family_id || id,
         belnet_reason: reason || '',
-        belnet_created_by: current_user&.id,
-        belnet_stage: new_stage
+        belnet_created_by: current_user&.id
       )
 
       # Copy over the answers, guidance groups and roles (users) to the new version
@@ -566,11 +587,34 @@ class Plan < ApplicationRecord
 
       new_version.save!(context: :versioning)
 
+      # Version metadata
+      BelnetPlanVersionMetadata.create!(
+        plan: new_version,
+        editable_plan: original_plan,
+        versioned_plan: new_version,
+        created_by: current_user,
+        updated_by: current_user,
+        lifecycle_stage: new_stage&.name_id
+      )
+
       # Add the current user as the creator of the new version
       new_version.add_user!(current_user.id, :creator) if current_user.present?
       # Return the new version
       new_version
     end
+  end
+
+  # Makes sure that plan has a belnet_editable_plan_metadata record
+  # and updates it with the current user and stage if provided
+  def ensure_editable_metadata!(current_user: nil, belnet_stage: nil)
+    return unless is_plan_live_version?
+
+    metadata = belnet_editable_plan_metadata || build_belnet_editable_plan_metadata
+    metadata.created_by ||= current_user
+    metadata.updated_by   = current_user
+    metadata.belnet_stage = belnet_stage if belnet_stage
+    metadata.save!
+    metadata
   end
 
   # the datetime for the latest update of this plan
@@ -733,8 +777,8 @@ class Plan < ApplicationRecord
       .each_with_object({}) do |validation, summary|
         next if validation.belnet_validation_status.blank?
 
-        topic_code = validation.belnet_validation_topic.code
-        summary[topic_code] ||= validation.belnet_validation_status.code
+        topic_name_id = validation.belnet_validation_topic.name_id
+        summary[topic_name_id] ||= validation.belnet_validation_status.name_id
       end
   end
 
@@ -770,6 +814,63 @@ class Plan < ApplicationRecord
   # rubocop:enable Metrics/CyclomaticComplexity
 
   private
+
+  # Shared stage change logic for UI using id and Belnet api using the name_id
+  def apply_belnet_stage_change(new_stage, current_user)
+    return false if new_stage.nil? || current_belnet_stage&.id == new_stage.id
+
+    old_name_id = current_belnet_stage&.name_id || _('None')
+    motivation = if old_name_id.present?
+                   "Stage changed from #{old_name_id} to #{new_stage.name_id}"
+                 else
+                   "Stage set to #{new_stage.name_id}"
+                 end
+
+    transaction do
+      persist_stage_metadata(new_stage, current_user)
+      BelnetStageHistory.create!(
+        plan: self,
+        belnet_stage: new_stage,
+        user: current_user,
+        motivation: motivation
+      )
+    end
+    true
+  rescue ActiveRecord::RecordInvalid, ActiveRecord::RecordNotSaved
+    false
+  end
+
+  # All stage changes go through the metadata tables
+  def persist_stage_metadata(new_stage, current_user)
+    if is_plan_live_version?
+      metadata = belnet_editable_plan_metadata || build_belnet_editable_plan_metadata(created_by: current_user)
+      metadata.updated_by = current_user
+      metadata.belnet_stage = new_stage
+      metadata.save!
+    else
+      metadata = belnet_version_metadata
+      if metadata.nil?
+        # Version predates the metadata rollout; create a record on first
+        # stage change so the new storage is populated going forward.
+        editable = Plan.find_by(belnet_family_id: belnet_family_id, belnet_version: 0)
+        metadata = BelnetPlanVersionMetadata.new(
+          plan: self,
+          editable_plan: editable,
+          versioned_plan: self,
+          created_by: current_user
+        )
+      end
+      metadata.updated_by = current_user
+      metadata.lifecycle_stage = new_stage&.name_id
+      metadata.save!
+    end
+  end
+
+  def lookup_stage_by_name(name_id)
+    return nil if name_id.blank? || org.nil?
+
+    org.all_belnet_stages.find { |s| s.name_id == name_id }
+  end
 
   # Validation to prevent end date from coming before the start date
   def end_date_after_start_date

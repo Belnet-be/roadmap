@@ -55,6 +55,7 @@ class Org < ApplicationRecord
   # The links are validated against custom validator allocated at
   # validators/template_links_validator.rb
   attribute :links, :text, default: { org: [] }
+  attribute :belnet_stages_order, default: []
   serialize :links, coder: JSON
 
   # ================
@@ -315,6 +316,37 @@ class Org < ApplicationRecord
           .where.not(visibility: Plan.visibilities[:is_test])
           .where(roles: { active: true })
     end
+  end
+
+  def current_valid_belnet_stages
+    # This returns a json array with all global stages and org specific
+    # stages in the order they specified, can be empty, then just use standard order
+    # for example: ["Initial Draft", "Working Draft", "Intermediate", "Finalized", "Archived"]
+    # Then use the names to sort on the stages' name_id attribute
+    # if a stage does not appear in the belnet_stages_order, it is deprecated and should be omitted.
+    sorting_order = belnet_stages_order || []
+
+    global_stages = BelnetStage.where(org_id: nil, deprecated: false)
+    org_specific_stages = belnet_stages.where(deprecated: false)
+
+    valid_stages = (global_stages + org_specific_stages).select do |stage|
+      sorting_order.empty? || sorting_order.include?(stage.name_id)
+    end
+
+    valid_stages.sort_by do |stage|
+      sorting_order.index(stage.name_id) || sorting_order.length
+    end
+  end
+
+  def all_belnet_stages
+    # This returns a json array with all global stages and org specific
+    # regardless of deprecated status
+    # used for lists that should contain deprecated stages
+    global_stages = BelnetStage.where(org_id: nil)
+    org_specific_stages = belnet_stages
+
+    # merge the two arrays and sort by name_id
+    (global_stages + org_specific_stages).sort_by(&:name_id)
   end
   # rubocop:enable Metrics/AbcSize
 
