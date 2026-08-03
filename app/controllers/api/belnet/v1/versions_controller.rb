@@ -8,77 +8,110 @@ module Api
         respond_to :json
 
         # GET /api/belnet-v1/plans/:plan_id/versions
-        def index # rubocop:disable Metrics/AbcSize
+        def index
           # This endpoint should return a collection of plans that are associated to the given plan
           # by their family_id (column: belnet_family_id).
-          scope = Api::Belnet::V1::PlansPolicy::Scope.new(client, Plan).resolve
-          plan = scope.where(id: params[:plan_id]).first
+          plan = find_editable_plan
+          return if performed?
 
-          unless plan
-            render_error(errors: [_('Plan not found')], status: :not_found)
-            return
-          end
+          versions = Api::Belnet::V1::PlansPolicy::Scope.new(client, Plan)
+                                                        .resolve
+                                                        .where(belnet_family_id: plan.id)
+                                                        .where('belnet_version > ?', 0)
+                                                        .includes(:belnet_version_metadata)
+                                                        .order(belnet_version: :desc)
 
-          versions = scope.where(belnet_family_id: params[:plan_id])
-                          .where('belnet_version > ?', 0)
-                          .order(belnet_version: :desc)
-
-          @view = params.fetch(:view, 'summary')
           @items = paginate_response(results: versions)
           render 'api/belnet/v1/versions/index', status: :ok
         end
 
-        # GET /api/belnet-v1/plans/:plan_id/versions/:id (:id means version number in this case)
-        def show # rubocop:disable Metrics/AbcSize
-          if params[:id].present? && params[:id].to_i > 0
-            plan = Api::Belnet::V1::PlansPolicy::Scope.new(client, Plan).resolve
-                                                      .where(id: params[:plan_id])
-                                                      .first
-            if plan
-              version = plan.plan_versions
-                            .where(belnet_version: params[:id])
-                            .first
-
-              if version
-                render 'api/belnet/v1/plans/versions/show', status: :ok, locals: { plan: version }
-              else
-                render_error(errors: [_('Version not found')], status: :not_found)
-              end
-            else
-              render_error(errors: [_('Plan not found')], status: :not_found)
-            end
-          else
-            # This is the live plan version
+        # GET /api/belnet-v1/plans/:plan_id/versions/:id
+        # :id is the version_number (belnet_version), not the plan_id of the
+        # version snapshot.
+        def show
+          if params[:id].blank? || params[:id].to_i <= 0
             render_error(errors: [_('Invalid version number')], status: :bad_request)
+            return
           end
+
+          plan = find_editable_plan
+          return if performed?
+
+          version = plan.plan_versions
+                        .includes(:belnet_version_metadata)
+                        .find_by(belnet_version: params[:id])
+
+          unless version
+            render_error(errors: [_('Version not found')], status: :not_found)
+            return
+          end
+
+          render 'api/belnet/v1/versions/show', status: :ok, locals: { version: version }
+        end
+
+        # PUT /api/belnet-v1/plans/:plan_id/versions/:id
+        # :id is the version_number. Updates the reason and/or lifecycle-stage
+        # of an existing version version, both fields are optional
+        # but atleast one is required
+        def update
+          if params[:id].blank? || params[:id].to_i <= 0
+            render_error(errors: [_('Invalid version number')], status: :bad_request)
+            return
+          end
+
+          plan = find_editable_plan
+          return if performed?
+
+          version = plan.plan_versions
+                        .includes(:belnet_version_metadata)
+                        .find_by(belnet_version: params[:id])
+
+          unless version
+            render_error(errors: [_('Version not found')], status: :not_found)
+            return
+          end
+
+          new_reason = params[:reason]
+          new_stage  = resolve_stage_for(version)
+          return if performed?
+
+          if new_reason.nil? && new_stage.nil?
+            render_error(errors: [_('At least one of reason or lifecycle-stage is required')],
+                         status: :bad_request)
+            return
+          end
+
+          acting_user = client.is_a?(User) ? client : nil
+
+          version.transaction do
+            if new_reason
+              version.assign_attributes(belnet_reason: new_reason)
+              version.save!(context: :versioning)
+            end
+            version.update_stage_by_name(new_stage.name_id, acting_user) if new_stage
+            version.touch_version_metadata!(acting_user) if new_reason && new_stage.nil?
+          end
+
+          version.reload
+          render 'api/belnet/v1/versions/show', status: :accepted, locals: { version: version }
+        rescue ActiveRecord::RecordInvalid => e
+          render_error(errors: e.record.errors.full_messages, status: :bad_request)
         end
 
         # POST /api/belnet-v1/plans/:plan_id/versions
         def create
           # This endpoint should create a new version of a plan given that the plan in question's belnet_version
           # is 0 (This means it's the LIVE version).
-          plan = Api::Belnet::V1::PlansPolicy::Scope.new(client, Plan).resolve
-                                                    .where(id: params[:plan_id])
-                                                    .first
-
-          unless plan
-            render_error(errors: [_('Plan not found')], status: :not_found)
-            return
-          end
-
-          unless plan.is_plan_live_version?
-            render_error(errors: [_('Versions can only be created from an editable DMP')],
-                         status: :bad_request)
-            return
-          end
+          plan = find_editable_plan
+          return if performed?
 
           stage = resolve_version_stage(plan)
           return if performed?
 
-          # User retrievel (better than current_user), client could be API client
+          # User retrieval (better than current_user), client could be API client
           acting_user = client.is_a?(User) ? client : nil
           new_version = plan.create_plan_with_new_version!(
-            reason: params[:reason],
+            reason: @json&.[]('reason'),
             current_user: acting_user,
             original_plan: plan,
             new_stage: stage
@@ -88,13 +121,44 @@ module Api
                                                   locals: { version: new_version,
                                                             created_by_user: acting_user }
         rescue ActiveRecord::RecordInvalid => e
-          render_error(errors: [_("Failed to create version: #{e.message}")], status: :bad_request)
+          render_error(errors: e.record.errors.full_messages, status: :bad_request)
         end
 
         private
 
-        # lifecyclestage is optional. When omitted, use the last versions stage
-        # (or the live plan's stage), this way it is possible to create a new version without needing to pass the stage.
+        # Loads the editable (LIVE) DMP for the request. Renders an error and
+        # returns nil when the plan is missing or not the live version.
+        def find_editable_plan
+          plan = Api::Belnet::V1::PlansPolicy::Scope.new(client, Plan).resolve
+                                                    .where(id: params[:plan_id])
+                                                    .first
+
+          unless plan
+            render_error(errors: [_('Plan not found')], status: :not_found)
+            return nil
+          end
+
+          unless plan.is_plan_live_version?
+            render_error(errors: [_('Versions can only be created from an editable DMP')],
+                         status: :bad_request)
+            return nil
+          end
+
+          plan
+        end
+
+        def resolve_stage_for(plan)
+          stage_name = params[:'lifecycle-stage']
+          return nil if stage_name.blank?
+
+          stage = plan.org&.current_valid_belnet_stages&.find { |s| s.name_id == stage_name }
+          return stage if stage
+
+          render_error(errors: [_('Lifecycle stage not found')], status: :bad_request)
+          nil
+        end
+
+        # lifecycle stage is optional, if omitted, fall back to previous versions stage
         def resolve_version_stage(plan)
           stage_name = @json&.[]('lifecycle-stage').to_s.strip
 

@@ -227,7 +227,7 @@ Rails.application.routes.draw do
         resources :plans, only: [] do
           # THese endpoints are for the custom Belnet implementation of the plans versioning feature.
           # They are nested under plans as they require a plan_id to function.
-          resources :versions, only: %i[index show create]
+          resources :versions, only: %i[index show create update]
           resource :lifecycle_stage, path: 'lifecycle-stage', only: %i[show create update]
           resources :governance_validations, path: 'governance-validations', only: %i[index show create update]
         end

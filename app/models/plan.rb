@@ -617,6 +617,28 @@ class Plan < ApplicationRecord
     metadata
   end
 
+  # Touches version metadata, can only be done on version
+  # Used by UI and API
+  def touch_version_metadata!(current_user)
+    return if is_plan_live_version?
+
+    metadata = belnet_version_metadata
+    if metadata.nil?
+      editable = Plan.find_by(belnet_family_id: belnet_family_id, belnet_version: 0)
+      metadata = BelnetPlanVersionMetadata.new(
+        plan: self,
+        editable_plan: editable,
+        versioned_plan: self,
+        created_by: current_user,
+        lifecycle_stage: current_lifecycle_stage_name
+      )
+    end
+    metadata.updated_by = current_user
+    metadata.updated_at = Time.current
+    metadata.save!
+    metadata
+  end
+
   # the datetime for the latest update of this plan
   #
   # Returns DateTime
