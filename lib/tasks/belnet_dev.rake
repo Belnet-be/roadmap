@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Belnet tasks to support development and test environments
 # If usage is within docker terminal (bash) use:
 # Usage: bin/rails belnet_dev:setup_test_users
