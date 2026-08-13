@@ -11,4 +11,8 @@ class BelnetPlanVersionMetadata < ApplicationRecord
 
   # Snapshotted stage name (name_id). Kept alongside for durability if the
   # backing BelnetStage is renamed or removed.
+  validates :reason,
+            length: { minimum: 10, maximum: 500 },
+            presence: { message: 'Reason must be present and between 10 and 500 characters.' },
+            on: :versioning
 end

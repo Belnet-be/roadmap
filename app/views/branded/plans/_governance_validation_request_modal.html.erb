@@ -10,9 +10,9 @@
           <p class="alert alert-primary"><%= _('Governance Validation is a process to ensure that your plan meets the required standards and guidelines of the organization.') %></p>
 
           <div class="form-control d-flex flex-column gap-2">
-            <%= f.label :belnet_validation_topic_id, _('Validation topic'), class: 'form-label fw-bold mb-0' %>
-            <%= f.select :belnet_validation_topic_id,
-                         options_for_select(available_topics.map { |topic| [topic.description.presence || topic.code, topic.id] }),
+            <%= f.label :validation_topic, _('Validation topic'), class: 'form-label fw-bold mb-0' %>
+            <%= f.select :validation_topic,
+                         options_for_select(available_topics.map { |name| [name, name] }),
                          { include_blank: _('Select a topic') },
                          { class: 'form-select', required: true } %>
 

@@ -12,9 +12,9 @@ module Api
           plan = find_plan
           return unless plan
 
-          lifecycle_stage = plan.current_belnet_stage
+          lifecycle_stage = plan.current_lifecycle_stage_name
 
-          if lifecycle_stage
+          if lifecycle_stage.present?
             render_lifecycle_stage(plan: plan, lifecycle_stage: lifecycle_stage, status: :ok)
           else
             render_error(errors: [_('Lifecycle stage not found')], status: :not_found)
@@ -33,23 +33,24 @@ module Api
             return
           end
 
-          if plan.current_belnet_stage.present?
+          if plan.current_lifecycle_stage_name.present?
             render_error(errors: [_('Lifecycle stage already exists. Use PUT to update it.')],
                          status: :bad_request)
             return
           end
 
-          stage = resolve_stage(plan)
-          return unless stage
+          stage_name = resolve_stage(plan)
+          return unless stage_name
 
           acting_user = client.is_a?(User) ? client : nil
-          unless plan.update_stage_by_name(stage.name_id, acting_user)
+          unless plan.update_stage(stage_name, acting_user)
             render_error(errors: [_('Failed to add lifecycle stage')], status: :unprocessable_entity)
             return
           end
 
           plan.reload
-          render_lifecycle_stage(plan: plan, lifecycle_stage: plan.current_belnet_stage, status: :created)
+          render_lifecycle_stage(plan: plan, lifecycle_stage: plan.current_lifecycle_stage_name,
+                                 status: :created)
         end
 
         # PUT /api/belnet-v1/plans/:plan_id/lifecycle-stage
@@ -57,24 +58,25 @@ module Api
           plan = find_plan
           return unless plan
 
-          stage = resolve_stage(plan)
-          return unless stage
+          stage_name = resolve_stage(plan)
+          return unless stage_name
 
           acting_user = client.is_a?(User) ? client : nil
 
-          # already at the requested stage
-          if plan.current_belnet_stage&.id == stage.id
-            render_lifecycle_stage(plan: plan, lifecycle_stage: stage, status: :accepted)
+          # already at the requested stage.
+          if plan.current_lifecycle_stage_name == stage_name
+            render_lifecycle_stage(plan: plan, lifecycle_stage: stage_name, status: :accepted)
             return
           end
 
-          unless plan.update_stage_by_name(stage.name_id, acting_user)
+          unless plan.update_stage(stage_name, acting_user)
             render_error(errors: [_('Failed to update lifecycle stage')], status: :unprocessable_entity)
             return
           end
 
           plan.reload
-          render_lifecycle_stage(plan: plan, lifecycle_stage: plan.current_belnet_stage, status: :accepted)
+          render_lifecycle_stage(plan: plan, lifecycle_stage: plan.current_lifecycle_stage_name,
+                                 status: :accepted)
         end
 
         private
@@ -83,7 +85,6 @@ module Api
           scope = Api::Belnet::V1::PlansPolicy::Scope.new(client, Plan).resolve
           plan = scope.includes(
             { belnet_editable_plan_metadata: [
-              :belnet_stage,
               { created_by: :identifiers },
               { updated_by: :identifiers }
             ] },
@@ -99,15 +100,13 @@ module Api
         end
 
         def resolve_stage(plan)
-          stage_name = params[:'lifecycle-stage']
-          puts "the stage name: #{stage_name}"
+          stage_name = params[:'lifecycle-stage'].to_s.strip
           if stage_name.blank?
             render_error(errors: [_('lifecycle-stage is required')], status: :bad_request)
             return nil
           end
-          puts "plan.org&.current_valid_belnet_stages = #{plan.org&.current_valid_belnet_stages&.map(&:name_id)}"
-          stage = plan.org&.current_valid_belnet_stages&.find { |s| s.name_id == stage_name }
-          return stage if stage
+
+          return stage_name if plan.org&.current_valid_belnet_stages&.include?(stage_name)
 
           render_error(errors: [_('Lifecycle stage not found')], status: :bad_request)
           nil

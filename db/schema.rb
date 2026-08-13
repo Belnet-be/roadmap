@@ -27,6 +27,33 @@ ActiveRecord::Schema[7.1].define(version: 2026_06_22_130102) do
 # Could not dump table "api_clients" because of following ActiveRecord::StatementInvalid
 #   Mysql2::Error: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'NULL' at line 1
 
+  create_table "belnet_config_lifecycle_stages", force: :cascade do |t|
+    t.integer "org_id"
+    t.json "current_list_order"
+    t.json "full_list_order"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["org_id"], name: "index_belnet_config_lifecycle_stages_on_org_id"
+  end
+
+  create_table "belnet_config_validation_statuses", force: :cascade do |t|
+    t.integer "org_id"
+    t.json "current_list_order"
+    t.json "full_list_order"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["org_id"], name: "index_belnet_config_validation_statuses_on_org_id"
+  end
+
+  create_table "belnet_config_validation_topics", force: :cascade do |t|
+    t.integer "org_id"
+    t.json "current_list_order"
+    t.json "full_list_order"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["org_id"], name: "index_belnet_config_validation_topics_on_org_id"
+  end
+
 # Could not dump table "belnet_editable_plan_metadata" because of following ActiveRecord::StatementInvalid
 #   Mysql2::Error: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'NULL' at line 1
 
@@ -265,7 +292,9 @@ ActiveRecord::Schema[7.1].define(version: 2026_06_22_130102) do
   add_foreign_key "answers", "users"
   add_foreign_key "answers_question_options", "answers"
   add_foreign_key "answers_question_options", "question_options"
-  add_foreign_key "belnet_editable_plan_metadata", "belnet_stages"
+  add_foreign_key "belnet_config_lifecycle_stages", "orgs"
+  add_foreign_key "belnet_config_validation_statuses", "orgs"
+  add_foreign_key "belnet_config_validation_topics", "orgs"
   add_foreign_key "belnet_editable_plan_metadata", "plans"
   add_foreign_key "belnet_editable_plan_metadata", "users", column: "created_by_id"
   add_foreign_key "belnet_editable_plan_metadata", "users", column: "updated_by_id"
@@ -274,18 +303,12 @@ ActiveRecord::Schema[7.1].define(version: 2026_06_22_130102) do
   add_foreign_key "belnet_plan_version_metadata", "plans", column: "versioned_plan_id"
   add_foreign_key "belnet_plan_version_metadata", "users", column: "created_by_id"
   add_foreign_key "belnet_plan_version_metadata", "users", column: "updated_by_id"
-  add_foreign_key "belnet_stage_histories", "belnet_stages"
   add_foreign_key "belnet_stage_histories", "plans"
   add_foreign_key "belnet_stage_histories", "users"
-  add_foreign_key "belnet_stages", "orgs"
-  add_foreign_key "belnet_validation_statuses", "orgs"
-  add_foreign_key "belnet_validation_topics", "orgs"
-  add_foreign_key "belnet_validations", "belnet_validation_statuses"
-  add_foreign_key "belnet_validations", "belnet_validation_topics"
   add_foreign_key "belnet_validations", "plans"
   add_foreign_key "belnet_validations", "plans", column: "validated_plan_id"
-  add_foreign_key "belnet_validations", "users", column: "decided_by_id"
   add_foreign_key "belnet_validations", "users", column: "requested_by_id"
+  add_foreign_key "belnet_validations", "users", column: "reviewed_by_id"
   add_foreign_key "conditions", "questions"
   add_foreign_key "guidance_groups", "orgs"
   add_foreign_key "guidances", "guidance_groups"

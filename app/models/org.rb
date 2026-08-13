@@ -55,7 +55,6 @@ class Org < ApplicationRecord
   # The links are validated against custom validator allocated at
   # validators/template_links_validator.rb
   attribute :links, :text, default: { org: [] }
-  attribute :belnet_stages_order, default: []
   serialize :links, coder: JSON
 
   # ================
@@ -90,21 +89,9 @@ class Org < ApplicationRecord
 
   has_many :departments
 
-  has_many :belnet_stages, dependent: :destroy
-
-  has_many :belnet_stage_histories, through: :belnet_stages
-
-  has_many :belnet_validation_topics
-
-  has_many :belnet_validation_statuses
-
-  has_many :active_belnet_validation_topics,
-           -> { where(is_active: true) },
-           class_name: 'BelnetValidationTopic'
-
-  has_many :active_belnet_validation_statuses,
-           -> { where(is_active: true) },
-           class_name: 'BelnetValidationStatus'
+  has_one :belnet_config_lifecycle_stage, dependent: :destroy
+  has_one :belnet_config_validation_topic, dependent: :destroy
+  has_one :belnet_config_validation_status, dependent: :destroy
 
   # ===============
   # = Validations =
@@ -319,35 +306,65 @@ class Org < ApplicationRecord
   end
 
   def current_valid_belnet_stages
-    # This returns a json array with all global stages and org specific
-    # stages in the order they specified, can be empty, then just use standard order
-    # for example: ["Initial Draft", "Working Draft", "Intermediate", "Finalized", "Archived"]
-    # Then use the names to sort on the stages' name_id attribute
-    # if a stage does not appear in the belnet_stages_order, it is deprecated and should be omitted.
-    sorting_order = belnet_stages_order || []
-
-    global_stages = BelnetStage.where(org_id: nil, deprecated: false)
-    org_specific_stages = belnet_stages.where(deprecated: false)
-
-    valid_stages = (global_stages + org_specific_stages).select do |stage|
-      sorting_order.empty? || sorting_order.include?(stage.name_id)
-    end
-
-    valid_stages.sort_by do |stage|
-      sorting_order.index(stage.name_id) || sorting_order.length
-    end
+    (lifecycle_stage_config&.current_list_order || []).map(&:to_s)
   end
 
   def all_belnet_stages
-    # This returns a json array with all global stages and org specific
-    # regardless of deprecated status
-    # used for lists that should contain deprecated stages
-    global_stages = BelnetStage.where(org_id: nil)
-    org_specific_stages = belnet_stages
-
-    # merge the two arrays and sort by name_id
-    (global_stages + org_specific_stages).sort_by(&:name_id)
+    (lifecycle_stage_config&.full_list_order || []).map(&:to_s)
   end
+
+  def active_validation_topics
+    (validation_topic_config&.current_list_order || []).map(&:to_s)
+  end
+
+  def active_validation_statuses
+    (validation_status_config&.current_list_order || []).map(&:to_s)
+  end
+
+  def lifecycle_stage_config
+    @lifecycle_stage_config ||= BelnetConfigLifecycleStage.for_org(self)
+  end
+
+  def validation_topic_config
+    @validation_topic_config ||= BelnetConfigValidationTopic.for_org(self)
+  end
+
+  def validation_status_config
+    @validation_status_config ||= BelnetConfigValidationStatus.for_org(self)
+  end
+
+  def add_lifecycle_stage!(name)
+    append_config_name!(BelnetConfigLifecycleStage, name)
+    @lifecycle_stage_config = nil
+    self
+  end
+
+  def add_validation_topic!(name)
+    append_config_name!(BelnetConfigValidationTopic, name)
+    @validation_topic_config = nil
+    self
+  end
+
+  def add_validation_status!(name)
+    append_config_name!(BelnetConfigValidationStatus, name)
+    @validation_status_config = nil
+    self
+  end
+
+  private
+
+  def append_config_name!(config_class, name)
+    config = config_class.find_or_initialize_by(org_id: id) do |c|
+      c.current_list_order = []
+      c.full_list_order    = []
+    end
+    config.current_list_order = (config.current_list_order || []) | [name]
+    config.full_list_order    = (config.full_list_order    || []) | [name]
+    config.save!
+  end
+
+  public
+
   # rubocop:enable Metrics/AbcSize
 
   def grant_api!(token_permission_type)

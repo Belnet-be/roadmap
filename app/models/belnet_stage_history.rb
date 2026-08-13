@@ -2,6 +2,5 @@
 
 class BelnetStageHistory < ApplicationRecord
   belongs_to :plan
-  belongs_to :belnet_stage
-  belongs_to :user
+  belongs_to :user, optional: true
 end

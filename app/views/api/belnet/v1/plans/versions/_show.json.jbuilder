@@ -74,7 +74,7 @@ unless @minimal
         json.version plan.belnet_version
         json.id plan.id
         json.url plan_url(plan)
-        json.reason_for_version plan.belnet_reason
+        json.reason_for_version plan.belnet_version_metadata&.reason
       end
     end
   end

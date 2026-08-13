@@ -396,7 +396,7 @@ class PlansController < ApplicationController
     authorize @plan
     @versions = @plan.plan_versions
                      .includes(:belnet_version_metadata,
-                               belnet_stage_histories: %i[belnet_stage user])
+                               belnet_stage_histories: :user)
                      .order(belnet_version: :desc)
     render 'history'
   end
@@ -487,7 +487,8 @@ class PlansController < ApplicationController
   def create_new_version
     original_plan = Plan.find(params[:id])
     authorize original_plan
-    stage = original_plan.org.current_valid_belnet_stages.find { |s| s.id.to_s == params[:belnet_stage].to_s }
+    stage_param = params[:belnet_stage].to_s
+    stage = stage_param if original_plan.org.current_valid_belnet_stages.include?(stage_param)
 
     # Capture reason from the Stimulus modal
     new_version = original_plan.create_plan_with_new_version!(
@@ -508,11 +509,11 @@ class PlansController < ApplicationController
     plan = Plan.find(params[:id])
     authorize plan
 
-    old_stage_description = plan.current_belnet_stage&.name_id || _('None')
+    old_stage_description = plan.current_lifecycle_stage_name.presence || _('None')
     if plan.update_stage(params[:belnet_stage], current_user)
       live_plan = Plan.find_by(belnet_family_id: plan.belnet_family_id, belnet_version: 0) || plan
       redirect_to history_plan_path(live_plan),
-                  notice: "(Version #{plan.belnet_version}): Stage updated from #{old_stage_description} to #{plan.current_belnet_stage&.name_id}."
+                  notice: "(Version #{plan.belnet_version}): Stage updated from #{old_stage_description} to #{plan.current_lifecycle_stage_name}."
     else
       live_plan = Plan.find_by(belnet_family_id: plan.belnet_family_id, belnet_version: 0) || plan
       redirect_to history_plan_path(live_plan), alert: 'Failed to update stage.'
@@ -595,11 +596,10 @@ class PlansController < ApplicationController
 
   def load_governance_validations
     @governance_validations = @plan.governance_validations
-                                   .includes(:belnet_validation_topic, :belnet_validation_status,
-                                             :requested_by, :decided_by, :validated_plan)
+                                   .includes(:requested_by, :reviewed_by, :validated_plan)
                                    .order(created_at: :desc)
-    @available_topics = @plan.org.active_belnet_validation_topics.order(:description, :name_id)
-    @available_validation_statuses = @plan.org.active_belnet_validation_statuses.order(:description, :name_id)
+    @available_topics = @plan.org.active_validation_topics
+    @available_validation_statuses = @plan.org.active_validation_statuses
     @available_validated_plans = @plan.plan_versions.order(belnet_version: :desc)
   end
 end

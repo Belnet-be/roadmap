@@ -23,7 +23,7 @@ module Paginable
 
       scope = @plan.plan_versions
                    .includes(:belnet_version_metadata,
-                             belnet_stage_histories: %i[belnet_stage user])
+                             belnet_stage_histories: :user)
 
       paginable_renderise(
         partial: 'history',

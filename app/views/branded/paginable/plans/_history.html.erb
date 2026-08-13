@@ -21,29 +21,30 @@
           <td class="text-nowrap" data-toggle="tooltip" title="<%= l plan_version.created_at, format: :long %>">
             <%= l plan_version.created_at, format: :long %>
           </td>
-          <td title="<%= plan_version.belnet_reason %>">
-            <%= plan_version.belnet_reason %>
+          <% version_reason = plan_version.belnet_version_metadata&.reason %>
+          <td title="<%= version_reason %>">
+            <%= version_reason %>
           </td>
           <td>
             <%= "#{plan_version.num_answered_questions}/#{plan_version.num_questions} (#{plan_version.percent_answered.to_i}%)" %>
           </td>
           <td class="text-center text-nowrap align-middle">
-            <% current_stage = plan_version.current_belnet_stage %>
+            <% current_stage = plan_version.current_lifecycle_stage_name %>
             <% stage_history = plan_version.belnet_stage_histories.map do |history|
                  {
-                   stage: history.belnet_stage&.name_id,
+                   stage: history.lifecycle_stage,
                    user: history.user&.name(false),
                    date: l(history.created_at, format: :long),
                    motivation: history.motivation
                  }
                end %>
-            <%= button_to current_stage&.name_id || _('Select stage'),
+            <%= button_to current_stage.presence || _('Select stage'),
               update_stage_plan_path(plan_version),
               class: "btn btn-secondary w-100 color-white dropdown-toggle",
               data: { action: "change-stage-modal#open",
                 plan_id: plan_version.id,
                 plan_path: update_stage_plan_path(plan_version),
-                stage_modal_stage_param: current_stage&.id,
+                stage_modal_stage_param: current_stage,
                 stage_modal_version_param: plan_version.belnet_version,
                 stage_modal_history_param: stage_history.to_json
               },
@@ -80,8 +81,8 @@
                   </option>
                 <% else %>
                   <option value="" disabled><%= _("Select a Stage...") %></option>
-                  <% stages.each do |stage| %>
-                    <option value="<%= stage.id %>"><%= stage.name_id %></option>
+                  <% stages.each do |stage_name| %>
+                    <option value="<%= stage_name %>"><%= stage_name %></option>
                   <% end %>
                 <% end %>
               </select>

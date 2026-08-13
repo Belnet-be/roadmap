@@ -40,14 +40,14 @@
           </thead>
           <tbody>
             <% governance_validations.each do |validation| %>
-              <% reviewable = validation.decided_at.blank? %>
+              <% reviewable = validation.reviewed_at.blank? %>
               <tr>
-                <td><%= validation.belnet_validation_topic.description.presence || validation.belnet_validation_topic.code %></td>
+                <td><%= validation.validation_topic %></td>
                 <td><%= _("Version #{validation.validated_plan.belnet_version}") %></td>
                 <td>
-                  <% if validation.belnet_validation_status.present? %>
+                  <% if validation.validation_status.present? %>
                     <span class="badge text-bg-secondary">
-                      <%= validation.belnet_validation_status.description.presence || validation.belnet_validation_status.code %>
+                      <%= validation.validation_status %>
                     </span>
                   <% else %>
                     <span class="badge text-bg-light"><%= _('Pending review') %></span>
@@ -55,8 +55,8 @@
                 </td>
                 <td><%= validation.requested_by&.name || _('Unknown') %></td>
                 <td><%= l(validation.requested_at, format: :long) if validation.requested_at.present? %></td>
-                <td><%= validation.decided_by&.name || _('Not reviewed') %></td>
-                <td><%= l(validation.decided_at, format: :long) if validation.decided_at.present? %></td>
+                <td><%= validation.reviewed_by&.name || _('Not reviewed') %></td>
+                <td><%= l(validation.reviewed_at, format: :long) if validation.reviewed_at.present? %></td>
                 <td><%= validation.rationale.presence || '' %></td>
                 <td><%= validation.conditions.presence || '' %></td>
                 <td>
@@ -93,7 +93,7 @@
 
 <% if plan.editable_by?(current_user.id) %>
   <% governance_validations.each do |validation| %>
-    <% if validation.decided_at.blank? %>
+    <% if validation.reviewed_at.blank? %>
       <%= render partial: 'plans/governance_validation_review_modal',
                  locals: {
                    plan: plan,

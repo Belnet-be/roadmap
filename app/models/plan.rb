@@ -185,13 +185,6 @@ class Plan < ApplicationRecord
 
   validates :belnet_family_id, numericality: { only_integer: true, greater_than_or_equal_to: 0 }, allow_nil: true
 
-  # belnet_reason cannot be nil or empty if the belnet_version is greater than 0
-  # length between 10 and 500 characters if present and show message if not valid
-  validates :belnet_reason,
-            length: { minimum: 10, maximum: 500 },
-            presence: { message: 'Reason must be present and between 10 and 500 characters.' },
-            on: :versioning
-
   validate :end_date_after_start_date
 
   # ==========
@@ -521,31 +514,18 @@ class Plan < ApplicationRecord
     belnet_version == 0
   end
 
-  def update_stage(new_stage_id, current_user)
+  def update_stage(new_stage_name, current_user)
     return false if is_plan_live_version?
 
-    new_stage = org.current_valid_belnet_stages.find { |s| s.id == new_stage_id.to_i }
-    apply_belnet_stage_change(new_stage, current_user)
-  end
+    new_stage_name = new_stage_name.to_s
+    return false unless org&.current_valid_belnet_stages&.include?(new_stage_name)
 
-  def update_stage_by_name(name_id, current_user)
-    new_stage = org.current_valid_belnet_stages.find { |s| s.name_id == name_id.to_s }
-    apply_belnet_stage_change(new_stage, current_user)
-  end
-
-  def current_belnet_stage
-    if is_plan_live_version?
-      belnet_editable_plan_metadata&.belnet_stage
-    else
-      snapshot = belnet_version_metadata&.lifecycle_stage
-      snapshot.present? ? lookup_stage_by_name(snapshot) : nil
-    end
+    apply_belnet_stage_change(new_stage_name, current_user)
   end
 
   def current_lifecycle_stage_name
     if is_plan_live_version?
-      belnet_editable_plan_metadata&.lifecycle_stage.presence ||
-        belnet_editable_plan_metadata&.belnet_stage&.name_id
+      belnet_editable_plan_metadata&.lifecycle_stage.presence
     else
       belnet_version_metadata&.lifecycle_stage.presence
     end
@@ -567,9 +547,7 @@ class Plan < ApplicationRecord
       new_version = dup
       new_version.assign_attributes(
         belnet_version: latest_belnet_version + 1,
-        belnet_family_id: belnet_family_id || id,
-        belnet_reason: reason || '',
-        belnet_created_by: current_user&.id
+        belnet_family_id: belnet_family_id || id
       )
 
       # Copy over the answers, guidance groups and roles (users) to the new version
@@ -588,14 +566,16 @@ class Plan < ApplicationRecord
       new_version.save!(context: :versioning)
 
       # Version metadata
-      BelnetPlanVersionMetadata.create!(
+      metadata = BelnetPlanVersionMetadata.new(
         plan: new_version,
         editable_plan: original_plan,
         versioned_plan: new_version,
         created_by: current_user,
         updated_by: current_user,
-        lifecycle_stage: new_stage&.name_id
+        reason: reason || '',
+        lifecycle_stage: new_stage.to_s.presence
       )
+      metadata.save!(context: :versioning)
 
       # Add the current user as the creator of the new version
       new_version.add_user!(current_user.id, :creator) if current_user.present?
@@ -605,14 +585,14 @@ class Plan < ApplicationRecord
   end
 
   # Makes sure that plan has a belnet_editable_plan_metadata record
-  # and updates it with the current user and stage if provided
-  def ensure_editable_metadata!(current_user: nil, belnet_stage: nil)
+  # and updates it with the current user and lifecycle_stage if provided.
+  def ensure_editable_metadata!(current_user: nil, lifecycle_stage: nil)
     return unless is_plan_live_version?
 
     metadata = belnet_editable_plan_metadata || build_belnet_editable_plan_metadata
     metadata.created_by ||= current_user
     metadata.updated_by   = current_user
-    metadata.belnet_stage = belnet_stage if belnet_stage
+    metadata.lifecycle_stage = lifecycle_stage if lifecycle_stage
     metadata.save!
     metadata
   end
@@ -794,20 +774,20 @@ class Plan < ApplicationRecord
 
   def validation_summary
     governance_validations
-      .includes(:belnet_validation_topic, :belnet_validation_status)
       .order(created_at: :desc)
       .each_with_object({}) do |validation, summary|
-        next if validation.belnet_validation_status.blank?
+        next if validation.validation_status.blank?
 
-        topic_name_id = validation.belnet_validation_topic.name_id
-        summary[topic_name_id] ||= validation.belnet_validation_status.name_id
+        summary[validation.validation_topic] ||= validation.validation_status
       end
   end
 
+  # Filters governance_validations down to those whose topic name still
+  # appears in the org's active validation topic config
   def governance_validations_for_org_topics
-    governance_validations
-      .joins(:belnet_validation_topic)
-      .where(belnet_validation_topics: { org_id: org_id })
+    return governance_validations.none if org.nil?
+
+    governance_validations.where(validation_topic: org.active_validation_topics)
   end
 
   # Since the Grant is not a normal AR association, override the getter and setter
@@ -837,22 +817,23 @@ class Plan < ApplicationRecord
 
   private
 
-  # Shared stage change logic for UI using id and Belnet api using the name_id
-  def apply_belnet_stage_change(new_stage, current_user)
-    return false if new_stage.nil? || current_belnet_stage&.id == new_stage.id
+  # Shared stagechange logic. 'new_stage_name' is a plain string that must
+  # already be validated against the org's current config by the caller
+  def apply_belnet_stage_change(new_stage_name, current_user)
+    return false if new_stage_name.blank? || current_lifecycle_stage_name == new_stage_name
 
-    old_name_id = current_belnet_stage&.name_id || _('None')
-    motivation = if old_name_id.present?
-                   "Stage changed from #{old_name_id} to #{new_stage.name_id}"
+    old_name = current_lifecycle_stage_name.presence || _('None')
+    motivation = if current_lifecycle_stage_name.present?
+                   "Stage changed from #{old_name} to #{new_stage_name}"
                  else
-                   "Stage set to #{new_stage.name_id}"
+                   "Stage set to #{new_stage_name}"
                  end
 
     transaction do
-      persist_stage_metadata(new_stage, current_user)
+      persist_stage_metadata(new_stage_name, current_user)
       BelnetStageHistory.create!(
         plan: self,
-        belnet_stage: new_stage,
+        lifecycle_stage: new_stage_name,
         user: current_user,
         motivation: motivation
       )
@@ -863,11 +844,11 @@ class Plan < ApplicationRecord
   end
 
   # All stage changes go through the metadata tables
-  def persist_stage_metadata(new_stage, current_user)
+  def persist_stage_metadata(new_stage_name, current_user)
     if is_plan_live_version?
       metadata = belnet_editable_plan_metadata || build_belnet_editable_plan_metadata(created_by: current_user)
       metadata.updated_by = current_user
-      metadata.belnet_stage = new_stage
+      metadata.lifecycle_stage = new_stage_name
       metadata.save!
     else
       metadata = belnet_version_metadata
@@ -883,15 +864,9 @@ class Plan < ApplicationRecord
         )
       end
       metadata.updated_by = current_user
-      metadata.lifecycle_stage = new_stage&.name_id
+      metadata.lifecycle_stage = new_stage_name
       metadata.save!
     end
-  end
-
-  def lookup_stage_by_name(name_id)
-    return nil if name_id.blank? || org.nil?
-
-    org.all_belnet_stages.find { |s| s.name_id == name_id }
   end
 
   # Validation to prevent end date from coming before the start date

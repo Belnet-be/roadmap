@@ -85,11 +85,13 @@ module Api
 
           version.transaction do
             if new_reason
-              version.assign_attributes(belnet_reason: new_reason)
-              version.save!(context: :versioning)
+              metadata = version.belnet_version_metadata || version.touch_version_metadata!(acting_user)
+              metadata.reason = new_reason
+              metadata.updated_by = acting_user
+              metadata.updated_at = Time.current
+              metadata.save!(context: :versioning)
             end
-            version.update_stage_by_name(new_stage.name_id, acting_user) if new_stage
-            version.touch_version_metadata!(acting_user) if new_reason && new_stage.nil?
+            version.update_stage(new_stage, acting_user) if new_stage
           end
 
           version.reload
@@ -151,28 +153,26 @@ module Api
           stage_name = params[:'lifecycle-stage']
           return nil if stage_name.blank?
 
-          stage = plan.org&.current_valid_belnet_stages&.find { |s| s.name_id == stage_name }
-          return stage if stage
+          return stage_name if plan.org&.current_valid_belnet_stages&.include?(stage_name)
 
           render_error(errors: [_('Lifecycle stage not found')], status: :bad_request)
           nil
         end
 
-        # lifecycle stage is optional, if omitted, fall back to previous versions stage
+        # lifecycle-stage is optional. When omitted, fall back to the most
+        # recent versions stage, then to the live plan's current stage
         def resolve_version_stage(plan)
-          stage_name = @json&.[]('lifecycle-stage').to_s.strip
+          stage_name = params[:'lifecycle-stage']
 
           if stage_name.present?
-            stage = plan.org&.current_valid_belnet_stages&.find { |s| s.name_id == stage_name }
-            unless stage
-              render_error(errors: [_('Lifecycle stage not found')], status: :bad_request)
-              return nil
-            end
-            return stage
+            return stage_name if plan.org&.current_valid_belnet_stages&.include?(stage_name)
+
+            render_error(errors: [_('Lifecycle stage not found')], status: :bad_request)
+            return nil
           end
 
-          plan.plan_versions.order(:belnet_version).last&.current_belnet_stage ||
-            plan.current_belnet_stage
+          plan.plan_versions.order(:belnet_version).last&.current_lifecycle_stage_name ||
+            plan.current_lifecycle_stage_name
         end
       end
     end

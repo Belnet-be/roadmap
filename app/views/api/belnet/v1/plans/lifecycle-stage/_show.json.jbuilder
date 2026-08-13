@@ -28,4 +28,4 @@ if modified_by_orcid.present?
   end
 end
 
-json.set! 'lifecycle-stage', plan.current_lifecycle_stage_name || lifecycle_stage&.name_id
+json.set! 'lifecycle-stage', plan.current_lifecycle_stage_name || lifecycle_stage.to_s.presence

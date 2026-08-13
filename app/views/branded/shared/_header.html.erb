@@ -79,15 +79,15 @@
                     <%= _("No stages available for your organization") %>
                   </option>
                 <% else %>
-                  <% last_version_stage = plan.plan_versions.any? ? plan.plan_versions.last.current_belnet_stage : nil %>
-                  <% preselected_stage_id = last_version_stage&.id || plan.current_belnet_stage&.id %>
-                  <option value="" disabled <%= 'selected' if preselected_stage_id.blank? %>>
+                  <% last_version_stage = plan.plan_versions.any? ? plan.plan_versions.last.current_lifecycle_stage_name : nil %>
+                  <% preselected_stage_name = last_version_stage.presence || plan.current_lifecycle_stage_name %>
+                  <option value="" disabled <%= 'selected' if preselected_stage_name.blank? %>>
                     <%= _("Select a Stage...") %>
                   </option>
 
-                  <% stages.each do |stage| %>
-                    <option value="<%= stage.id %>" <%= 'selected' if preselected_stage_id == stage.id %>>
-                      <%= stage.name_id %>
+                  <% stages.each do |stage_name| %>
+                    <option value="<%= stage_name %>" <%= 'selected' if preselected_stage_name == stage_name %>>
+                      <%= stage_name %>
                     </option>
                   <% end %>
                 <% end %>

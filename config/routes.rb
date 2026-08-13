@@ -224,12 +224,25 @@ Rails.application.routes.draw do
         # Path cleared in namespace belnet to avoid belnet/v1 in route
         # Path then set in namespace v1 to create belnet-v1 in route
         # This will allow the controllers to function as wanted (app/controllers/api/belnet/v1)
-        resources :plans, only: [] do
+        namespace :configurations, path: 'configurations' do
+          resource :lifecycle_stages, path: 'lifecycle-stages',
+                                      controller: 'lifecycle_stages',
+                                      only: :show
+          resource :validation_topics, path: 'validation-topics',
+                                       controller: 'validation_topics',
+                                       only: :show
+          resource :validation_statuses, path: 'validation-statuses',
+                                         controller: 'validation_statuses',
+                                         only: :show
+        end
+
+        resources :plans, only: %i[show] do
           # THese endpoints are for the custom Belnet implementation of the plans versioning feature.
           # They are nested under plans as they require a plan_id to function.
           resources :versions, only: %i[index show create update]
           resource :lifecycle_stage, path: 'lifecycle-stage', only: %i[show create update]
-          resources :governance_validations, path: 'governance-validations', only: %i[index show create update]
+          resources :validations, controller: 'governance_validations',
+                                  only: %i[index show create update]
         end
       end
     end

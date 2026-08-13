@@ -10,10 +10,10 @@
           <p class="alert alert-primary"><%= _('Please review the validation request, update its status, and provide your rationale') %></p>
 
           <div class="form-control d-flex flex-column gap-2">
-            <%= f.label :belnet_validation_status_id, _('Status'), class: 'form-label fw-bold mb-0' %>
-            <%= f.select :belnet_validation_status_id,
-                         options_for_select(available_validation_statuses.map { |status| [status.description.presence || status.code, status.id] },
-                                            validation.belnet_validation_status_id),
+            <%= f.label :validation_status, _('Status'), class: 'form-label fw-bold mb-0' %>
+            <%= f.select :validation_status,
+                         options_for_select(available_validation_statuses.map { |name| [name, name] },
+                                            validation.validation_status),
                          { include_blank: _('Select a status') },
                          { class: 'form-select', required: true } %>
 

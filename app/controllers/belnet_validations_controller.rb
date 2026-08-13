@@ -37,9 +37,9 @@ class BelnetValidationsController < ApplicationController
     end
 
     attrs = update_validation_params.merge(
-      decided_by: current_user,
       # Use actual timezone time, way better than time.now
-      decided_at: Time.zone.now
+      reviewed_by: current_user,
+      reviewed_at: Time.zone.now
     )
 
     if @validation.update(attrs)
@@ -63,26 +63,38 @@ class BelnetValidationsController < ApplicationController
     raise ActionController::BadRequest, _('Invalid governance validation review.')
   end
 
+  # Form submits :validation_topic (a name string) and :validated_plan_id
   def create_validation_params
-    params.require(:belnet_validation)
-          .permit(:belnet_validation_topic_id, :validated_plan_id)
-          .tap do |permitted|
-      permitted[:belnet_validation_topic_id] = available_topics.find(permitted[:belnet_validation_topic_id]).id
-      permitted[:validated_plan_id] = available_validated_plans.find(permitted[:validated_plan_id]).id
+    raw = params.require(:belnet_validation)
+                .permit(:validation_topic, :validated_plan_id)
+
+    unless available_topics.include?(raw[:validation_topic].to_s)
+      raise ActionController::BadRequest, _('Invalid governance validation request.')
     end
+
+    validated_plan = available_validated_plans.find(raw[:validated_plan_id])
+
+    {
+      validation_topic: raw[:validation_topic].to_s,
+      validated_plan_id: validated_plan.id
+    }
   rescue ActiveRecord::RecordNotFound
     raise ActionController::BadRequest, _('Invalid governance validation request.')
   end
 
   def update_validation_params
-    params.require(:belnet_validation)
-          .permit(:belnet_validation_status_id, :rationale, :conditions)
-          .tap do |permitted|
-      permitted[:belnet_validation_status_id] =
-        available_validation_statuses.find(permitted[:belnet_validation_status_id]).id
+    raw = params.require(:belnet_validation)
+                .permit(:validation_status, :rationale, :conditions)
+
+    unless available_validation_statuses.include?(raw[:validation_status].to_s)
+      raise ActionController::BadRequest, _('Invalid governance validation review.')
     end
-  rescue ActiveRecord::RecordNotFound
-    raise ActionController::BadRequest, _('Invalid governance validation review.')
+
+    {
+      validation_status: raw[:validation_status].to_s,
+      rationale: raw[:rationale],
+      conditions: raw[:conditions]
+    }
   end
 
   def validation_org
@@ -90,11 +102,11 @@ class BelnetValidationsController < ApplicationController
   end
 
   def available_topics
-    validation_org.active_belnet_validation_topics
+    validation_org.active_validation_topics
   end
 
   def available_validation_statuses
-    validation_org.active_belnet_validation_statuses
+    validation_org.active_validation_statuses
   end
 
   def available_validated_plans
@@ -102,6 +114,6 @@ class BelnetValidationsController < ApplicationController
   end
 
   def reviewable?(validation)
-    validation.decided_at.blank?
+    validation.reviewed_at.blank?
   end
 end

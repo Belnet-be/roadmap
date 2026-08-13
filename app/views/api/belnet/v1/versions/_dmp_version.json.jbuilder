@@ -15,9 +15,7 @@ json.created version.created_at.utc.iso8601
 # modified and modified by are only emitted when the version was updated (touched)
 json.modified metadata.updated_at.utc.iso8601 if metadata && metadata.updated_at != metadata.created_at
 
-created_by_user = local_assigns[:created_by_user] ||
-                  metadata&.created_by ||
-                  (version.belnet_created_by.present? ? User.includes(:identifiers).find_by(id: version.belnet_created_by) : nil)
+created_by_user = local_assigns[:created_by_user] || metadata&.created_by
 
 created_by_orcid = created_by_user&.identifier_for_scheme(scheme: 'orcid')
 if created_by_orcid.present?
@@ -37,5 +35,5 @@ if metadata && metadata.updated_at != metadata.created_at
   end
 end
 
-json.reason version.belnet_reason
+json.reason metadata&.reason
 json.set! 'lifecycle-stage', version.current_lifecycle_stage_name
