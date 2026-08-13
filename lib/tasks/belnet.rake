@@ -27,8 +27,8 @@ namespace :belnet do
   ## namespace :org_stages
   # Add a lifecycle stage name to an org's config, or the global config.
   # Examples (docker):
-  #   bin/rails "belnet:org_stages:create_global_stage[Working Draft]"
-  #   bin/rails "belnet:org_stages:add_stage_to_org[62,Working Draft]"
+  #   bin/rails belnet:org_stages:create_global_stage["Working Draft"]
+  #   bin/rails belnet:org_stages:add_stage_to_org[62,"Working Draft"]
 
   namespace :org_stages do
     desc 'Add a stage name to the GLOBAL lifecycle-stage config'
@@ -48,8 +48,8 @@ namespace :belnet do
 
   ## namespace :org_validation_topics
   # Examples (docker):
-  #   bin/rails "belnet:org_validation_topics:create_global_topic[GDPR]"
-  #   bin/rails "belnet:org_validation_topics:add_topic_to_org[62,GDPR]"
+  #   bin/rails belnet:org_validation_topics:create_global_topic["GDPR"]
+  #   bin/rails belnet:org_validation_topics:add_topic_to_org[62,"GDPR"]
 
   namespace :org_validation_topics do
     desc 'Add a validation topic name to the GLOBAL config'
@@ -69,8 +69,8 @@ namespace :belnet do
 
   ## namespace :org_validation_statuses
   # Examples (docker):
-  #   bin/rails "belnet:org_validation_statuses:create_global_status[Approved]"
-  #   bin/rails "belnet:org_validation_statuses:add_status_to_org[62,Approved]"
+  #   bin/rails belnet:org_validation_statuses:create_global_status["Approved"]
+  #   bin/rails belnet:org_validation_statuses:add_status_to_org[62,"Approved"]
 
   namespace :org_validation_statuses do
     desc 'Add a validation status name to the GLOBAL config'
