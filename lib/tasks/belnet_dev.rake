@@ -22,7 +22,8 @@ namespace :belnet_dev do
       ugent_org = Org.where(managed: true, abbreviation: 'UGent').first
 
       unless kul_org || liege_org || ugent_org
-        puts 'KUL or ULiege or UGent organisation not found. Please ensure these organisations exist before running this task.'
+        puts 'KUL or ULiege or UGent organisation not found. ' \
+             'Please ensure these organisations exist before running this task.'
         exit
       end
 
@@ -90,9 +91,13 @@ namespace :belnet_dev do
 
       unless User.exists?(email: 'orgadminkul@testuser-kul.be')
         puts 'Creating Organisational Admin KUL'
-        organisational_admin_kul = User.new(email: 'orgadminkul@testuser-kul.be', firstname: 'Birgit', surname: 'Smulders')
-        organisational_admin_kul.perms = [Perm.grant_permissions, Perm.modify_templates, Perm.modify_guidance, Perm.use_api,
-                                           Perm.change_org_details, Perm.review_plans]
+        organisational_admin_kul = User.new(
+          email: 'orgadminkul@testuser-kul.be', firstname: 'Birgit', surname: 'Smulders'
+        )
+        organisational_admin_kul.perms = [
+          Perm.grant_permissions, Perm.modify_templates, Perm.modify_guidance, Perm.use_api,
+          Perm.change_org_details, Perm.review_plans
+        ]
         organisational_admin_kul.password = organisational_admin_kul.email
         organisational_admin_kul.password_confirmation = organisational_admin_kul.email
         organisational_admin_kul.save!
@@ -102,8 +107,10 @@ namespace :belnet_dev do
       unless User.exists?(email: 'orgadmin@testuser.be')
         puts 'Creating Organisational Admin Liege'
         organisational_admin_liege = User.new(email: 'orgadmin@testuser.be', firstname: 'Bob', surname: 'Brown')
-        organisational_admin_liege.perms = [Perm.grant_permissions, Perm.modify_templates, Perm.modify_guidance, Perm.use_api,
-                                            Perm.change_org_details, Perm.review_plans]
+        organisational_admin_liege.perms = [
+          Perm.grant_permissions, Perm.modify_templates, Perm.modify_guidance, Perm.use_api,
+          Perm.change_org_details, Perm.review_plans
+        ]
         organisational_admin_liege.password = organisational_admin_liege.email
         organisational_admin_liege.password_confirmation = organisational_admin_liege.email
         organisational_admin_liege.save!
@@ -215,6 +222,114 @@ namespace :belnet_dev do
 
       puts 'Destroying test users completed.'
     end
+
+    task setup_test_configs: :environment do
+      puts 'Setup test configs for lifecycle stages, validation statuses and validation topics'
+
+      unless BelnetConfigLifecycleStage.exists?(id: 1)
+        puts 'Creating default lifecycle stages'
+        lifecycle_stages1 = BelnetConfigLifecycleStage.new
+        # Because JSON strings require double quotes, we need to disable the rubocop rule for string literals here
+        # rubocop:disable Style/StringLiterals
+        lifecycle_stages1.current_list_order = [
+          "Initial Draft",
+          "Working Draft",
+          "Intermediate",
+          "Finalized",
+          "Archived"
+        ]
+        lifecycle_stages1.full_list_order = [
+          "Initial Draft",
+          "Working Draft",
+          "Intermediate",
+          "Finalized",
+          "Archived"
+        ]
+        # rubocop:enable Style/StringLiterals
+        lifecycle_stages1.save!
+        lifecycle_stages2 = BelnetConfigLifecycleStage.new
+        lifecycle_stages2.org_id = 62
+        # Because JSON strings require double quotes, we need to disable the rubocop rule for string literals here
+        # rubocop:disable Style/StringLiterals
+        lifecycle_stages2.current_list_order = [
+          "Initial Draft",
+          "Working Draft",
+          "Internal Review",
+          "External Review",
+          "Finalized",
+          "Archived" # rubocop:disable Style/StringLiterals
+        ]
+        lifecycle_stages2.full_list_order = [
+          "Initial Draft",
+          "Working Draft",
+          "Intermediate",
+          "Internal Review",
+          "External Review",
+          "Finalized",
+          "Archived"
+        ]
+        # rubocop:enable Style/StringLiterals
+        lifecycle_stages2.save!
+        puts 'Created default lifecycle stages'
+      end
+
+      unless BelnetConfigValidationStatus.exists?(id: 1)
+        puts 'Creating default validation statuses'
+        validation_statuses1 = BelnetConfigValidationStatus.new
+        # Because JSON strings require double quotes, we need to disable the rubocop rule for string literals here
+        # rubocop:disable Style/StringLiterals
+        validation_statuses1.current_list_order = [
+          "Pending Review",
+          "Approved",
+          "Denied",
+          "Rework Needed"
+        ]
+        validation_statuses1.full_list_order = [
+          "Pending Review",
+          "Approved",
+          "Denied",
+          "Rework Needed"
+        ]
+        # rubocop:enable Style/StringLiterals
+        validation_statuses1.save!
+        # validation_statuses2 = BelnetConfigValidationStatus.new
+        # validation_statuses2.org_id = 62
+        # validation_statuses2.current_list_order = ["Pending Review", "Approved", "Denied", "Rework Needed"]
+        # validation_statuses2.full_list_order = ["Pending Review", "Approved", "Denied", "Rework Needed"]
+        # validation_statuses2.save!
+        puts 'Created default validation statuses'
+      end
+
+      unless BelnetConfigValidationTopic.exists?(id: 1)
+        puts 'Creating default validation topics'
+        validation_topics1 = BelnetConfigValidationTopic.new
+        # Because JSON strings require double quotes, we need to disable the rubocop rule for string literals here
+        # rubocop:disable Style/StringLiterals
+        validation_topics1.current_list_order = [
+          "GDPR",
+          "Ethics",
+          "FAIR",
+          "Data Security",
+          "Data Storage"
+        ]
+        validation_topics1.full_list_order = [
+          "GDPR",
+          "Ethics",
+          "FAIR",
+          "Data Security",
+          "Data Storage"
+        ]
+        # rubocop:enable Style/StringLiterals
+        validation_topics1.save!
+        # validation_topics2 = BelnetConfigValidationTopic.new
+        # validation_topics2.org_id = 62
+        # validation_topics2.current_list_order = ["GDPR", "Ethics", "FAIR", "Data Security", "Data Storage"]
+        # validation_topics2.full_list_order = ["GDPR", "Ethics", "FAIR", "Data Security", "Data Storage"]
+        # validation_topics2.save!
+        puts 'Created default validation topics'
+      end
+    end
+
   else
     puts 'Belnet dev tasks are not available in this environment.'
   end
