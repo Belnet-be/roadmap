@@ -88,6 +88,17 @@ namespace :belnet_dev do
         puts 'Created Data Steward Liege'
       end
 
+      unless User.exists?(email: 'orgadminkul@testuser-kul.be')
+        puts 'Creating Organisational Admin KUL'
+        organisational_admin_kul = User.new(email: 'orgadminkul@testuser-kul.be', firstname: 'Birgit', surname: 'Smulders')
+        organisational_admin_kul.perms = [Perm.grant_permissions, Perm.modify_templates, Perm.modify_guidance, Perm.use_api,
+                                           Perm.change_org_details, Perm.review_plans]
+        organisational_admin_kul.password = organisational_admin_kul.email
+        organisational_admin_kul.password_confirmation = organisational_admin_kul.email
+        organisational_admin_kul.save!
+        puts 'Created Organisational Admin KUL'
+      end
+
       unless User.exists?(email: 'orgadmin@testuser.be')
         puts 'Creating Organisational Admin Liege'
         organisational_admin_liege = User.new(email: 'orgadmin@testuser.be', firstname: 'Bob', surname: 'Brown')
@@ -132,6 +143,7 @@ namespace :belnet_dev do
       researcher_liege = User.find_by(email: 'researcher.liege@testuser-liege.be')
       data_steward_liege = User.find_by(email: 'datasteward@testuser.be')
       organisational_admin_liege = User.find_by(email: 'orgadmin@testuser.be')
+      organisational_admin_kul = User.find_by(email: 'orgadminkul@testuser-kul.be')
       super_admin_liege = User.find_by(email: 'superadmin@testuser.be')
       super_admin_ugent = User.find_by(email: 'superadmin.ugent@testuser-ugent.be')
 
@@ -155,6 +167,11 @@ namespace :belnet_dev do
       if organisational_admin_liege
         organisational_admin_liege.destroy!
         puts 'Destroyed organisational_admin_liege'
+      end
+
+      if organisational_admin_kul
+        organisational_admin_kul.destroy!
+        puts 'Destroyed organisational_admin_kul'
       end
 
       if super_admin_liege
