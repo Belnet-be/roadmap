@@ -4,6 +4,7 @@ module Api
   module Belnet
     module V1
       # Handles retrieval and updates of a plan's lifecycle stage for Belnet API V1
+
       class LifecycleStagesController < BaseApiController
         respond_to :json
 
@@ -22,7 +23,8 @@ module Api
         end
 
         # POST /api/belnet-v1/plans/:plan_id/lifecycle-stage
-        # Adds an initial lifecycle stage to an editable (live) DMP that has none yet.
+        # Adds an initial lifecycle stage to an editable (live) DMP that has
+        # none yet.
         def create
           plan = find_plan
           return unless plan
@@ -39,18 +41,7 @@ module Api
             return
           end
 
-          stage_name = resolve_stage(plan)
-          return unless stage_name
-
-          acting_user = client.is_a?(User) ? client : nil
-          unless plan.update_stage(stage_name, acting_user)
-            render_error(errors: [_('Failed to add lifecycle stage')], status: :unprocessable_entity)
-            return
-          end
-
-          plan.reload
-          render_lifecycle_stage(plan: plan, lifecycle_stage: plan.current_lifecycle_stage_name,
-                                 status: :created)
+          apply_stage_change(plan, status: :created)
         end
 
         # PUT /api/belnet-v1/plans/:plan_id/lifecycle-stage
@@ -58,25 +49,15 @@ module Api
           plan = find_plan
           return unless plan
 
-          stage_name = resolve_stage(plan)
-          return unless stage_name
+          stage_name = require_stage_name
+          return if performed?
 
-          acting_user = client.is_a?(User) ? client : nil
-
-          # already at the requested stage.
           if plan.current_lifecycle_stage_name == stage_name
             render_lifecycle_stage(plan: plan, lifecycle_stage: stage_name, status: :accepted)
             return
           end
 
-          unless plan.update_stage(stage_name, acting_user)
-            render_error(errors: [_('Failed to update lifecycle stage')], status: :unprocessable_entity)
-            return
-          end
-
-          plan.reload
-          render_lifecycle_stage(plan: plan, lifecycle_stage: plan.current_lifecycle_stage_name,
-                                 status: :accepted)
+          apply_stage_change(plan, status: :accepted)
         end
 
         private
@@ -99,17 +80,29 @@ module Api
           nil
         end
 
-        def resolve_stage(plan)
-          stage_name = params[:'lifecycle-stage'].to_s.strip
-          if stage_name.blank?
-            render_error(errors: [_('lifecycle-stage is required')], status: :bad_request)
-            return nil
-          end
+        def require_stage_name
+          stage_name = params[:lifecycle_stage].to_s.strip
+          return stage_name if stage_name.present?
 
-          return stage_name if plan.org&.current_valid_belnet_stages&.include?(stage_name)
-
-          render_error(errors: [_('Lifecycle stage not found')], status: :bad_request)
+          render_error(errors: [_('lifecycle-stage is required')], status: :bad_request)
           nil
+        end
+
+        def apply_stage_change(plan, status:)
+          stage_name = require_stage_name
+          return if performed?
+
+          acting_user = client.is_a?(User) ? client : nil
+
+          if plan.update_stage(stage_name, acting_user)
+            plan.reload
+            render_lifecycle_stage(plan: plan, lifecycle_stage: plan.current_lifecycle_stage_name,
+                                   status: status)
+          else
+            errors = plan.last_stage_change_errors.presence ||
+                     [_('Failed to update lifecycle stage')]
+            render_error(errors: errors, status: :unprocessable_entity)
+          end
         end
 
         def render_lifecycle_stage(plan:, lifecycle_stage:, status:)

@@ -515,8 +515,6 @@ class Plan < ApplicationRecord
   end
 
   def update_stage(new_stage_name, current_user)
-    return false if is_plan_live_version?
-
     new_stage_name = new_stage_name.to_s
     return false unless org&.current_valid_belnet_stages&.include?(new_stage_name)
 
@@ -817,9 +815,14 @@ class Plan < ApplicationRecord
 
   private
 
-  # Shared stagechange logic. 'new_stage_name' is a plain string that must
-  # already be validated against the org's current config by the caller
+  public
+
+  attr_reader :last_stage_change_errors
+
+  private
+
   def apply_belnet_stage_change(new_stage_name, current_user)
+    @last_stage_change_errors = nil
     return false if new_stage_name.blank? || current_lifecycle_stage_name == new_stage_name
 
     old_name = current_lifecycle_stage_name.presence || _('None')
@@ -839,7 +842,10 @@ class Plan < ApplicationRecord
       )
     end
     true
-  rescue ActiveRecord::RecordInvalid, ActiveRecord::RecordNotSaved
+  rescue ActiveRecord::RecordInvalid => e
+    @last_stage_change_errors = e.record.errors.full_messages
+    false
+  rescue ActiveRecord::RecordNotSaved
     false
   end
 

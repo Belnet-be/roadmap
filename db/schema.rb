@@ -63,15 +63,6 @@ ActiveRecord::Schema[7.1].define(version: 2026_06_22_130102) do
 # Could not dump table "belnet_stage_histories" because of following ActiveRecord::StatementInvalid
 #   Mysql2::Error: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'NULL' at line 1
 
-# Could not dump table "belnet_stages" because of following ActiveRecord::StatementInvalid
-#   Mysql2::Error: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'NULL' at line 1
-
-# Could not dump table "belnet_validation_statuses" because of following ActiveRecord::StatementInvalid
-#   Mysql2::Error: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'NULL' at line 1
-
-# Could not dump table "belnet_validation_topics" because of following ActiveRecord::StatementInvalid
-#   Mysql2::Error: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'NULL' at line 1
-
 # Could not dump table "belnet_validations" because of following ActiveRecord::StatementInvalid
 #   Mysql2::Error: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'NULL' at line 1
 

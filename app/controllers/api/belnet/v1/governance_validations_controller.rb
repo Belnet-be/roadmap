@@ -36,7 +36,6 @@ module Api
         end
 
         # PUT /api/belnet-v1/plans/:plan_id/validations/:id
-        # One-shot review: once reviewed_at is set, further edits are rejected.
         def update
           plan = find_editable_plan
           return if performed?
@@ -44,25 +43,18 @@ module Api
           validation = find_validation(plan)
           return unless validation
 
-          if validation.reviewed_at.present?
-            render_error(errors: [_('This validation has already been reviewed')],
-                         status: :bad_request)
-            return
-          end
-
-          status_name = resolve_status(plan)
+          require_param(:status)
           return if performed?
 
           acting_user = client.is_a?(User) ? client : nil
 
-          validation.assign_attributes(
-            validation_status: status_name,
+          validation.update!(
+            validation_status: params[:status],
             rationale: params[:rationale],
             conditions: params[:conditions],
             reviewed_by: acting_user,
             reviewed_at: Time.zone.now
           )
-          validation.save!
 
           render 'api/belnet/v1/validations/show', status: :accepted,
                                                    locals: { validation: validation }
@@ -75,21 +67,19 @@ module Api
         def create
           plan = find_editable_plan
           return if performed?
+          require_param(:topic)
+          return if performed?
 
           version = resolve_version(plan)
           return if performed?
 
-          topic_name = resolve_topic(plan)
-          return if performed?
-
           acting_user = client.is_a?(User) ? client : nil
 
-          validation = plan.governance_validations.new(
+          validation = plan.governance_validations.create!(
             validated_plan: version,
-            validation_topic: topic_name,
+            validation_topic: params[:topic],
             requested_by: acting_user
           )
-          validation.save!
 
           render 'api/belnet/v1/validations/create', status: :created,
                                                      locals: { validation: validation }
@@ -132,19 +122,6 @@ module Api
           nil
         end
 
-        def resolve_status(plan)
-          status_name = params[:status]
-
-          if status_name.blank?
-            render_error(errors: [_('status is required')], status: :bad_request)
-            return nil
-          end
-
-          return status_name if plan.org&.active_validation_statuses&.include?(status_name)
-
-          render_error(errors: [_('Validation status not found')], status: :bad_request)
-          nil
-        end
 
         def resolve_version(plan)
           version_number = params[:dmp_version_number]
@@ -161,18 +138,10 @@ module Api
           nil
         end
 
-        def resolve_topic(plan)
-          topic_name = params[:topic]
+        def require_param(name)
+          return if params[name].to_s.strip.present?
 
-          if topic_name.blank?
-            render_error(errors: [_('topic is required')], status: :bad_request)
-            return nil
-          end
-
-          return topic_name if plan.org&.active_validation_topics&.include?(topic_name)
-
-          render_error(errors: [_('Validation topic not found')], status: :bad_request)
-          nil
+          render_error(errors: [_("#{name} is required")], status: :bad_request)
         end
       end
     end

@@ -9,10 +9,22 @@ class BelnetPlanVersionMetadata < ApplicationRecord
   belongs_to :created_by, class_name: 'User', optional: true
   belongs_to :updated_by, class_name: 'User', optional: true
 
-  # Snapshotted stage name (name_id). Kept alongside for durability if the
-  # backing BelnetStage is renamed or removed.
   validates :reason,
             length: { minimum: 10, maximum: 500 },
             presence: { message: 'Reason must be present and between 10 and 500 characters.' },
             on: :versioning
+
+  validate :lifecycle_stage_must_be_active_on_create, on: :create
+
+  private
+
+  def lifecycle_stage_must_be_active_on_create
+    return if lifecycle_stage.blank?
+
+    org = plan&.org || editable_plan&.org || versioned_plan&.org
+    return if org.nil?
+    return if org.current_valid_belnet_stages.include?(lifecycle_stage)
+
+    errors.add(:lifecycle_stage, 'is not an active lifecycle stage for this org')
+  end
 end

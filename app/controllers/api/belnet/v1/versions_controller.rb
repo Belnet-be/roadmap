@@ -149,27 +149,16 @@ module Api
           plan
         end
 
-        def resolve_stage_for(plan)
-          stage_name = params[:'lifecycle-stage']
-          return nil if stage_name.blank?
-
-          return stage_name if plan.org&.current_valid_belnet_stages&.include?(stage_name)
-
-          render_error(errors: [_('Lifecycle stage not found')], status: :bad_request)
-          nil
+        def resolve_stage_for(_plan)
+          stage_name = params[:'lifecycle-stage'].to_s.strip
+          stage_name.presence
         end
 
         # lifecycle-stage is optional. When omitted, fall back to the most
-        # recent versions stage, then to the live plan's current stage
+        # recent versions stage, then to the live plan's current stage.
         def resolve_version_stage(plan)
-          stage_name = params[:'lifecycle-stage']
-
-          if stage_name.present?
-            return stage_name if plan.org&.current_valid_belnet_stages&.include?(stage_name)
-
-            render_error(errors: [_('Lifecycle stage not found')], status: :bad_request)
-            return nil
-          end
+          stage_name = params[:lifecycle_stage]
+          return stage_name if stage_name.present?
 
           plan.plan_versions.order(:belnet_version).last&.current_lifecycle_stage_name ||
             plan.current_lifecycle_stage_name
