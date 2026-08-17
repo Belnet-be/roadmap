@@ -23,11 +23,6 @@
 </div>
 <div class="row">
   <div class="col-xs-12">
-    <%= render partial: 'plans/governance_validations_summary', locals: { plan: plan } %>
-  </div>
-</div>
-<div class="row">
-  <div class="col-xs-12">
     <% if plan.template.phases.size == 1 %>
       <%= render(partial: '/phases/overview', locals: { plan_id: plan.id, phase: plan.template.phases.first }) %>
     <% else %>

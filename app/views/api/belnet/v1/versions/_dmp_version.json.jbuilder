@@ -36,4 +36,4 @@ if metadata && metadata.updated_at != metadata.created_at
 end
 
 json.reason metadata&.reason
-json.set! 'lifecycle-stage', version.current_lifecycle_stage_name
+json.set! 'lifecycle_stage', version.current_lifecycle_stage_name

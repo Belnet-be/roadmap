@@ -1,5 +1,5 @@
 <% title "#{plan.title} - #{title_suffix}" %>
-<div data-controller="confirm-modal">
+<div data-controller="change-stage-modal">
   <div class="row">
     <div class="col-md-12">
       <div class="d-flex justify-content-between align-items-center">
@@ -12,13 +12,37 @@
           <% end %>
         </div>
         <div class="d-flex gap-2">
+          <% if plan.editable_by?(current_user.id) %>
+            <%
+              current_stage = plan.current_lifecycle_stage_name
+              stage_history = plan.belnet_stage_histories.map do |history|
+                {
+                  stage: history.lifecycle_stage,
+                  user: history.user&.name(false),
+                  date: l(history.created_at, format: :long),
+                  motivation: history.motivation
+                }
+              end
+            %>
+            <%= button_to current_stage.presence || _('Select stage'),
+              update_stage_plan_path(plan),
+              class: "btn btn-secondary color-white dropdown-toggle",
+              data: { action: "change-stage-modal#open",
+                plan_id: plan.id,
+                plan_path: update_stage_plan_path(plan),
+                stage_modal_stage_param: current_stage,
+                stage_modal_version_param: plan.belnet_version,
+                stage_modal_history_param: stage_history.to_json
+              },
+              method: :put %>
+          <% end %>
           <% if plan.readable_by?(current_user.id) && plan.plan_versions_with_live_version.any? %>
             <div class="dropdown">
               <a href="#" class="dropdown-toggle align-center btn btn-secondary text-white" role="button" id="reference-menu" data-bs-toggle="dropdown" data-bs-display="static" aria-haspopup="true" aria-expanded="false">
                 <%= _("Compare") %>
                 <span class="caret"></span>
               </a>
-              <ul class="dropdown-menu dropdown-menu-end" 
+              <ul class="dropdown-menu dropdown-menu-end"
                   aria-labelledby="reference-menu">
                 <% plan.plan_versions_with_live_version.each do |version| %>
                   <li>
@@ -32,97 +56,102 @@
             <%= link_to "Edit", plan_path(plan.belnet_family_id), class: "btn btn-secondary" %>
           <% end %>
           <% if plan.submittable_by?(current_user.id) %>
-            <%= button_to _("Create Version (V#{plan.latest_belnet_version + 1})"), 
-                          create_new_version_plan_path(plan), 
-                          method: :post, 
-                          class: "btn btn-primary",
-                          data: { action: "click->confirm-modal#confirm" } %>
+            <div data-controller="confirm-modal">
+              <%= button_to _("Create Version (V#{plan.latest_belnet_version + 1})"),
+                            create_new_version_plan_path(plan),
+                            method: :post,
+                            class: "btn btn-primary",
+                            data: { action: "click->confirm-modal#confirm" } %>
+
+              <div class="modal fade"
+                  data-confirm-modal-target="modal"
+                  tabindex="-1"
+                  role="dialog">
+                <div class="modal-dialog modal-lg" role="document">
+                  <div class="modal-content">
+                    <div class="modal-body">
+                      <p><%= _('Reason for version') %> <strong><%= plan.latest_belnet_version + 1 %></strong>:</p>
+                      <p class="alert alert-primary"><%= _("Use versioning to mark important milestones in your DMP. Please add a brief description of the changes or the stage reached, to follow this DMP's history. Please avoid excessive versioning for optimal workspace and storage management.") %></p>
+                      <div class="form-control d-flex flex-column gap-2">
+
+                        <label for="version_reason" class="form-label fw-bold mb-0"><%= _('Version Description') %></label>
+                        <textarea id="version_reason"
+                                  class="form-control"
+                                  rows="5"
+                                  required
+                                  data-confirm-modal-target="input"
+                                  placeholder="<%= _('Provide a description... (10-500 characters)') %>"
+                                  minlength="10"
+                                  maxlength="500"></textarea>
+
+                        <p class="alert alert-primary mb-0 mt-2"><%= _("You can choose to change the stage for this new version, if not, it will remain the stage of your last version, this can be updated at anytime in the History tab.") %></p>
+
+                        <label for="version_stage" class="form-label fw-bold mb-0"><%= _('Plan Stage') %></label>
+                        <% stages = plan.org.current_valid_belnet_stages %>
+                        <select id="version_stage"
+                                class="form-select"
+                                data-confirm-modal-target="stage"
+                                required
+                                <%= 'disabled' if stages.empty? %>>
+
+                          <% if stages.empty? %>
+                            <option value="" disabled selected>
+                              <%= _("No stages available for your organization") %>
+                            </option>
+                          <% else %>
+                            <% last_version_stage = plan.plan_versions.any? ? plan.plan_versions.last.current_lifecycle_stage_name : nil %>
+                            <% preselected_stage_name = last_version_stage.presence || plan.current_lifecycle_stage_name %>
+                            <option value="" disabled <%= 'selected' if preselected_stage_name.blank? %>>
+                              <%= _("Select a Stage...") %>
+                            </option>
+
+                            <% stages.each do |stage_name| %>
+                              <option value="<%= stage_name %>" <%= 'selected' if preselected_stage_name == stage_name %>>
+                                <%= stage_name %>
+                              </option>
+                            <% end %>
+                          <% end %>
+
+                        </select>
+                        <div data-confirm-modal-target="errorMessage" class="text-danger d-none" style="margin-top: 5px;">
+                          <ul class="mb-0 ps-3">
+                            <li data-confirm-modal-target="reasonError" class="d-none">
+                              <%= _('Reason must be between 10 and 500 characters.') %>
+                            </li>
+                            <li data-confirm-modal-target="stageError" class="d-none">
+                              <%= _('Stage is required.') %>
+                            </li>
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="modal-footer justify-content-between">
+                      <p><%= _("Don't forget to save your changes before creating a version!") %></p>
+                      <div>
+                        <button type="button"
+                                class="btn btn-default"
+                                data-action="click->confirm-modal#close">
+                          <%= _('Cancel') %>
+                        </button>
+                        <button type="submit"
+                                class="btn btn-primary"
+                                data-action="confirm-modal#submitWithReason"
+                                <%= 'disabled' if stages.empty? %>>
+                          <%= _('Create Version') %>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           <% end %>
         </div>
       </div>
     </div>
   </div>
-  <% if plan.submittable_by?(current_user.id) %>
-    <div class="modal fade" 
-        data-confirm-modal-target="modal" 
-        tabindex="-1" 
-        role="dialog">
-      <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-          <div class="modal-body">
-            <p><%= _('Reason for version') %> <strong><%= plan.latest_belnet_version + 1 %></strong>:</p>
-            <p class="alert alert-primary"><%= _("Use versioning to mark important milestones in your DMP. Please add a brief description of the changes or the stage reached, to follow this DMP's history. Please avoid excessive versioning for optimal workspace and storage management.") %></p>
-            <div class="form-control d-flex flex-column gap-2">
-              
-              <label for="version_reason" class="form-label fw-bold mb-0"><%= _('Version Description') %></label>
-              <textarea id="version_reason"
-                        class="form-control" 
-                        rows="5" 
-                        required
-                        data-confirm-modal-target="input"
-                        placeholder="<%= _('Provide a description... (10-500 characters)') %>"
-                        minlength="10"
-                        maxlength="500"></textarea>
-              
-              <p class="alert alert-primary mb-0 mt-2"><%= _("You can choose to change the stage for this new version, if not, it will remain the stage of your last version, this can be updated at anytime in the History tab.") %></p>
-              
-              <label for="version_stage" class="form-label fw-bold mb-0"><%= _('Plan Stage') %></label>
-              <% stages = plan.org.current_valid_belnet_stages %>
-              <select id="version_stage"
-                      class="form-select" 
-                      data-confirm-modal-target="stage"
-                      required
-                      <%= 'disabled' if stages.empty? %>>
-                
-                <% if stages.empty? %>
-                  <option value="" disabled selected>
-                    <%= _("No stages available for your organization") %>
-                  </option>
-                <% else %>
-                  <% last_version_stage = plan.plan_versions.any? ? plan.plan_versions.last.current_lifecycle_stage_name : nil %>
-                  <% preselected_stage_name = last_version_stage.presence || plan.current_lifecycle_stage_name %>
-                  <option value="" disabled <%= 'selected' if preselected_stage_name.blank? %>>
-                    <%= _("Select a Stage...") %>
-                  </option>
 
-                  <% stages.each do |stage_name| %>
-                    <option value="<%= stage_name %>" <%= 'selected' if preselected_stage_name == stage_name %>>
-                      <%= stage_name %>
-                    </option>
-                  <% end %>
-                <% end %>
-                
-              </select>
-              <div data-confirm-modal-target="errorMessage" class="text-danger d-none" style="margin-top: 5px;">
-                <ul class="mb-0 ps-3">
-                  <li data-confirm-modal-target="reasonError" class="d-none">
-                    <%= _('Reason must be between 10 and 500 characters.') %>
-                  </li>
-                  <li data-confirm-modal-target="stageError" class="d-none">
-                    <%= _('Stage is required.') %>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
-          <div class="modal-footer justify-content-between">
-            <p><%= _("Don't forget to save your changes before creating a version!") %></p>
-            <div>
-              <button type="button" 
-                      class="btn btn-default" 
-                      data-action="click->confirm-modal#close">
-                <%= _('Cancel') %>
-              </button>
-              <button type="submit" 
-                      class="btn btn-primary" 
-                      data-action="confirm-modal#submitWithReason"
-                      <%= 'disabled' if stages.empty? %>>
-                <%= _('Create Version') %>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+  <% if plan.editable_by?(current_user.id) %>
+    <%= render partial: 'plans/change_stage_modal', locals: { plan: plan } %>
   <% end %>
 </div>

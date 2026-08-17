@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["modal", "input", "errorMessage", "stage", "reasonError", "stageError"]
+  static targets = ["modal", "input", "errorMessage", "stage", "reasonError", "stageError", "form"]
 
   confirm(event) {
     event.preventDefault()
@@ -61,8 +61,10 @@ export default class extends Controller {
       return
     }
 
-    const form = this.element.querySelector("form")
-    
+    const form = this.hasFormTarget
+      ? this.formTarget
+      : this.element.querySelector("form")
+
     const hiddenInput = document.createElement("input")
     hiddenInput.type = "hidden"
     hiddenInput.name = "belnet_reason"

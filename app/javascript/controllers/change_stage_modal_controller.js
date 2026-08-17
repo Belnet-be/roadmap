@@ -13,8 +13,10 @@ export default class extends Controller {
 
     this.formTarget.action = planPath
     this.stageSelectTarget.value = stageId || ""
+    const versionParam = event.currentTarget.dataset.stageModalVersionParam
+    // Hardcoded validation because models validations are not available here
     this.versionNumberTarget.textContent =
-      "Version " + event.currentTarget.dataset.stageModalVersionParam
+      versionParam === "0" ? "LIVE version" : "Version " + versionParam
     this.renderHistory(history)
     $(this.modalTarget).modal("show")
   }
