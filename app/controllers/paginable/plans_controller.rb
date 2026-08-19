@@ -4,15 +4,18 @@ module Paginable
   # Controller for paginating/sorting/searching the plans tables
   class PlansController < ApplicationController
     include Paginable
+    include PlanDashboardFilters
 
     # /paginable/plans/privately_visible/:page
     def privately_visible
       authorize Plan
 
+      filters = plan_dashboard_filter_params
+
       paginable_renderise(
         partial: 'privately_visible',
-        scope: Plan.includes(:roles).active(current_user),
-        query_params: { sort_field: 'plans.updated_at', sort_direction: :desc },
+        scope: apply_plan_dashboard_filters(Plan.includes(:roles).active(current_user), filters),
+        query_params: { sort_field: 'plans.updated_at', sort_direction: :desc }.merge(filters.compact),
         format: :json
       )
     end

@@ -21,12 +21,20 @@
 </div>
 <div class="row">
   <div class="col-md-12">
+    <%= render 'plans/dashboard_filters' %>
+  </div>
+</div>
+<div class="row">
+  <div class="col-md-12">
     <%= paginable_renderise(
       partial: '/paginable/plans/privately_visible',
       controller: 'paginable/plans',
       action: 'privately_visible',
       scope: @plans,
-      query_params: { sort_field: 'plans.updated_at', sort_direction: 'desc' }) %>
+      query_params: {
+        sort_field: 'plans.updated_at',
+        sort_direction: 'desc'
+      }.merge((@dashboard_filter_values || {}).compact)) %>
   </div>
 </div>
 <% if policy(Plan.new).new? %>

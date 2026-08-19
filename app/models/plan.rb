@@ -246,6 +246,25 @@ class Plan < ApplicationRecord
 
   scope :live_versions, -> { where(belnet_version: 0) }
 
+  scope :with_lifecycle_stage, lambda { |stage_name|
+    next all if stage_name.blank?
+
+    left_joins(:belnet_editable_plan_metadata, :belnet_version_metadata)
+      .where(
+        'belnet_editable_plan_metadata.lifecycle_stage = :stage ' \
+        'OR belnet_plan_version_metadata.lifecycle_stage = :stage',
+        stage: stage_name
+      )
+  }
+
+  scope :excluding_test_plans, -> { where.not(visibility: visibilities[:is_test]) }
+
+  scope :grouped_by_family, lambda {
+    order(Arel.sql('COALESCE(plans.belnet_family_id, plans.id) DESC'))
+      .order(Arel.sql('CASE WHEN plans.belnet_version = 0 THEN 0 ELSE 1 END ASC'))
+      .order(belnet_version: :desc)
+  }
+
   ##
   # Settings for the template
   has_settings :export, class_name: 'Settings::Template' do |s|

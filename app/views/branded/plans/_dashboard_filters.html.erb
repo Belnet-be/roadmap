@@ -1,0 +1,121 @@
+<div class="card card-body bg-light mb-3">
+  <h2 class="h5 mb-3">
+    <i class="fa fa-filter" aria-hidden="true"></i>
+    <%= _('Filters') %>
+  </h2>
+
+  <%= form_with url: plans_path, method: :get, local: true, class: 'row g-3' do |f| %>
+    <% values = @dashboard_filter_values || {} %>
+
+    <div class="col-md-2 m-1">
+      <label class="form-label fw-bold" for="filter-time-period"><%= _('Time period') %></label>
+      <select id="filter-time-period" class="form-select" disabled>
+        <option><%= _('Last 12 Months') %></option>
+      </select>
+    </div>
+
+    <div class="col-md-2 m-1">
+      <label class="form-label fw-bold" for="filter-period-step"><%= _('Period step') %></label>
+      <select id="filter-period-step" class="form-select" disabled>
+        <option><%= _('Month') %></option>
+      </select>
+    </div>
+
+    <div class="col-md-2 m-1">
+      <label class="form-label fw-bold" for="filter-template"><%= _('Template') %></label>
+      <select id="filter-template" class="form-select" disabled>
+        <option><%= _('All') %></option>
+      </select>
+    </div>
+
+    <div class="col-md-2 m-1">
+      <label class="form-label fw-bold" for="filter-stage"><%= _('Stage') %></label>
+      <select id="filter-stage" name="stage" class="form-select">
+        <option value=""><%= _('All') %></option>
+        <% (@dashboard_stage_options || []).each do |stage_name| %>
+          <option value="<%= stage_name %>" <%= 'selected' if values[:stage] == stage_name %>>
+            <%= stage_name %>
+          </option>
+        <% end %>
+      </select>
+    </div>
+
+    <div class="col-md-2 m-1">
+      <label class="form-label fw-bold" for="filter-validation-theme"><%= _('Validation theme') %></label>
+      <select id="filter-validation-theme" class="form-select" disabled>
+        <option><%= _('All') %></option>
+      </select>
+    </div>
+
+    <div class="col-md-2 m-1">
+      <label class="form-label fw-bold" for="filter-validation-status"><%= _('Validation status') %></label>
+      <select id="filter-validation-status" class="form-select" disabled>
+        <option><%= _('All') %></option>
+      </select>
+    </div>
+
+    <div class="col-md-2 m-1">
+      <label class="form-label fw-bold" for="filter-completion-rate"><%= _('Completion rate') %></label>
+      <select id="filter-completion-rate" class="form-select" disabled>
+        <option><%= _('Any') %></option>
+      </select>
+    </div>
+
+    <div class="col-md-2 m-1">
+      <label class="form-label fw-bold" for="filter-versions"><%= _('Number of Versions') %></label>
+      <select id="filter-versions" class="form-select" disabled>
+        <option><%= _('Any') %></option>
+      </select>
+    </div>
+
+    <div class="col-md-2 m-1">
+      <label class="form-label fw-bold" for="filter-role"><%= _('Role') %></label>
+      <select id="filter-role" class="form-select" disabled>
+        <option><%= _('Any') %></option>
+      </select>
+    </div>
+
+    <div class="col-md-2 m-1">
+      <label class="form-label fw-bold" for="filter-shared"><%= _('Shared') %></label>
+      <select id="filter-shared" class="form-select" disabled>
+        <option><%= _('Any') %></option>
+      </select>
+    </div>
+
+    <%
+      # local lambda to determine if a filter value is truthy, for checkboxes. This is used to
+      # avoid having to call the TRUTHY_FILTER_VALUES constant directly in the view, which
+      # would be a violation of the MVC pattern. --- IGNORE ---
+      truthy = ->(v) { PlanDashboardFilters::TRUTHY_FILTER_VALUES.include?(v.to_s.downcase) }
+    %>
+
+    <div class="col-md-2 m-1 d-flex align-items-end">
+      <div class="form-check">
+        <%= check_box_tag 'include_versions', '1',
+                          truthy.call(values[:include_versions]),
+                          class: 'form-check-input m-0',
+                          id: 'filter-include-versions' %>
+        <label class="form-check-label" for="filter-include-versions">
+          <%= _('include versions') %>
+        </label>
+      </div>
+    </div>
+
+    <div class="col-md-2 m-1 d-flex align-items-end">
+      <div class="form-check">
+        <%= check_box_tag 'exclude_test_plans', '1',
+                          truthy.call(values[:exclude_test_plans]),
+                          class: 'form-check-input m-0',
+                          id: 'filter-exclude-test' %>
+        <label class="form-check-label" for="filter-exclude-test">
+          <%= _('exclude test plans') %>
+        </label>
+      </div>
+    </div>
+
+    <div class="col-12 d-flex gap-2 mt-2">
+      <%= f.submit _('Apply filters'), class: 'btn btn-primary' %>
+      <%= link_to _('Clear'), plans_path, class: 'btn btn-secondary' %>
+    </div>
+  <% end %>
+</div>
