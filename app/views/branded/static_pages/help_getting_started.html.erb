@@ -1,0 +1,14 @@
+<% title _('Getting Started') %>
+<div class="row">
+  <div class="col-md-12">
+    <h1><%= _('Help') %></h1>
+  </div>
+</div>
+
+<% content_for :help_tab_body do %>
+  <div class="changelog-container">
+    <%= render_markdown('belnet/help/getting_started.md') %>
+  </div>
+<% end %>
+
+<%= render partial: 'help_navigation' %>
