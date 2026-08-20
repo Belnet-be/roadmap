@@ -511,12 +511,11 @@ class PlansController < ApplicationController
 
     old_stage_description = plan.current_lifecycle_stage_name.presence || _('None')
     if plan.update_stage(params[:belnet_stage], current_user)
-      live_plan = Plan.find_by(belnet_family_id: plan.belnet_family_id, belnet_version: 0) || plan
-      redirect_to history_plan_path(live_plan),
+      redirect_to history_plan_path(plan),
                   notice: "(Version #{plan.belnet_version}): Stage updated from #{old_stage_description} to #{plan.current_lifecycle_stage_name}."
     else
-      live_plan = Plan.find_by(belnet_family_id: plan.belnet_family_id, belnet_version: 0) || plan
-      redirect_to history_plan_path(live_plan), alert: 'Failed to update stage.'
+      redirect_to history_plan_path(plan),
+                  alert: 'Failed to update stage.'
     end
   end
 
