@@ -50,8 +50,8 @@
           </li>
         <% end %>
         <!-- help page -->
-        <li class="nav-item <%= ' active' if active_page?(help_path, true) %>">
-          <%= link_to _('Help'), help_path, class: 'nav-link' %>
+        <li class="nav-item <%= ' active' if active_page?(help_overview_path, true) %>">
+          <%= link_to _('Help'), help_overview_path, class: 'nav-link' %>
         </li>
         <%= render_belnet_environment_banner %>
       </ul>

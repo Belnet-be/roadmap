@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["modal", "form", "stageSelect", "versionNumber", "historyList", "historyEmpty"]
+  static targets = ["modal", "form", "stageSelect", "versionNumber", "historyList", "historyEmpty", "versionDescription"]
 
   open(event) {
     event.preventDefault()
@@ -17,6 +17,9 @@ export default class extends Controller {
     // Hardcoded validation because models validations are not available here
     this.versionNumberTarget.textContent =
       versionParam === "0" ? "LIVE version" : "Version " + versionParam
+    this.versionDescriptionTarget.textContent = versionParam === "0"
+      ? "Select the new lifecycle stage for the LIVE version of the DMP."
+      : "Select the new stage for this version of the DMP."
     this.renderHistory(history)
     $(this.modalTarget).modal("show")
   }

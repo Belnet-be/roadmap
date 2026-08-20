@@ -45,6 +45,24 @@ class StaticPagesController < ApplicationController
   def api_documentation_belnet_v1
   end
 
+  def help_overview
+  end
+
+  def help_getting_started
+  end
+
+  def help_concepts
+  end
+
+  def help_user_guide
+  end
+
+  def help_admin_guide
+  end
+
+  def help_reference
+  end
+
   def belnet_changelog
   end
 

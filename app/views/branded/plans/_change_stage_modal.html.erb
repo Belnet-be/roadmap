@@ -8,9 +8,7 @@
       <%= form_with method: :put, data: { change_stage_modal_target: "form" } do |f| %>
         <div class="modal-body">
           <p data-change-stage-modal-target="versionNumber"></p>
-          <p class="alert alert-primary mb-3">
-            <%= _("Select the new stage for this version of the DMP.") %>
-          </p>
+          <p class="alert alert-primary mb-3" data-change-stage-modal-target="versionDescription"></p>
           <div class="form-control d-flex flex-column gap-2">
             <% stages = plan.org.current_valid_belnet_stages %>
             <select class="form-select"

@@ -1,0 +1,61 @@
+<ul class="nav nav-tabs" role="tablist">
+  <li role="presentation"
+      class="nav-item <%= active_page?(help_overview_path) ? 'active' : '' %>">
+    <%= link_to _('Overview'),
+                help_overview_path,
+                role: 'tab',
+                aria: { controls: 'content' },
+                class: 'nav-link' %>
+  </li>
+  <li role="presentation"
+      class="nav-item <%= active_page?(help_getting_started_path) ? 'active' : '' %>">
+    <%= link_to _('Getting started'),
+                help_getting_started_path,
+                role: 'tab',
+                aria: { controls: 'content' },
+                class: 'nav-link' %>
+  </li>
+  <li role="presentation"
+      class="nav-item <%= active_page?(help_concepts_path) ? 'active' : '' %>">
+    <%= link_to _('Concepts'),
+                help_concepts_path,
+                role: 'tab',
+                aria: { controls: 'content' },
+                class: 'nav-link' %>
+  </li>
+  <li role="presentation"
+      class="nav-item <%= active_page?(help_user_guide_path) ? 'active' : '' %>">
+    <%= link_to _('User Guide'),
+                help_user_guide_path,
+                role: 'tab',
+                aria: { controls: 'content' },
+                class: 'nav-link' %>
+  </li>
+  <li role="presentation"
+      class="nav-item <%= active_page?(help_admin_guide_path) ? 'active' : '' %>">
+    <%= link_to _('Admin Guide'),
+                help_admin_guide_path,
+                role: 'tab',
+                aria: { controls: 'content' },
+                class: 'nav-link' %>
+  </li>
+  <li role="presentation"
+      class="nav-item <%= active_page?(help_reference_path) ? 'active' : '' %>">
+    <%= link_to _('Reference'),
+                help_reference_path,
+                role: 'tab',
+                aria: { controls: 'content' },
+                class: 'nav-link' %>
+  </li>
+</ul>
+<div class="tab-content">
+  <div id="content" role="tabpanel" class="tab-pane active">
+    <div class="card card-default">
+      <div class="card-body">
+        <%= yield :help_tab_body %>
+      </div>
+    </div>
+  </div>
+</div>
+
+
