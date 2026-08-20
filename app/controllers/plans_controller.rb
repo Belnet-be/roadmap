@@ -508,11 +508,11 @@ class PlansController < ApplicationController
   def update_stage
     plan = Plan.find(params[:id])
     authorize plan
-
+    plan_version = plan.belnet_version == 0 ? 'Editable version' : "Version #{plan.belnet_version}"
     old_stage_description = plan.current_lifecycle_stage_name.presence || _('None')
     if plan.update_stage(params[:belnet_stage], current_user)
       redirect_to history_plan_path(plan),
-                  notice: "(Version #{plan.belnet_version}): Stage updated from #{old_stage_description} to #{plan.current_lifecycle_stage_name}."
+                  notice: "(#{plan_version}): Stage updated from #{old_stage_description} to #{plan.current_lifecycle_stage_name}."
     else
       redirect_to history_plan_path(plan),
                   alert: 'Failed to update stage.'
