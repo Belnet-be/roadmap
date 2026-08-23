@@ -1,0 +1,44 @@
+<div id="swagger-ui"></div>
+<script src="https://unpkg.com/swagger-ui-dist@5.32.8/swagger-ui-bundle.js" crossorigin></script>
+<script>
+  const HideInfoUrlPartsPlugin = () => {
+    return {
+      wrapComponents: {
+        InfoUrl: () => () => null,
+        InfoBasePath: () => () => null, // this hides the `Base Url` part too, if you want that
+      }
+    };
+  };
+
+  const DisableAuthorizePlugin = function () {
+    return {
+      wrapComponents: {
+        authorizeBtn: () => () => null
+      }
+    };
+  };
+
+  const DisableTryItOutPlugin = function () {
+    return {
+      statePlugins: {
+        spec: {
+          wrapSelectors: {
+            allowTryItOutFor: () => () => false
+          }
+        }
+      }
+    }
+  }
+
+  window.onload = () => {
+    window.ui = SwaggerUIBundle({
+      url: 'files/openapi/belnet-api-v1.yaml',
+      dom_id: '#swagger-ui',
+      plugins: [
+        HideInfoUrlPartsPlugin,
+        DisableAuthorizePlugin,
+        DisableTryItOutPlugin
+      ]
+    });
+  };
+</script>

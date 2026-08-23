@@ -1,0 +1,147 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/RDA-DMP-Common/RDA-DMP-Common-Standard/tree/master/examples/JSON/JSON-schema/1.0",
+  "title": "RDA DMP Common Standard Schema",
+  "description": "JSON Schema for the RDA DMP Common Standard v1.0, updated to include the DMPRoadmap and Belnet extensions.",
+  "type": "object",
+  "properties": {
+    "lifecycle_stages": {
+      "$id": "#/properties/lifecycle_stages",
+      "type": "object",
+      "title": "The Belnet Extension Lifecycle Stages Schema",
+      "description": "The Belnet extension to support different stages of a DMP.",
+      "properties": {
+        "modified": {
+          "$id": "#/properties/lifecycle_stages/properties/modified",
+          "type": "string",
+          "format": "date-time",
+          "title": "The Belnet Extension Lifecycle Stages Modified Schema",
+          "description": "The date and time when the lifecycle stage lists were last modified.",
+          "examples": [
+            "2020-03-14 11:13"
+          ]
+        },
+        "organization": {
+          "$id": "#/properties/lifecycle_stages/properties/organization",
+          "type": "object",
+          "title": "The Belnet Extension Organization Schema",
+          "description": "The organization(s) for which the lifecycle stage lists are defined.",
+          "properties": {
+            "org_id": {
+              "$id": "#/properties/lifecycle_stages/properties/organization/properties/org_id",
+              "type": "number",
+              "title": "The Belnet Extension Organization Identifier Schema",
+              "description": "The unique identifier of the organization.",
+              "examples": [
+                62
+              ]
+            },
+            "org_name": {
+              "$id": "#/properties/lifecycle_stages/properties/organization/properties/org_name",
+              "type": "string",
+              "title": "The Belnet Extension Organization Name Schema",
+              "description": "The full name of the organization.",
+              "examples": [
+                "Université de Liège"
+              ]
+            },
+            "org_abbreviation": {
+              "$id": "#/properties/lifecycle_stages/properties/organization/properties/org_abbreviation",
+              "type": "string",
+              "title": "The Belnet Extension Organization Abbreviation Schema",
+              "description": "The abbreviation of the organization.",
+              "examples": [
+                "ULiege"
+              ]
+            }
+          },
+          "required": [
+            "org_id",
+            "org_name",
+            "org_abbreviation"
+          ]
+        },
+        "current_list": {
+          "$id": "#/properties/lifecycle_stages/properties/current_list",
+          "type": "object",
+          "title": "The Belnet Extension Lifecycle Stages Current List Schema",
+          "description": "The current allowed list of DMP lifecycle stages for this organization, ordered from start to finish.",
+          "properties": {
+            "enum": {
+              "$id": "#/properties/lifecycle_stages/properties/current_list/properties/enum",
+              "type": "array",
+              "title": "The Belnet Extension Lifecycle Stages Current List Enum Schema",
+              "description": "With `enum` indicate this is a fixed list of values.",
+              "items": {
+                "$id": "#/properties/lifecycle_stages/properties/current_list/properties/enum/items",
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 28,
+                "title": "The Belnet Extension Lifecycle Stages Current List Enum Items Schema",
+                "description": "The items in this list. A space is allowed, but no other special characters."
+              },
+              "examples": [
+                [
+                  "Initial Draft",
+                  "Working Draft",
+                  "Internal Review",
+                  "External Review",
+                  "Finalized",
+                  "Archived"
+                ]
+              ]
+            }
+          },
+          "required": [
+            "enum"
+          ]
+        },
+        "full_list": {
+          "$id": "#/properties/lifecycle_stages/properties/full_list",
+          "type": "object",
+          "title": "The Belnet Extension Lifecycle Stages Full List Schema",
+          "description": "The complete list of DMP lifecycle stages for this organization, always including the default stages and the deprecated stages, ordered from start to finish.",
+          "properties": {
+            "enum": {
+              "$id": "#/properties/lifecycle_stages/properties/full_list/properties/enum",
+              "type": "array",
+              "title": "The Belnet Extension Lifecycle Stages Full List Enum Schema",
+              "description": "With `enum` indicate this is a fixed list of values.",
+              "items": {
+                "$id": "#/properties/lifecycle_stages/properties/full_list/properties/enum/items",
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 28,
+                "title": "The Belnet Extension Lifecycle Stages Full List Enum Items Schema",
+                "description": "The items in this list. A space is allowed, but no other special characters."
+              },
+              "examples": [
+                [
+                  "Initial Draft",
+                  "Working Draft",
+                  "Intermediate",
+                  "Internal Review",
+                  "External Review",
+                  "Finalized",
+                  "Archived"
+                ]
+              ]
+            }
+          },
+          "required": [
+            "enum"
+          ]
+        }
+      },
+      "required": [
+        "modified",
+        "organization",
+        "current_list",
+        "full_list"
+      ]
+    }
+  },
+  "required": [
+    "lifecycle_stages"
+  ]
+}
