@@ -1,11 +1,4 @@
-## DMPonline.be
-{:.no_toc}
-
-* TOC
-{:toc}
-
-## WIP
-Note: This guide is still undergoing changes, also in green categories (see source document).
+> **Note**: This guide is still undergoing changes, also in green categories (see source document).
 
 ## Introduction
 DMPonline.be is an online platform powered by Belnet and based on [DCC’s DMPonline](https://dmponline.dcc.ac.uk/), that helps researchers to create, manage, collaborate on, review, and export Data Management Plans (DMPs). It allows institutions to monitor DMP activities, define custom templates, and provide specific guidance on how to fill out a DMP. 
@@ -21,4 +14,6 @@ The rest of this guide is divided in:
 * **Concepts**: Learn the parts of the DMPonline.be system to obtain a deeper understanding of how it works.
 * **User Guide**: More in depth guidance on how to use DMPonline.be.
 * **Admin Guide**: Guidance on how to administer DMPonline.be for your organisation.
-* **Reference**: The API reference and other technical details on DMPonline.be.
+* **API Reference**: Reference information on the different DMPonline.be APIs.
+* **Technology stack**: Technical details on the DMPonline.be application.
+* **What's New**: What is changed with latest deployment.
