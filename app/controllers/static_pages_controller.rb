@@ -60,10 +60,7 @@ class StaticPagesController < ApplicationController
   def help_admin_guide
   end
 
-  def help_reference
-  end
-
-  def help_reference_tech_stack
+  def help_tech_stack
     @app_name = ApplicationService.application_name
     @provider = Rails.configuration.x.organisation.name
     @ruby_version = RUBY_VERSION

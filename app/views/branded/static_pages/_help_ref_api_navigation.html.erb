@@ -1,10 +1,10 @@
 <ul class="nav nav-tabs" role="tablist">
   <li role="presentation"
       class="nav-item <%= active_page?(help_reference_api_path, exact_match: true) ? 'active' : '' %>">
-    <%= link_to _('API Overview'),
+    <%= link_to _('Overview'),
                 help_reference_api_path,
                 role: 'tab',
-                aria: { controls: 'sub2-content' },
+                aria: { controls: 'sub-content' },
                 class: 'nav-link' %>
   </li>
   <li role="presentation"
@@ -12,7 +12,7 @@
     <%= link_to _('API v0'),
                 help_reference_api_v0_path,
                 role: 'tab',
-                aria: { controls: 'sub2-content' },
+                aria: { controls: 'sub-content' },
                 class: 'nav-link' %>
   </li>
   <li role="presentation"
@@ -20,7 +20,7 @@
     <%= link_to _('API v1'),
                 help_reference_api_v1_path,
                 role: 'tab',
-                aria: { controls: 'sub2-content' },
+                aria: { controls: 'sub-content' },
                 class: 'nav-link' %>
   </li>
   <li role="presentation"
@@ -28,12 +28,12 @@
     <%= link_to _('API Belnet v1'),
                 help_reference_api_belnet_v1_path,
                 role: 'tab',
-                aria: { controls: 'sub2-content' },
+                aria: { controls: 'sub-content' },
                 class: 'nav-link' %>
   </li>
 </ul>
 <div class="tab-content">
-  <div id="sub2-content" role="tabpanel" class="tab-pane active">
+  <div id="sub-content" role="tabpanel" class="tab-pane active">
     <div class="card card-default">
       <div class="card-body">
         <%= yield :help_ref_api_tab_body %>
