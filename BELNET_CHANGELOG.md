@@ -1,5 +1,5 @@
-# Changelog Belnet version
-> **Note:** From v5.0.0 Belnet will follow its own versioning, but mention the used roadmap version
+> **Note 1:** From DMPonline.be v5.0.0 onwards Belnet will follow its own versioning, but we mention the used DMProadmap version.  
+> **Note 2:** Needs to be reviewed to only contain changes compared with current production version, not all the project details from sprint to sprint.
 
 <div class="card mb-4" markdown="1">
 

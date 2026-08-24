@@ -1,0 +1,142 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/RDA-DMP-Common/RDA-DMP-Common-Standard/tree/master/examples/JSON/JSON-schema/1.0",
+  "title": "RDA DMP Common Standard Schema",
+  "description": "JSON Schema for the RDA DMP Common Standard v1.0, updated to include the DMPRoadmap and Belnet extensions.",
+  "type": "object",
+  "properties": {
+    "validation_statuses": {
+      "$id": "#/properties/validation_statuses",
+      "type": "object",
+      "title": "The Belnet Extension Validation Status Schema",
+      "description": "The Belnet extension to support different validation statuses.",
+      "properties": {
+        "modified": {
+          "$id": "#/properties/validation_statuses/properties/modified",
+          "type": "string",
+          "format": "date-time",
+          "title": "The Belnet Extension Validation Statuses Modified Schema",
+          "description": "The date and time when the validation status lists were last modified.",
+          "examples": [
+            "2020-03-14 11:13"
+          ]
+        },
+        "organization": {
+          "$id": "#/properties/validation_statuses/properties/organization",
+          "type": "object",
+          "title": "The Belnet Extension Organization Schema",
+          "description": "The organization(s) for which the validation status lists are defined.",
+          "properties": {
+            "org_id": {
+              "$id": "#/properties/validation_statuses/properties/organization/properties/org_id",
+              "type": "number",
+              "title": "The Belnet Extension Organization Identifier Schema",
+              "description": "The unique identifier of the organization.",
+              "examples": [
+                62
+              ]
+            },
+            "org_name": {
+              "$id": "#/properties/validation_statuses/properties/organization/properties/org_name",
+              "type": "string",
+              "title": "The Belnet Extension Organization Name Schema",
+              "description": "The full name of the organization.",
+              "examples": [
+                "Université de Liège"
+              ]
+            },
+            "org_abbreviation": {
+              "$id": "#/properties/validation_statuses/properties/organization/properties/org_abbreviation",
+              "type": "string",
+              "title": "The Belnet Extension Organization Abbreviation Schema",
+              "description": "The abbreviation of the organization.",
+              "examples": [
+                "ULiege"
+              ]
+            }
+          },
+          "required": [
+            "org_id",
+            "org_name",
+            "org_abbreviation"
+          ]
+        },
+        "current_list": {
+          "$id": "#/properties/validation_statuses/properties/current_list",
+          "type": "object",
+          "title": "The Belnet Extension Validation Statuses Current List Schema",
+          "description": "The current allowed list of DMP validation statuses for this organization, ordered from start to finish.",
+          "properties": {
+            "enum": {
+              "$id": "#/properties/validation_statuses/properties/current_list/properties/enum",
+              "type": "array",
+              "title": "The Belnet Extension Validation Statuses Current List Enum Schema",
+              "description": "With `enum` indicate this is a fixed list of values.",
+              "items": {
+                "$id": "#/properties/validation_statuses/properties/current_list/properties/enum/items",
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 28,
+                "title": "The Belnet Extension Validation Statuses Current List Enum Items Schema",
+                "description": "The items in this list. A space is allowed, but no other special characters."
+              },
+              "examples": [
+                [
+                  "Pending Review",
+                  "Approved",
+                  "Denied",
+                  "Rework Needed"
+                ]
+              ]
+            }
+          },
+          "required": [
+            "enum"
+          ]
+        },
+        "full_list": {
+          "$id": "#/properties/validation_statuses/properties/full_list",
+          "type": "object",
+          "title": "The Belnet Extension Validation Statuses Full List Schema",
+          "description": "The complete list of DMP validation statuses for this organization, always including the default statuses and the deprecated statuses, ordered from start to finish.",
+          "properties": {
+            "enum": {
+              "$id": "#/properties/validation_statuses/properties/full_list/properties/enum",
+              "type": "array",
+              "title": "The Belnet Extension Validation Statuses Full List Enum Schema",
+              "description": "With `enum` indicate this is a fixed list of values.",
+              "items": {
+                "$id": "#/properties/validation_statuses/properties/full_list/properties/enum/items",
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 28,
+                "title": "The Belnet Extension Validation Statuses Full List Enum Items Schema",
+                "description": "The items in this list. A space is allowed, but no other special characters."
+              },
+              "examples": [
+                [
+                  "Pending Review",
+                  "Approved",
+                  "Denied",
+                  "Rework Needed"
+                ]
+              ]
+            }
+          },
+          "required": [
+            "enum"
+          ]
+        }
+      },
+      "required": [
+        "modified",
+        "organization",
+        "current_list",
+        "full_list"
+      ]
+    }
+  },
+  "required": [
+    "validation_statuses"
+  ]
+}

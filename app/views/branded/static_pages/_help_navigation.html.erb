@@ -40,9 +40,25 @@
                 class: 'nav-link' %>
   </li>
   <li role="presentation"
-      class="nav-item <%= active_page?(help_reference_path) ? 'active' : '' %>">
-    <%= link_to _('Reference'),
-                help_reference_path,
+      class="nav-item <%= active_page?(help_reference_api_path) ? 'active' : '' %>">
+    <%= link_to _('API Reference'),
+                help_reference_api_path,
+                role: 'tab',
+                aria: { controls: 'content' },
+                class: 'nav-link' %>
+  </li>
+  <li role="presentation"
+      class="nav-item <%= active_page?(help_tech_stack_path) ? 'active' : '' %>">
+    <%= link_to _('Technology stack'),
+                help_tech_stack_path,
+                role: 'tab',
+                aria: { controls: 'content' },
+                class: 'nav-link' %>
+  </li>
+  <li role="presentation"
+      class="nav-item <%= active_page?(help_whats_new_path) ? 'active' : '' %>">
+    <%= link_to _('What\'s New'),
+                help_whats_new_path,
                 role: 'tab',
                 aria: { controls: 'content' },
                 class: 'nav-link' %>
@@ -53,9 +69,5 @@
     <div class="card card-default">
       <div class="card-body">
         <%= yield :help_tab_body %>
-      </div>
-    </div>
-  </div>
-</div>
 
 

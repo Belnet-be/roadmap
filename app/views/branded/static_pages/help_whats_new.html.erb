@@ -1,13 +1,14 @@
-<% title _('User Guide') %>
+<% title _('What\'s New') %>
 <div class="row">
   <div class="col-md-12">
     <h1><%= _('Help') %></h1>
   </div>
 </div>
 
+
 <% content_for :help_tab_body do %>
   <div class="changelog-container">
-    <%= render_markdown('belnet/help/user_guide.md') %>
+    <%= render_markdown('BELNET_CHANGELOG.md') %>
   </div>
 <% end %>
 

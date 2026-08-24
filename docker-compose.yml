@@ -8,6 +8,7 @@ services:
     volumes:
       - .:/opt/roadmap
     environment:
+      - TZ=Europe/Brussels
       - DB_ADAPTER=${DB_ADAPTER:-mysql2}
       - DB_NAME=${DB_NAME:?DB_NAME must be set}
       - DB_USERNAME=${DB_USERNAME:?DB_USERNAME must be set}
@@ -42,6 +43,7 @@ services:
     image: mysql
     container_name: mysql
     environment:
+      TZ: Europe/Brussels
       MYSQL_ROOT_PASSWORD: root
       MYSQL_HOST: "0.0.0.0"
       MYSQL_DATABASE: roadmap_development

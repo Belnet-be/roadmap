@@ -60,7 +60,38 @@ class StaticPagesController < ApplicationController
   def help_admin_guide
   end
 
-  def help_reference
+  def help_tech_stack
+    @app_name = ApplicationService.application_name
+    @provider = Rails.configuration.x.organisation.name
+    @ruby_version = RUBY_VERSION
+    @rails_version = Rails.version
+    @app_version = ENV.fetch('BELNET_DMPONLINE_VERSION', 'Unknown')
+    @build_date = "#{BOOTED_AT.strftime('%Y-%m-%d %H:%M:%S %Z')} (#{time_ago_in_words(BOOTED_AT)} ago)"
+    @app_based_on = {
+      'name' => 'DMPRoadmap v5.0.2',
+      'url' => 'https://github.com/DMPRoadmap/roadmap/releases/tag/v5.0.2'
+    }
+    # We get the list of js dependencies from package.json
+    @js_dependencies = parse_package_json
+    # We get the list of ruby gems straight from bundler
+    @gems = Bundler.load.specs.map do |spec|
+      { name: spec.name, version: spec.version.to_s }
+    end.sort_by { |gem| gem[:name].downcase }
+  end
+
+  def help_reference_api
+  end
+
+  def help_reference_api_v0
+  end
+
+  def help_reference_api_v1
+  end
+
+  def help_reference_api_belnet_v1
+  end
+
+  def help_whats_new
   end
 
   def belnet_changelog

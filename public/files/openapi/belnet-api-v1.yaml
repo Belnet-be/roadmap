@@ -1,0 +1,2019 @@
+openapi: 3.1.0
+info:
+  title: API Belnet v1
+  version: 1.0.0-alpha+spr0019.1
+  description: |-
+    The Belnet extension of the standard APIs for the DMPonline application.
+
+    ## Goal and scope
+
+    ## Details
+    * All list endpoints support pagination, with a default of 100 items per page.
+
+    ## Open points
+    * [ ] Write out
+      * GetVersionedPlanResponse and GetEditablePlanResponse
+      * RegularCreatePlanLifecycleStageResponse
+    * [x] Check fields required or not, and allowed values for all request and response schemas
+    * [ ] Error messages
+    * [x] Update schemas for config payloads
+    * [x] Change `dmp_stages` to `lifecycle_stages` in config responses to make it consistent with other endpoints
+    * [x] Change `validation` to `dmp_validation` in validation responses to make it consistent with other endpoints
+    * [x] Correct the `lifecycle-stage` field to `lifecycle_stage` in all examples and responses
+
+servers:
+  - description: Internal TEST environment
+    url: https://dmponline-test-1.tl.belnet.be
+tags:
+  - name: Plans
+    description: Retrieving a Data Management Plan (DMP), but now extended with metadata for either the _editable_ DMP or an _immutable_ DMP version (read-only snapshot).
+  - name: Versions of plans
+    description: Operations for creating and retrieving versions of Data Management Plans (DMPs).
+  - name: Lifecycle stage of a plan
+    description: Operations for creating and retrieving the lifecycle stage of a Data Management Plan (DMP).
+  - name: Validations of plans
+    description: Operations for creating and retrieving validation requests for Data Management Plans (DMPs).
+  - name: Configurations
+    description: Operations for retrieving configuration objects to support governance of Data Management Plans (DMPs). They are centrally managed and can't be modified via this API.
+paths:
+  /api/belnet-v1/plans/{plan_id}:
+    get:
+      description: |
+        Retrieves a Data Management Plan (DMP), but now the `plan_id` parameter refers to either the default _editable_ DMP or an _immutable_ DMP version of it.<br>
+        To make the distinction read the `dmp/extension/belnet/dmp_extension_type` value: it is either `editable` or `version`.
+        * `dmp/dmp_id` refers still to the `plan_id` of the editable DMP.
+        * `dmp/extension/belnet/dmp_version/dmp_id` refers to the `plan_id` of the immutable DMP version.
+
+        Extra metadata:
+        * Editable DMP:
+          * `dmp/extension/belnet/dmp_editable` tracks currently only the DMP `lifecycle_stage`.
+          * `dmp/extension/belnet/dmp_validations` tracks ALL validation requests for this DMP.
+        * Immutable DMP version:
+          * `dmp/extension/belnet/dmp_version` tracks DMP version information and the DMP `lifecycle_stage` at that moment.
+          * `dmp/extension/belnet/dmp_validations` tracks ONLY the validation requests for this DMP version.
+
+      operationId: get_plan_versions
+      parameters:
+        - $ref: "#/components/parameters/AcceptHeader"
+        - $ref: "#/components/parameters/AuthorizationHeader"
+        - $ref: "#/components/parameters/VersionedPlanIdParam"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetPlanResponse"
+              # examples:
+              #   versioned:
+              #     $ref: "#/components/examples/GetVersionedPlanResponse"
+              #   editable:
+              #     $ref: "#/components/examples/GetEditablePlanResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorUnauthorizedResponse"
+              # examples:
+              #   Error1:
+              #     $ref: "#/components/examples/Error1"
+          description: Bad Request
+      tags:
+        - Plans
+  /api/belnet-v1/plans/{plan_id}/versions:
+    post:
+      description: |
+        Creates a _immutable_ DMP version (read-only snapshot) of the current _editable_ DMP.
+
+        A `reason` (motivation) for the DMP version is required between 10 and 500 characters.
+
+        A `lifecycle_stage` is only required when you want to change the DMP lifecycle stage with this version of the DMP.<br>
+        For allowed values check the `current_list` via the `GET /api/belnet-v1/configurations/lifecycle-stages` endpoint.
+      operationId: create_plan_version
+      parameters:
+        - $ref: "#/components/parameters/AcceptHeader"
+        - $ref: "#/components/parameters/AuthorizationHeader"
+        - $ref: "#/components/parameters/PlanIdParam"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePlanVersionRequest"
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreatePlanVersionResponse"
+              examples:
+                regular:
+                  $ref: "#/components/examples/RegularCreatePlanVersionResponse"
+          description: Created
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorUnauthorizedResponse"
+              # examples:
+              #   Error1:
+              #     $ref: "#/components/examples/Error1"
+              #   Error2:
+              #     $ref: "#/components/examples/Error2"
+          description: Bad Request
+      tags:
+        - Versions of plans
+    get:
+      description: |
+        Retrieves all versions of a specific Data Management Plan (DMP).
+        You could use `dmp_version/dmp_id` to lookup the full DMP.
+
+        NOTE: It will not list the _editable_ DMP, which is not considered a version of the DMP.
+      operationId: get_plan_versions
+      parameters:
+        - $ref: "#/components/parameters/AcceptHeader"
+        - $ref: "#/components/parameters/AuthorizationHeader"
+        - $ref: "#/components/parameters/PlanIdParam"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetPlanVersionsResponse"
+              examples:
+                regular:
+                  $ref: "#/components/examples/RegularGetPlanVersionsResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorUnauthorizedResponse"
+              # examples:
+              #   Error1:
+              #     $ref: "#/components/examples/Error1"
+          description: Bad Request
+      tags:
+        - Versions of plans
+  /api/belnet-v1/plans/{plan_id}/versions/{version_number}:
+    get:
+      description: |
+        Retrieves a specific version of a Data Management Plan (DMP).
+        You could use `dmp_version/dmp_id` to lookup the full DMP.
+      operationId: get_plan_version
+      parameters:
+        - $ref: "#/components/parameters/AcceptHeader"
+        - $ref: "#/components/parameters/AuthorizationHeader"
+        - $ref: "#/components/parameters/PlanIdParam"
+        - $ref: "#/components/parameters/VersionNumberParam"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetPlanVersionResponse"
+              examples:
+                regular:
+                  $ref: "#/components/examples/RegularGetPlanVersionResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorUnauthorizedResponse"
+              # examples:
+              #   Error1:
+              #     $ref: "#/components/examples/Error1"
+          description: Bad Request
+      tags:
+        - Versions of plans
+    put:
+      description: |
+        Update a specific version of a Data Management Plan (DMP).
+
+        Either the `reason` or the `lifecycle_stage` must be provided, but at least one of them is required.<br>
+        For allowed values for the `lifecycle_stage` parameter check the `current_list` via the `GET /api/belnet-v1/configurations/lifecycle-stages` endpoint.
+
+        You could use `dmp_version/dmp_id` to lookup the full DMP.
+      operationId: put_plan_version
+      parameters:
+        - $ref: "#/components/parameters/AcceptHeader"
+        - $ref: "#/components/parameters/AuthorizationHeader"
+        - $ref: "#/components/parameters/PlanIdParam"
+        - $ref: "#/components/parameters/UpdatedVersionNumberParam"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdatePlanVersionRequest"
+        required: true
+      responses:
+        "202":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UpdatePlanVersionResponse"
+              examples:
+                regular:
+                  $ref: "#/components/examples/RegularUpdatePlanVersionResponse"
+          description: Accepted
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorUnauthorizedResponse"
+              # examples:
+              #   Error1:
+              #     $ref: "#/components/examples/Error1"
+          description: Bad Request
+      tags:
+        - Versions of plans
+  /api/belnet-v1/plans/{plan_id}/lifecycle-stage:
+    post:
+      description: |
+        Add a `lifecycle_stage` to an _editable_ DMP, the minimum governance level you can add.<br>
+        For allowed values check the `current_list` via the `GET /api/belnet-v1/configurations/lifecycle-stages` endpoint.
+        * An option to manage older DMPs with minimum effort.
+
+        Note 1: No further governance at this moment.
+        API user is responsible to keep the `lifecycle_stage` on _editable_ DMP
+        consistent with the `lifecycle_stage` on DMP _versions_.
+
+        Note 2: This entrypoint is currently only for _editable_ DMP (MVP).
+        We could support it for DMP versions, using `plan_id` for a version, at a later stage.
+
+      operationId: create_plan_stage
+      parameters:
+        - $ref: "#/components/parameters/AcceptHeader"
+        - $ref: "#/components/parameters/AuthorizationHeader"
+        - $ref: "#/components/parameters/PlanIdParam"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePlanLifecycleStageRequest"
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreatePlanLifecycleStageResponse"
+              # examples:
+              #   regular:
+              #     $ref: "#/components/examples/RegularCreatePlanLifecycleStageResponse"
+          description: Created
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorUnauthorizedResponse"
+              # examples:
+              #   Error1:
+              #     $ref: "#/components/examples/Error1"
+              #   Error2:
+              #     $ref: "#/components/examples/Error2"
+          description: Bad Request
+      tags:
+        - Lifecycle stage of a plan
+    get:
+      description: |
+        Retrieves the lifecycle stage of the _editable_ DMP.
+      operationId: get_plan_stage
+      parameters:
+        - $ref: "#/components/parameters/AcceptHeader"
+        - $ref: "#/components/parameters/AuthorizationHeader"
+        - $ref: "#/components/parameters/PlanIdParam"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetPlanLifecycleStageResponse"
+              # examples:
+              #   regular:
+              #     $ref: "#/components/examples/RegularGetPlanLifecycleStageResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorUnauthorizedResponse"
+              # examples:
+              #   Error1:
+              #     $ref: "#/components/examples/Error1"
+          description: Bad Request
+      tags:
+        - Lifecycle stage of a plan
+    put:
+      description: |
+        Updates the `lifecycle_stage` of the _editable_ DMP.<br>
+        For allowed values check the `current_list` via the `GET /api/belnet-v1/configurations/lifecycle-stages` endpoint.
+      operationId: update_plan_stage
+      parameters:
+        - $ref: "#/components/parameters/AcceptHeader"
+        - $ref: "#/components/parameters/AuthorizationHeader"
+        - $ref: "#/components/parameters/PlanIdParam"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdatePlanLifecycleStageRequest"
+        required: true
+      responses:
+        "202":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UpdatePlanLifecycleStageResponse"
+              # examples:
+              #   regular:
+              #     $ref: "#/components/examples/RegularUpdatePlanLifecycleStageResponse"
+          description: Accepted
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorUnauthorizedResponse"
+              # examples:
+              #   Error1:
+              #     $ref: "#/components/examples/Error1"
+          description: Bad Request
+      tags:
+        - Lifecycle stage of a plan
+  /api/belnet-v1/plans/{plan_id}/validations:
+    post:
+      description: |
+        Creates a new validation request for a specific _immutable_ version of a Data Management Plan (DMP).<br>
+        For allowed values for the `dmp_version_number` check the `GET /api/belnet-v1/plans/{plan_id}/versions` endpoint.<br>
+        For allowed values for the validation `topic`, check the `current_list` via the `GET /api/belnet-v1/configurations/validation-topics` endpoint.
+      operationId: create_plan_validation
+      parameters:
+        - $ref: "#/components/parameters/AcceptHeader"
+        - $ref: "#/components/parameters/AuthorizationHeader"
+        - $ref: "#/components/parameters/PlanIdParam"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePlanValidationRequest"
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreatePlanValidationResponse"
+              examples:
+                regular:
+                  $ref: "#/components/examples/RegularCreatePlanValidationResponse"
+          description: Created
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorUnauthorizedResponse"
+              # examples:
+              #   Error1:
+              #     $ref: "#/components/examples/Error1"
+              #   Error2:
+              #     $ref: "#/components/examples/Error2"
+          description: Bad Request
+      tags:
+        - Validations of plans
+    get:
+      description: |
+        Retrieves all validation requests for all versions of a specific Data Management Plan (DMP).
+      operationId: get_plan_validations
+      parameters:
+        - $ref: "#/components/parameters/AcceptHeader"
+        - $ref: "#/components/parameters/AuthorizationHeader"
+        - $ref: "#/components/parameters/PlanIdParam"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetPlanValidationsResponse"
+              examples:
+                regular:
+                  $ref: "#/components/examples/RegularGetPlanValidationsResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorUnauthorizedResponse"
+              # examples:
+              #   Error1:
+              #     $ref: "#/components/examples/Error1"
+          description: Bad Request
+      tags:
+        - Validations of plans
+  /api/belnet-v1/plans/{plan_id}/validations/{validation_id}:
+    get:
+      description: Retrieves a specific validation request for a Data Management Plan (DMP).
+      operationId: get_plan_validation
+      parameters:
+        - $ref: "#/components/parameters/AcceptHeader"
+        - $ref: "#/components/parameters/AuthorizationHeader"
+        - $ref: "#/components/parameters/PlanIdParam"
+        - $ref: "#/components/parameters/ValidationIdParam"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetPlanValidationResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorUnauthorizedResponse"
+              # examples:
+              #   Error1:
+              #     $ref: "#/components/examples/Error1"
+          description: Bad Request
+      tags:
+        - Validations of plans
+    put:
+      description:
+        Updates a specific validation request for a Data Management Plan (DMP).<br>
+        For allowed values for the validation `status`, check the `current_list` via the `GET /api/belnet-v1/configurations/validation-statuses` endpoint.
+      operationId: update_plan_validation
+      parameters:
+        - $ref: "#/components/parameters/AcceptHeader"
+        - $ref: "#/components/parameters/AuthorizationHeader"
+        - $ref: "#/components/parameters/PlanIdParam"
+        - $ref: "#/components/parameters/ValidationIdParam"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdatePlanValidationRequest"
+        required: true
+      responses:
+        "202":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UpdatePlanValidationResponse"
+          description: Accepted
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorUnauthorizedResponse"
+              # examples:
+              #   Error1:
+              #     $ref: "#/components/examples/Error1"
+          description: Bad Request
+      tags:
+        - Validations of plans
+  /api/belnet-v1/configurations/lifecycle-stages:
+    get:
+      description: Retrieves all allowed values for the `lifecycle_stage` field of a specific Data Management Plan (DMP).
+      operationId: get_config_lifecycle_stages
+      parameters:
+        - $ref: "#/components/parameters/AcceptHeader"
+        - $ref: "#/components/parameters/AuthorizationHeader"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetConfigLifecycleStagesResponse"
+              examples:
+                default:
+                  $ref: "#/components/examples/RegularGetConfigLifecycleStagesResponse"
+                org_specific:
+                  $ref: "#/components/examples/OrganizationGetConfigLifecycleStagesResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorUnauthorizedResponse"
+              # examples:
+              #   Error1:
+              #     $ref: "#/components/examples/Error1"
+          description: Bad Request
+      tags:
+        - Configurations
+  /api/belnet-v1/configurations/validation-topics:
+    get:
+      description: Retrieves all allowed validation topics that can be used to validate a specific Data Management Plan (DMP).
+      operationId: get_config_validation_topics
+      parameters:
+        - $ref: "#/components/parameters/AcceptHeader"
+        - $ref: "#/components/parameters/AuthorizationHeader"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetConfigValidationTopicsResponse"
+              examples:
+                regular:
+                  $ref: "#/components/examples/RegularGetConfigValidationTopicsResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorUnauthorizedResponse"
+          description: Bad Request
+      tags:
+        - Configurations
+  /api/belnet-v1/configurations/validation-statuses:
+    get:
+      description: Retrieves all allowed validation statuses that can be used to indicate the status of a validation request for a Data Management Plan (DMP).
+      operationId: get_config_validation_statuses
+      parameters:
+        - $ref: "#/components/parameters/AcceptHeader"
+        - $ref: "#/components/parameters/AuthorizationHeader"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetConfigValidationStatusesResponse"
+              examples:
+                regular:
+                  $ref: "#/components/examples/RegularGetConfigValidationStatusesResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorUnauthorizedResponse"
+          description: Bad Request
+      tags:
+        - Configurations
+components:
+  securitySchemes:
+    MyClientId:
+      type: apiKey
+      in: header
+      name: x-api-key
+  schemas:
+    # Base schemas
+    PlanIdSchema:
+      description: The unique identifier of a Data Management Plan (DMP).
+      type: number
+      example: 65875
+    VersionIdSchema:
+      description: The unique identifier of a specific version of a Data Management Plan (DMP). Don't confuse with the version number of a DMP.
+      type: number
+      example: 65877
+    VersionNumberSchema:
+      description: The version number of a Data Management Plan (DMP). Don't confuse with the version_id of a specific version of a DMP.
+      type: number
+      example: 2
+    ValidationIdSchema:
+      description: The unique identifier of a specific validation of a Data Management Plan (DMP).
+      type: number
+      example: 12345
+    ## Default set of schemas for all API responses
+    ApplicationSchema:
+      description: Name of the application responding to the API request.
+      type: string
+      example: DMPonline.be
+    SourceSchema:
+      description: The HTTP method and the endpoint used for the API request.
+      type: string
+      example: GET /api/belnet-v1/plans/65875/versions
+    TimeSchema:
+      description: The timestamp of the API request in ISO 8601 format.
+      type: string
+      format: date-time
+      example: 2026-07-16T12:01:19+00:00
+    CallerSchema:
+      description: The user or system making the API request.
+      type: string
+      example: Charlie Davis
+    CodeSchema:
+      description: The HTTP status code number of the API response.
+      type: string
+      example: "200"
+    MessageSchema:
+      description: The HTTP status code string of the API response.
+      type: string
+      example: OK
+    TotalItemsSchema:
+      description: The total number of items available in the API response.
+      type: integer
+      example: 1
+    ### Set of schemas only when total_items is positive in the API response
+    PageSchema:
+      description: The page number of the API response.
+      type: integer
+      example: 1
+    PerPageSchema:
+      description: The number of items per page in the API response.
+      type: integer
+      example: 100
+    ### Set of schemas only when pagination is used in the API response
+    PrevSchema:
+      description: The URL of the previous page of the API response, if applicable.
+      type: string
+      example: /api/belnet-v1/plans/65875/versions?page=1&per_page=100
+    NextSchema:
+      description: The URL of the next page of the API response, if applicable.
+      type: string
+      example: /api/belnet-v1/plans/65875/versions?page=3&per_page=100
+
+    # Schemas for plan operations
+    GetPlanResponse:
+      type: object
+      properties:
+        application:
+          $ref: "#/components/schemas/ApplicationSchema"
+        source:
+          allOf:
+            - $ref: "#/components/schemas/SourceSchema"
+            - example: GET /api/belnet-v1/plans/65877
+        time:
+          $ref: "#/components/schemas/TimeSchema"
+        caller:
+          $ref: "#/components/schemas/CallerSchema"
+        code:
+          $ref: "#/components/schemas/CodeSchema"
+        message:
+          $ref: "#/components/schemas/MessageSchema"
+        page:
+          $ref: "#/components/schemas/PageSchema"
+        per_page:
+          $ref: "#/components/schemas/PerPageSchema"
+        total_items:
+          $ref: "#/components/schemas/TotalItemsSchema"
+        # prev:
+        #   $ref: "#/components/schemas/PrevSchema"
+        # next:
+        #   $ref: "#/components/schemas/NextSchema"
+        items:
+          type: array
+          items:
+            oneOf:
+              - $ref: "./maDMP-schema-1.0-belnet-version.json"
+              - $ref: "./maDMP-schema-1.0-belnet-editable.json"
+      required:
+        - application
+        - source
+        - time
+        - caller
+        - code
+        - message
+        - total_items
+        - items
+
+    # Schemas for plan version operations
+    CreatePlanVersionRequest:
+      description: The request body for creating a new _immutable_ version of a Data Management Plan (DMP).
+      properties:
+        reason:
+          description: The reason (motivation) for creating a new _immutable_ version of the DMP.
+          type: string
+          minLength: 10
+          maxLength: 500
+          example: "Updating the plan to include GDPR requirements."
+        lifecycle_stage:
+          description: The DMP lifecycle stage for this version of the DMP.
+            Only required when you want to change the current DMP lifecycle stage.<br>
+            For allowed values check the `current_list` via the `GET /api/belnet-v1/configurations/lifecycle-stages` endpoint.
+          type: string
+          example: "Working Draft"
+      required:
+        - reason
+      type: object
+    UpdatePlanVersionRequest:
+      description: The request body for updating a specific _immutable_ version of a Data Management Plan (DMP). Either the `reason` or the `lifecycle_stage` must be provided, but at least one of them is required.
+      properties:
+        reason:
+          description: The reason (motivation) for creating a new _immutable_ version of the DMP.
+          type: string
+          minLength: 10
+          maxLength: 500
+          example: "Finalize the DMP."
+        lifecycle_stage:
+          description: The DMP lifecycle stage for this version of the DMP.
+            Only required when you want to change the current DMP lifecycle stage.<br>
+            For allowed values check the `current_list` via the `GET /api/belnet-v1/configurations/lifecycle-stages` endpoint.
+          type: string
+          example: "Finalized"
+      type: object
+    CreatePlanVersionResponse:
+      type: object
+      properties:
+        application:
+          $ref: "#/components/schemas/ApplicationSchema"
+        source:
+          allOf:
+            - $ref: "#/components/schemas/SourceSchema"
+            - example: POST /api/belnet-v1/plans/65875/versions
+        time:
+          $ref: "#/components/schemas/TimeSchema"
+        caller:
+          $ref: "#/components/schemas/CallerSchema"
+        code:
+          allOf:
+            - $ref: "#/components/schemas/CodeSchema"
+            - example: "201"
+        message:
+          allOf:
+            - $ref: "#/components/schemas/MessageSchema"
+            - example: "Created"
+        page:
+          $ref: "#/components/schemas/PageSchema"
+        per_page:
+          $ref: "#/components/schemas/PerPageSchema"
+        total_items:
+          $ref: "#/components/schemas/TotalItemsSchema"
+        # prev:
+        #   $ref: "#/components/schemas/PrevSchema"
+        # next:
+        #   $ref: "#/components/schemas/NextSchema"
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              dmp_version:
+                $ref: "./maDMP-schema-1.0-belnet.json#/properties/dmp/properties/extension/items/properties/belnet/properties/dmp_version"
+            required:
+              - dmp_version
+      required:
+        - application
+        - source
+        - time
+        - caller
+        - code
+        - message
+        - total_items
+        - items
+    UpdatePlanVersionResponse:
+      type: object
+      properties:
+        application:
+          $ref: "#/components/schemas/ApplicationSchema"
+        source:
+          allOf:
+            - $ref: "#/components/schemas/SourceSchema"
+            - example: PUT /api/belnet-v1/plans/65875/versions/3
+        time:
+          $ref: "#/components/schemas/TimeSchema"
+        caller:
+          $ref: "#/components/schemas/CallerSchema"
+        code:
+          allOf:
+            - $ref: "#/components/schemas/CodeSchema"
+            - example: "202"
+        message:
+          allOf:
+            - $ref: "#/components/schemas/MessageSchema"
+            - example: "Accepted"
+        page:
+          $ref: "#/components/schemas/PageSchema"
+        per_page:
+          $ref: "#/components/schemas/PerPageSchema"
+        total_items:
+          $ref: "#/components/schemas/TotalItemsSchema"
+        # prev:
+        #   $ref: "#/components/schemas/PrevSchema"
+        # next:
+        #   $ref: "#/components/schemas/NextSchema"
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              dmp_version:
+                $ref: "./maDMP-schema-1.0-belnet.json#/properties/dmp/properties/extension/items/properties/belnet/properties/dmp_version"
+            required:
+              - dmp_version
+      required:
+        - application
+        - source
+        - time
+        - caller
+        - code
+        - message
+        - total_items
+        - items
+    GetPlanVersionsResponse:
+      type: object
+      properties:
+        application:
+          $ref: "#/components/schemas/ApplicationSchema"
+        source:
+          $ref: "#/components/schemas/SourceSchema"
+        time:
+          $ref: "#/components/schemas/TimeSchema"
+        caller:
+          $ref: "#/components/schemas/CallerSchema"
+        code:
+          $ref: "#/components/schemas/CodeSchema"
+        message:
+          $ref: "#/components/schemas/MessageSchema"
+        page:
+          $ref: "#/components/schemas/PageSchema"
+        per_page:
+          $ref: "#/components/schemas/PerPageSchema"
+        total_items:
+          $ref: "#/components/schemas/TotalItemsSchema"
+        prev:
+          $ref: "#/components/schemas/PrevSchema"
+        next:
+          $ref: "#/components/schemas/NextSchema"
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              dmp_version:
+                $ref: "./maDMP-schema-1.0-belnet.json#/properties/dmp/properties/extension/items/properties/belnet/properties/dmp_version"
+            required:
+              - dmp_version
+      required:
+        - application
+        - source
+        - time
+        - caller
+        - code
+        - message
+        - total_items
+        - items
+    GetPlanVersionResponse:
+      type: object
+      properties:
+        application:
+          $ref: "#/components/schemas/ApplicationSchema"
+        source:
+          allOf:
+            - $ref: "#/components/schemas/SourceSchema"
+            - example: PUT /api/belnet-v1/plans/65875/versions/2
+        time:
+          $ref: "#/components/schemas/TimeSchema"
+        caller:
+          $ref: "#/components/schemas/CallerSchema"
+        code:
+          $ref: "#/components/schemas/CodeSchema"
+        message:
+          $ref: "#/components/schemas/MessageSchema"
+        page:
+          $ref: "#/components/schemas/PageSchema"
+        per_page:
+          $ref: "#/components/schemas/PerPageSchema"
+        total_items:
+          $ref: "#/components/schemas/TotalItemsSchema"
+        # prev:
+        #   $ref: "#/components/schemas/PrevSchema"
+        # next:
+        #   $ref: "#/components/schemas/NextSchema"
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              dmp_version:
+                $ref: "./maDMP-schema-1.0-belnet.json#/properties/dmp/properties/extension/items/properties/belnet/properties/dmp_version"
+            required:
+              - dmp_version
+      required:
+        - application
+        - source
+        - time
+        - caller
+        - code
+        - message
+        - total_items
+        - items
+
+    # Schemas for plan lifecycle stage operations
+    CreatePlanLifecycleStageRequest:
+      properties:
+        lifecycle_stage:
+          description: The DMP `lifecycle_stage` for the _editable_ DMP.<br>
+            For allowed values check the `current_list` via the `GET /api/belnet-v1/configurations/lifecycle-stages` endpoint.
+          type: string
+          maxLength: 28
+          minLength: 1
+          example: "Working Draft"
+      required:
+        - lifecycle_stage
+      type: object
+    UpdatePlanLifecycleStageRequest:
+      properties:
+        lifecycle_stage:
+          description: The DMP `lifecycle_stage` for the _editable_ DMP.<br>
+            For allowed values check the `current_list` via the `GET /api/belnet-v1/configurations/lifecycle-stages` endpoint.
+          type: string
+          maxLength: 28
+          minLength: 1
+          example: "Working Draft"
+      required:
+        - lifecycle_stage
+      type: object
+    CreatePlanLifecycleStageResponse:
+      type: object
+      properties:
+        application:
+          $ref: "#/components/schemas/ApplicationSchema"
+        source:
+          allOf:
+            - $ref: "#/components/schemas/SourceSchema"
+            - example: POST /api/belnet-v1/plans/65875/lifecycle-stage
+        time:
+          $ref: "#/components/schemas/TimeSchema"
+        caller:
+          $ref: "#/components/schemas/CallerSchema"
+        code:
+          allOf:
+            - $ref: "#/components/schemas/CodeSchema"
+            - example: "201"
+        message:
+          allOf:
+            - $ref: "#/components/schemas/MessageSchema"
+            - example: "Created"
+        page:
+          $ref: "#/components/schemas/PageSchema"
+        per_page:
+          $ref: "#/components/schemas/PerPageSchema"
+        total_items:
+          $ref: "#/components/schemas/TotalItemsSchema"
+        # prev:
+        #   $ref: "#/components/schemas/PrevSchema"
+        # next:
+        #   $ref: "#/components/schemas/NextSchema"
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              dmp_editable:
+                $ref: "./maDMP-schema-1.0-belnet.json#/properties/dmp/properties/extension/items/properties/belnet/properties/dmp_editable"
+            required:
+              - dmp_editable
+      required:
+        - application
+        - source
+        - time
+        - caller
+        - code
+        - message
+        - total_items
+        - items
+    UpdatePlanLifecycleStageResponse:
+      type: object
+      properties:
+        application:
+          $ref: "#/components/schemas/ApplicationSchema"
+        source:
+          allOf:
+            - $ref: "#/components/schemas/SourceSchema"
+            - example: PUT /api/belnet-v1/plans/65875/lifecycle-stage
+        time:
+          $ref: "#/components/schemas/TimeSchema"
+        caller:
+          $ref: "#/components/schemas/CallerSchema"
+        code:
+          allOf:
+            - $ref: "#/components/schemas/CodeSchema"
+            - example: "202"
+        message:
+          allOf:
+            - $ref: "#/components/schemas/MessageSchema"
+            - example: "Accepted"
+        page:
+          $ref: "#/components/schemas/PageSchema"
+        per_page:
+          $ref: "#/components/schemas/PerPageSchema"
+        total_items:
+          $ref: "#/components/schemas/TotalItemsSchema"
+        # prev:
+        #   $ref: "#/components/schemas/PrevSchema"
+        # next:
+        #   $ref: "#/components/schemas/NextSchema"
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              dmp_editable:
+                $ref: "./maDMP-schema-1.0-belnet.json#/properties/dmp/properties/extension/items/properties/belnet/properties/dmp_editable"
+            required:
+              - dmp_editable
+      required:
+        - application
+        - source
+        - time
+        - caller
+        - code
+        - message
+        - total_items
+        - items
+    GetPlanLifecycleStageResponse:
+      type: object
+      properties:
+        application:
+          $ref: "#/components/schemas/ApplicationSchema"
+        source:
+          allOf:
+            - $ref: "#/components/schemas/SourceSchema"
+            - example: GET /api/belnet-v1/plans/65875/lifecycle-stage
+        time:
+          $ref: "#/components/schemas/TimeSchema"
+        caller:
+          $ref: "#/components/schemas/CallerSchema"
+        code:
+          $ref: "#/components/schemas/CodeSchema"
+        message:
+          $ref: "#/components/schemas/MessageSchema"
+        page:
+          $ref: "#/components/schemas/PageSchema"
+        per_page:
+          $ref: "#/components/schemas/PerPageSchema"
+        total_items:
+          $ref: "#/components/schemas/TotalItemsSchema"
+        # prev:
+        #   $ref: "#/components/schemas/PrevSchema"
+        # next:
+        #   $ref: "#/components/schemas/NextSchema"
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              dmp_editable:
+                $ref: "./maDMP-schema-1.0-belnet.json#/properties/dmp/properties/extension/items/properties/belnet/properties/dmp_editable"
+            required:
+              - dmp_editable
+      required:
+        - application
+        - source
+        - time
+        - caller
+        - code
+        - message
+        - total_items
+        - items
+
+    # Schemas for plan validation operations
+    CreatePlanValidationRequest:
+      properties:
+        dmp_version_number:
+          description:
+            The version number of the DMP for which the validation is requested.<br>
+            For allowed values check the `GET /api/belnet-v1/plans/{plan_id}/versions` endpoint.
+          type: number
+          example: 2
+        topic:
+          description: The validation topic of this validation request.<br>
+            For allowed values check the `current_list` via the `GET /api/belnet-v1/configurations/validation-topics` endpoint.
+          type: string
+          example: "GDPR"
+      required:
+        - dmp_version_number
+        - topic
+      type: object
+    UpdatePlanValidationRequest:
+      properties:
+        status:
+          description:
+            The validation status for this DMP validation request.<br>
+            For allowed values check the `current_list` via the `GET /api/belnet-v1/configurations/validation-statuses` endpoint.
+          type: string
+          example: "Approved"
+        rationale:
+          description: The rationale (motivation) for the final decision.
+          type: string
+          example: "The DMP version is valid because it meets all GDPR requirements."
+        conditions:
+          description: When rework is needed, the conditions to pass the DMP validation topic.
+          type: string
+          example: "No extra conditions."
+      required:
+        - status
+        - rationale
+      type: object
+    CreatePlanValidationResponse:
+      type: object
+      properties:
+        application:
+          $ref: "#/components/schemas/ApplicationSchema"
+        source:
+          allOf:
+            - $ref: "#/components/schemas/SourceSchema"
+            - example: POST /api/belnet-v1/plans/65875/validations
+        time:
+          $ref: "#/components/schemas/TimeSchema"
+        caller:
+          $ref: "#/components/schemas/CallerSchema"
+        code:
+          allOf:
+            - $ref: "#/components/schemas/CodeSchema"
+            - example: "201"
+        message:
+          allOf:
+            - $ref: "#/components/schemas/MessageSchema"
+            - example: "Created"
+        page:
+          $ref: "#/components/schemas/PageSchema"
+        per_page:
+          $ref: "#/components/schemas/PerPageSchema"
+        total_items:
+          $ref: "#/components/schemas/TotalItemsSchema"
+        # prev:
+        #   $ref: "#/components/schemas/PrevSchema"
+        # next:
+        #   $ref: "#/components/schemas/NextSchema"
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              dmp_validation:
+                $ref: "./maDMP-schema-1.0-belnet.json#/properties/dmp/properties/extension/items/properties/belnet/properties/dmp_validations/items/properties/dmp_validation"
+            required:
+              - dmp_validation
+      required:
+        - application
+        - source
+        - time
+        - caller
+        - code
+        - message
+        - total_items
+        - items
+    UpdatePlanValidationResponse:
+      type: object
+      properties:
+        application:
+          $ref: "#/components/schemas/ApplicationSchema"
+        source:
+          allOf:
+            - $ref: "#/components/schemas/SourceSchema"
+            - example: PUT /api/belnet-v1/plans/65875/validations/12345
+        time:
+          $ref: "#/components/schemas/TimeSchema"
+        caller:
+          $ref: "#/components/schemas/CallerSchema"
+        code:
+          allOf:
+            - $ref: "#/components/schemas/CodeSchema"
+            - example: "202"
+        message:
+          allOf:
+            - $ref: "#/components/schemas/MessageSchema"
+            - example: "Accepted"
+        page:
+          $ref: "#/components/schemas/PageSchema"
+        per_page:
+          $ref: "#/components/schemas/PerPageSchema"
+        total_items:
+          $ref: "#/components/schemas/TotalItemsSchema"
+        # prev:
+        #   $ref: "#/components/schemas/PrevSchema"
+        # next:
+        #   $ref: "#/components/schemas/NextSchema"
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              dmp_validation:
+                $ref: "./maDMP-schema-1.0-belnet.json#/properties/dmp/properties/extension/items/properties/belnet/properties/dmp_validations/items/properties/dmp_validation"
+            required:
+              - dmp_validation
+      required:
+        - application
+        - source
+        - time
+        - caller
+        - code
+        - message
+        - total_items
+        - items
+    GetPlanValidationsResponse:
+      type: object
+      properties:
+        application:
+          $ref: "#/components/schemas/ApplicationSchema"
+        source:
+          allOf:
+            - $ref: "#/components/schemas/SourceSchema"
+            - example: GET /api/belnet-v1/plans/65875/validations
+        time:
+          $ref: "#/components/schemas/TimeSchema"
+        caller:
+          $ref: "#/components/schemas/CallerSchema"
+        code:
+          $ref: "#/components/schemas/CodeSchema"
+        message:
+          $ref: "#/components/schemas/MessageSchema"
+        page:
+          $ref: "#/components/schemas/PageSchema"
+        per_page:
+          $ref: "#/components/schemas/PerPageSchema"
+        total_items:
+          $ref: "#/components/schemas/TotalItemsSchema"
+        prev:
+          allOf:
+            - $ref: "#/components/schemas/PrevSchema"
+            - example: GET /api/belnet-v1/plans/65875/validations?page=1&per_page=100"
+        next:
+          allOf:
+            - $ref: "#/components/schemas/NextSchema"
+            - example: GET /api/belnet-v1/plans/65875/validations?page=3&per_page=100"
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              dmp_validation:
+                $ref: "./maDMP-schema-1.0-belnet.json#/properties/dmp/properties/extension/items/properties/belnet/properties/dmp_validations/items/properties/dmp_validation"
+            required:
+              - dmp_validation
+      required:
+        - application
+        - source
+        - time
+        - caller
+        - code
+        - message
+        - total_items
+        - items
+    GetPlanValidationResponse:
+      type: object
+      properties:
+        application:
+          $ref: "#/components/schemas/ApplicationSchema"
+        source:
+          allOf:
+            - $ref: "#/components/schemas/SourceSchema"
+            - example: GET /api/belnet-v1/plans/65875/validations/12345
+        time:
+          $ref: "#/components/schemas/TimeSchema"
+        caller:
+          $ref: "#/components/schemas/CallerSchema"
+        code:
+          $ref: "#/components/schemas/CodeSchema"
+        message:
+          $ref: "#/components/schemas/MessageSchema"
+        page:
+          $ref: "#/components/schemas/PageSchema"
+        per_page:
+          $ref: "#/components/schemas/PerPageSchema"
+        total_items:
+          $ref: "#/components/schemas/TotalItemsSchema"
+        # prev:
+        #   $ref: "#/components/schemas/PrevSchema"
+        # next:
+        #   $ref: "#/components/schemas/NextSchema"
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              dmp_validation:
+                $ref: "./maDMP-schema-1.0-belnet.json#/properties/dmp/properties/extension/items/properties/belnet/properties/dmp_validations/items/properties/dmp_validation"
+            required:
+              - dmp_validation
+      required:
+        - application
+        - source
+        - time
+        - caller
+        - code
+        - message
+        - total_items
+        - items
+
+    # Schemas for configuration operations
+    GetConfigLifecycleStagesResponse:
+      type: object
+      properties:
+        application:
+          $ref: "#/components/schemas/ApplicationSchema"
+        source:
+          allOf:
+            - $ref: "#/components/schemas/SourceSchema"
+            - example: GET /api/belnet-v1/configurations/lifecycle-stages
+        time:
+          $ref: "#/components/schemas/TimeSchema"
+        caller:
+          $ref: "#/components/schemas/CallerSchema"
+        code:
+          $ref: "#/components/schemas/CodeSchema"
+        message:
+          $ref: "#/components/schemas/MessageSchema"
+        total_items:
+          $ref: "#/components/schemas/TotalItemsSchema"
+        prev:
+          allOf:
+            - $ref: "#/components/schemas/PrevSchema"
+            - example: GET /api/belnet-v1/configurations/lifecycle-stages?page=1&per_page=100"
+        next:
+          allOf:
+            - $ref: "#/components/schemas/NextSchema"
+            - example: GET /api/belnet-v1/configurations/lifecycle-stages?page=3&per_page=100"
+        items:
+          type: array
+          items:
+            $ref: "./maDMP-schema-1.0-belnet-lifecycle-stage.json"
+      required:
+        - application
+        - source
+        - time
+        - caller
+        - code
+        - message
+        - total_items
+        - items
+    GetConfigValidationTopicsResponse:
+      type: object
+      properties:
+        application:
+          $ref: "#/components/schemas/ApplicationSchema"
+        source:
+          allOf:
+            - $ref: "#/components/schemas/SourceSchema"
+            - example: GET /api/belnet-v1/configurations/validation-topics
+        time:
+          $ref: "#/components/schemas/TimeSchema"
+        caller:
+          $ref: "#/components/schemas/CallerSchema"
+        code:
+          $ref: "#/components/schemas/CodeSchema"
+        message:
+          $ref: "#/components/schemas/MessageSchema"
+        total_items:
+          $ref: "#/components/schemas/TotalItemsSchema"
+        prev:
+          allOf:
+            - $ref: "#/components/schemas/PrevSchema"
+            - example: GET /api/belnet-v1/configurations/validation-topics?page=1&per_page=100"
+        next:
+          allOf:
+            - $ref: "#/components/schemas/NextSchema"
+            - example: GET /api/belnet-v1/configurations/validation-topics?page=3&per_page=100"
+        items:
+          type: array
+          items:
+            $ref: "./maDMP-schema-1.0-belnet-validation-topic.json"
+      required:
+        - application
+        - source
+        - time
+        - caller
+        - code
+        - message
+        - total_items
+        - items
+    GetConfigValidationStatusesResponse:
+      type: object
+      properties:
+        application:
+          $ref: "#/components/schemas/ApplicationSchema"
+        source:
+          allOf:
+            - $ref: "#/components/schemas/SourceSchema"
+            - example: GET /api/belnet-v1/configurations/validation-statuses
+        time:
+          $ref: "#/components/schemas/TimeSchema"
+        caller:
+          $ref: "#/components/schemas/CallerSchema"
+        code:
+          $ref: "#/components/schemas/CodeSchema"
+        message:
+          $ref: "#/components/schemas/MessageSchema"
+        total_items:
+          $ref: "#/components/schemas/TotalItemsSchema"
+        prev:
+          allOf:
+            - $ref: "#/components/schemas/PrevSchema"
+            - example: GET /api/belnet-v1/configurations/validation-statuses?page=1&per_page=100"
+        next:
+          allOf:
+            - $ref: "#/components/schemas/NextSchema"
+            - example: GET /api/belnet-v1/configurations/validation-statuses?page=3&per_page=100"
+        items:
+          type: array
+          items:
+            $ref: "./maDMP-schema-1.0-belnet-validation-status.json"
+      required:
+        - application
+        - source
+        - time
+        - caller
+        - code
+        - message
+        - total_items
+        - items
+    ErrorUnauthorizedResponse:
+      type: object
+      properties:
+        # application:
+        #   $ref: "#/components/schemas/ApplicationSchema"
+        source:
+          $ref: "#/components/schemas/SourceSchema"
+        time:
+          $ref: "#/components/schemas/TimeSchema"
+        # caller:
+        #   $ref: "#/components/schemas/CallerSchema"
+        code:
+          allOf:
+            - $ref: "#/components/schemas/CodeSchema"
+            - example: "401"
+        message:
+          allOf:
+            - $ref: "#/components/schemas/MessageSchema"
+            - example: "Unauthorized"
+        # page:
+        #   $ref: "#/components/schemas/PageSchema"
+        # per_page:
+        #   $ref: "#/components/schemas/PerPageSchema"
+        total_items:
+          allOf:
+            - $ref: "#/components/schemas/TotalItemsSchema"
+            - example: 0
+        # prev:
+        #   $ref: "#/components/schemas/PrevSchema"
+        # next:
+        #   $ref: "#/components/schemas/NextSchema"
+        items:
+          type: array
+          items:
+            $ref: "./maDMP-schema-1.0-belnet.json"
+          example: []
+        errors:
+          items:
+            $ref: "#/components/schemas/ErrorUnauthorizedMessage"
+          type: array
+      required:
+        # - application
+        - source
+        - time
+        # - caller
+        - code
+        - message
+        - total_items
+        - items
+        - errors
+    ErrorUnauthorizedMessage:
+      type: object
+      properties:
+        token:
+          type: string
+          example: "Invalid token"
+  parameters:
+    PlanIdParam:
+      name: plan_id
+      description: The unique identifier of a Data Management Plan (DMP).
+      in: path
+      required: true
+      schema:
+        $ref: "#/components/schemas/PlanIdSchema"
+    VersionedPlanIdParam:
+      name: plan_id
+      description: The unique identifier of a Data Management Plan (DMP).
+      in: path
+      required: true
+      schema:
+        allOf:
+          - $ref: "#/components/schemas/PlanIdSchema"
+          - example: 65877
+    ValidationIdParam:
+      name: validation_id
+      description: The unique identifier of a validation request for a Data Management Plan (DMP).
+      in: path
+      required: true
+      schema:
+        $ref: "#/components/schemas/ValidationIdSchema"
+    VersionNumberParam:
+      name: version_number
+      description: The version number of the Data Management Plan (DMP). Don't confuse with the version_id of a specific version of a DMP.
+      in: path
+      required: true
+      schema:
+        $ref: "#/components/schemas/VersionNumberSchema"
+    UpdatedVersionNumberParam:
+      name: version_number
+      description: The version number of the Data Management Plan (DMP). Don't confuse with the version_id of a specific version of a DMP.
+      in: path
+      required: true
+      schema:
+        allOf:
+          - $ref: "#/components/schemas/VersionNumberSchema"
+          - example: 3
+    AcceptHeader:
+      name: Accept
+      in: header
+      description: "The Accept header specifying the media types that are acceptable for the response: only application/json is supported."
+      required: true
+      schema:
+        type: string
+        enum:
+          - application/json
+    AuthorizationHeader:
+      name: Authorization
+      in: header
+      description: The Authorization header containing the Bearer token to authenticate a user agent with the server.
+      required: true
+      schema:
+        type: string
+        example: Bearer <token>
+  examples:
+    # GetVersionedPlanResponse:
+    #   summary: Regular answer
+    #   description: DMP version created successfully for DMP with ID 65875.
+    #   value:
+    #     application: "DMPonline.be"
+    #     source: "POST /api/belnet-v1/plans/65877"
+    #     time: "2026-07-16T12:01:19+00:00"
+    #     caller: "Charlie Davis"
+    #     code: "200"
+    #     message: "Ok"
+    #     page: 1
+    #     per_page: 100
+    #     total_items: 1
+    #     items:
+    #       - dmp
+    # GetEditablePlanResponse:
+    #   summary: Regular answer
+    #   description: DMP version created successfully for DMP with ID 65875.
+    #   value:
+    #     application: "DMPonline.be"
+    #     source: "POST /api/belnet-v1/plans/65875"
+    #     time: "2026-07-16T12:01:19+00:00"
+    #     caller: "Charlie Davis"
+    #     code: "200"
+    #     message: "Ok"
+    #     page: 1
+    #     per_page: 100
+    #     total_items: 1
+    #     items:
+    #       - dmp
+    DMPVersionRegular:
+      summary: Regular answer
+      description: DMP version created successfully for DMP with ID 65875.
+      value:
+        application: "DMPonline.be"
+        source: "POST /api/belnet-v1/plans/65875/versions"
+        time: "2026-07-16T12:01:19+00:00"
+        caller: "Charlie Davis"
+        code: "201"
+        message: "Created"
+        page: 1
+        per_page: 100
+        total_items: 1
+        items:
+          - dmp_version:
+              id: 65877
+              number: 2
+              created: "2026-06-18T14:10:33Z"
+              reason: "Updating the plan to include GDPR requirements."
+              lifecycle_stage: "Working Draft"
+    RegularCreatePlanVersionResponse:
+      summary: Regular answer
+      description: DMP version created successfully for DMP with ID 65875.
+      value:
+        application: "DMPonline.be"
+        source: "POST /api/belnet-v1/plans/65875/versions"
+        time: "2026-07-16T12:01:19+00:00"
+        caller: "Charlie Davis"
+        code: "201"
+        message: "Created"
+        page: 1
+        per_page: 100
+        total_items: 1
+        items:
+          - dmp_version:
+              dmp_id:
+                identifier: "https://dmponline-test-1.tl.belnet.be/api/belnet-v1/plans/65877"
+                type: "url"
+              number: 2
+              created: "2026-06-18T14:10:33Z"
+              created_by:
+                identifier: "https://orcid.org/0000-0000-0000-0000"
+                type: "orcid"
+              reason: "Updating the plan to include GDPR requirements."
+              lifecycle_stage: "Working Draft"
+    RegularGetPlanVersionsResponse:
+      summary: Regular answer
+      description: DMP versions available for DMP with ID 65875.
+      value:
+        application: "DMPonline.be"
+        source: "GET /api/belnet-v1/plans/65875/versions"
+        time: "2026-07-16T12:01:19+00:00"
+        caller: "Charlie Davis"
+        code: "200"
+        message: "OK"
+        page: 1
+        per_page: 100
+        total_items: 3
+        items:
+          - dmp_version:
+              dmp_id:
+                identifier: "https://dmponline-test-1.tl.belnet.be/api/belnet-v1/plans/65878"
+                type: "url"
+              number: 3
+              created: "2026-06-18T14:12:17Z"
+              modified: "2026-06-18T14:14:33Z"
+              created_by:
+                identifier: "https://orcid.org/0000-0000-0000-0000"
+                type: "orcid"
+              modified_by:
+                identifier: "https://orcid.org/0000-0000-0000-0000"
+                type: "orcid"
+              reason: "Finalize the DMP."
+              lifecycle_stage: "Finalized"
+          - dmp_version:
+              dmp_id:
+                identifier: "https://dmponline-test-1.tl.belnet.be/api/belnet-v1/plans/65877"
+                type: "url"
+              number: 2
+              created: "2026-06-18T14:10:33Z"
+              created_by:
+                identifier: "https://orcid.org/0000-0000-0000-0000"
+                type: "orcid"
+              reason: "Updating the plan to include GDPR requirements."
+              lifecycle_stage: "Working Draft"
+          - dmp_version:
+              dmp_id:
+                identifier: "https://dmponline-test-1.tl.belnet.be/api/belnet-v1/plans/65876"
+                type: "url"
+              number: 1
+              created: "2026-04-27T09:20:40Z"
+              created_by:
+                identifier: "https://orcid.org/0000-0000-0000-0000"
+                type: "orcid"
+              reason: "First working draft of the DMP."
+              lifecycle_stage: "Initial Draft"
+    RegularGetPlanVersionResponse:
+      summary: Regular answer
+      description: DMP version 2 for DMP with ID 65875.
+      value:
+        application: "DMPonline.be"
+        source: "GET /api/belnet-v1/plans/65875/versions/2"
+        time: "2026-07-16T12:01:19+00:00"
+        caller: "Charlie Davis"
+        code: "200"
+        message: "OK"
+        page: 1
+        per_page: 100
+        total_items: 1
+        items:
+          - dmp_version:
+              dmp_id:
+                identifier: "https://dmponline-test-1.tl.belnet.be/api/belnet-v1/plans/65877"
+                type: "url"
+              number: 2
+              created: "2026-06-18T14:10:33Z"
+              created_by:
+                identifier: "https://orcid.org/0000-0000-0000-0000"
+                type: "orcid"
+              reason: "Updating the plan to include GDPR requirements."
+              lifecycle_stage: "Working Draft"
+    RegularUpdatePlanVersionResponse:
+      summary: Regular answer
+      description: Updated DMP version 3 for DMP with ID 65875.
+      value:
+        application: "DMPonline.be"
+        source: "PUT /api/belnet-v1/plans/65875/versions/3"
+        time: "2026-07-16T12:01:19+00:00"
+        caller: "Charlie Davis"
+        code: "202"
+        message: "Accepted"
+        page: 1
+        per_page: 100
+        total_items: 1
+        items:
+          - dmp_version:
+              dmp_id:
+                identifier: "https://dmponline-test-1.tl.belnet.be/api/belnet-v1/plans/65878"
+                type: "url"
+              number: 3
+              created: "2026-06-18T14:12:17Z"
+              modified: "2026-06-18T14:14:33Z"
+              created_by:
+                identifier: "https://orcid.org/0000-0000-0000-0000"
+                type: "orcid"
+              modified_by:
+                identifier: "https://orcid.org/0000-0000-0000-0000"
+                type: "orcid"
+              reason: "Finalize the DMP."
+              lifecycle_stage: "Finalized"
+    RegularCreatePlanValidationResponse:
+      summary: Regular answer
+      description: DMP validation created successfully for DMP with ID 65875.
+      value:
+        application: "DMPonline.be"
+        source: "POST /api/belnet-v1/plans/65875/validations"
+        time: "2026-07-16T12:01:19+00:00"
+        caller: "Charlie Davis"
+        code: "201"
+        message: "Created"
+        page: 1
+        per_page: 100
+        total_items: 1
+        items:
+          - dmp_validation:
+              id: 12345
+              dmp_version_number: 2
+              created: "2026-06-18T14:10:33Z"
+              created_by:
+                identifier: "https://orcid.org/0000-0000-0000-0000"
+                type: "orcid"
+              topic: "GDPR"
+              status: "Pending Review"
+    RegularGetPlanValidationsResponse:
+      summary: Regular answer
+      description: DMP validations available for DMP with ID 65875.
+      value:
+        application: "DMPonline.be"
+        source: "GET /api/belnet-v1/plans/65875/validations"
+        time: "2026-07-16T12:01:19+00:00"
+        caller: "Charlie Davis"
+        code: "200"
+        message: "OK"
+        page: 1
+        per_page: 100
+        total_items: 2
+        items:
+          - dmp_validation:
+              id: 12346
+              dmp_version_number: 3
+              created: "2026-06-18T14:12:17Z"
+              created_by:
+                identifier: "https://orcid.org/0000-0000-0000-0000"
+                type: "orcid"
+              topic: "FAIR"
+              status: "Pending Review"
+          - dmp_validation:
+              id: 12345
+              dmp_version_number: 2
+              created: "2026-06-18T14:10:33Z"
+              modified: "2026-06-18T14:10:33Z"
+              created_by:
+                identifier: "https://orcid.org/0000-0000-0000-0000"
+                type: "orcid"
+              modified_by:
+                identifier: "https://orcid.org/0000-0000-0000-0000"
+                type: "orcid"
+              topic: "GDPR"
+              status: "Approved"
+              rationale: "The DMP version is valid because it meets all GDPR requirements."
+              conditions: "No extra conditions."
+    # RegularGetConfigLifecycleStagesResponse:
+    #   summary: Regular answer
+    #   description: DMP stages available for current logged-in user.
+    #   value:
+    #     application: "DMPonline.be"
+    #     source: "GET /api/belnet-v1/configurations/lifecycle-stages"
+    #     time: "2026-07-16T12:01:19+00:00"
+    #     caller: "Charlie Davis"
+    #     code: "200"
+    #     message: "OK"
+    #     page: 1
+    #     per_page: 100
+    #     total_items: 5
+    #     items:
+    #       - dmp_stage:
+    #           name_id: "Initial Draft"
+    #           description: "The initial stage for every newly created DMP."
+    #           created: "2026-06-18T14:12:17Z"
+    #           deprecated: false
+    #       - dmp_stage:
+    #           name_id: "Working Draft"
+    #           description: "Working draft of the DMP."
+    #           created: "2026-06-18T14:10:33Z"
+    #           deprecated: false
+    #       - dmp_stage:
+    #           name_id: "Intermediate"
+    #           description: "Intermediate DMP."
+    #           created: "2026-04-27T09:20:40Z"
+    #           deprecated: false
+    #       - dmp_stage:
+    #           name_id: "Finalized"
+    #           description: "Finalized DMP."
+    #           created: "2026-04-27T09:20:40Z"
+    #           deprecated: false
+    #       - dmp_stage:
+    #           name_id: "Archived"
+    #           description: "Archived DMP."
+    #           created: "2026-04-27T09:20:40Z"
+    #           deprecated: false
+    RegularGetConfigLifecycleStagesResponse:
+      summary: Default list for all organizations
+      description: Default DMP stages available for current logged-in user.
+      value:
+        application: "DMPonline.be"
+        source: "GET /api/belnet-v1/configurations/lifecycle-stages"
+        time: "2026-07-16T12:01:19+00:00"
+        caller: "Charlie Davis"
+        code: "200"
+        message: "OK"
+        page: 1
+        per_page: 100
+        total_items: 1
+        items:
+          - lifecycle_stages:
+              modified: "2026-06-18T14:12:17Z"
+              organization:
+                org_id: 0
+                org_name: "All organizations in DMPOnline"
+                org_abbreviation: "All"
+              current_list:
+                enum:
+                  - "Initial Draft"
+                  - "Working Draft"
+                  - "Intermediate"
+                  - "Finalized"
+                  - "Archived"
+              full_list:
+                enum:
+                  - "Initial Draft"
+                  - "Working Draft"
+                  - "Intermediate"
+                  - "Finalized"
+                  - "Archived"
+    OrganizationGetConfigLifecycleStagesResponse:
+      summary: Organization specific list
+      description: DMP stages available for your organization for current logged-in user.
+      value:
+        application: "DMPonline.be"
+        source: "GET /api/belnet-v1/configurations/lifecycle-stages"
+        time: "2026-07-16T12:01:19+00:00"
+        caller: "Charlie Davis"
+        code: "200"
+        message: "OK"
+        page: 1
+        per_page: 100
+        total_items: 1
+        items:
+          - lifecycle_stages:
+              modified: "2026-06-18T14:12:17Z"
+              organization:
+                org_id: 62
+                org_name: "Université de Liège"
+                org_abbreviation: "ULiege"
+              current_list:
+                enum:
+                  - "Initial Draft"
+                  - "Working Draft"
+                  - "Internal Review"
+                  - "External Review"
+                  - "Finalized"
+                  - "Archived"
+              full_list:
+                enum:
+                  - "Initial Draft"
+                  - "Working Draft"
+                  - "Intermediate"
+                  - "Internal Review"
+                  - "External Review"
+                  - "Finalized"
+                  - "Archived"
+    # RegularGetConfigValidationTopicsResponse:
+    #   summary: Regular answer
+    #   description: DMP validation topics available for current logged-in user.
+    #   value:
+    #     application: "DMPonline.be"
+    #     source: "GET /api/belnet-v1/configurations/validation-topics"
+    #     time: "2026-07-16T12:01:19+00:00"
+    #     caller: "Charlie Davis"
+    #     code: "200"
+    #     message: "OK"
+    #     page: 1
+    #     per_page: 100
+    #     total_items: 5
+    #     items:
+    #       - validation_topic:
+    #           name_id: "GDPR"
+    #           description: "The General Data Protection Regulation compliance of the DMP."
+    #           created: "2026-06-18T14:12:17Z"
+    #           deprecated: false
+    #       - validation_topic:
+    #           name_id: "Ethics"
+    #           description: "Ethical considerations for the DMP."
+    #           created: "2026-06-18T14:10:33Z"
+    #           deprecated: false
+    #       - validation_topic:
+    #           name_id: "FAIR"
+    #           description: "The Findable, Accessible, Interoperable and Reusable data principles compliance of the DMP."
+    #           created: "2026-04-27T09:20:40Z"
+    #           deprecated: false
+    #       - validation_topic:
+    #           name_id: "Data Security"
+    #           description: "Data security considerations for the DMP."
+    #           created: "2026-04-27T09:20:40Z"
+    #           deprecated: false
+    #       - validation_topic:
+    #           name_id: "Data Storage"
+    #           description: "Data storage considerations for the DMP."
+    #           created: "2026-04-27T09:20:40Z"
+    #           deprecated: false
+    RegularGetConfigValidationTopicsResponse:
+      summary: Default list for all organizations
+      description: DMP validation topics available for current logged-in user.
+      value:
+        application: "DMPonline.be"
+        source: "GET /api/belnet-v1/configurations/validation-topics"
+        time: "2026-07-16T12:01:19+00:00"
+        caller: "Charlie Davis"
+        code: "200"
+        message: "OK"
+        page: 1
+        per_page: 100
+        total_items: 1
+        items:
+          - validation_topics:
+              modified: "2026-06-18T14:12:17Z"
+              organization:
+                org_id: 0
+                org_name: "All organizations in DMPOnline"
+                org_abbreviation: "All"
+              current_list:
+                enum:
+                  - "GDPR"
+                  - "Ethics"
+                  - "FAIR"
+                  - "Data Security"
+                  - "Data Storage"
+              full_list:
+                enum:
+                  - "GDPR"
+                  - "Ethics"
+                  - "FAIR"
+                  - "Data Security"
+                  - "Data Storage"
+    # RegularGetConfigValidationStatusesResponse:
+    #   summary: Regular answer
+    #   description: DMP validation statuses available for current logged-in user.
+    #   value:
+    #     application: "DMPonline.be"
+    #     source: "GET /api/belnet-v1/configurations/validation-statuses"
+    #     time: "2026-07-16T12:01:19+00:00"
+    #     caller: "Charlie Davis"
+    #     code: "200"
+    #     message: "OK"
+    #     page: 1
+    #     per_page: 100
+    #     total_items: 4
+    #     items:
+    #       - validation_status:
+    #           name_id: "Pending Review"
+    #           description: "The initial validation status every DMP validation review request enters."
+    #           created: "2026-06-18T14:12:17Z"
+    #           deprecated: false
+    #       - validation_status:
+    #           name_id: "Approved"
+    #           description: "The DMP version has been approved for the indicated validation topic."
+    #           created: "2026-06-18T14:10:33Z"
+    #           deprecated: false
+    #       - validation_status:
+    #           name_id: "Denied"
+    #           description: "The DMP version has been denied for the indicated validation topic."
+    #           created: "2026-04-27T09:20:40Z"
+    #           deprecated: false
+    #       - validation_status:
+    #           name_id: "Rework Needed"
+    #           description: "The DMP version needs rework for the indicated validation topic."
+    #           created: "2026-04-27T09:20:40Z"
+    #           deprecated: false
+    RegularGetConfigValidationStatusesResponse:
+      summary: Default list for all organizations
+      description: DMP validation statuses available for current logged-in user.
+      value:
+        application: "DMPonline.be"
+        source: "GET /api/belnet-v1/configurations/validation-statuses"
+        time: "2026-07-16T12:01:19+00:00"
+        caller: "Charlie Davis"
+        code: "200"
+        message: "OK"
+        page: 1
+        per_page: 100
+        total_items: 1
+        items:
+          - validation_statuses:
+              modified: "2026-06-18T14:12:17Z"
+              organization:
+                org_id: 0
+                org_name: "All organizations in DMPOnline"
+                org_abbreviation: "All"
+              current_list:
+                enum:
+                  - "Pending Review"
+                  - "Approved"
+                  - "Denied"
+                  - "Rework Needed"
+              full_list:
+                enum:
+                  - "Pending Review"
+                  - "Approved"
+                  - "Denied"
+                  - "Rework Needed"
+security:
+  - MyClientId: []
