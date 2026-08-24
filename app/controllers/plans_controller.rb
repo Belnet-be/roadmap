@@ -26,6 +26,11 @@ class PlansController < ApplicationController
                                             end
     @dashboard_filter_values = plan_dashboard_filter_params
     @dashboard_stage_options = current_user.org&.current_valid_belnet_stages || []
+    @dashboard_template_options = Template
+                                  .where(id: Plan.active(current_user).select(:template_id))
+                                  .order(:title)
+    @dashboard_validation_topic_options  = current_user.org&.active_validation_topics || []
+    @dashboard_validation_status_options = current_user.org&.active_validation_statuses || []
     # TODO: Is this still used? We cannot switch this to use the :plan_params
     #       strong params because any calls that do not include `plan` in the
     #       query string will fail
@@ -326,6 +331,15 @@ class PlansController < ApplicationController
     if @plan.present?
       authorize @plan
       @plan_roles = @plan.roles.where(active: true)
+    else
+      redirect_to(plans_path)
+    end
+  end
+
+  def validate
+    @plan = Plan.find(params[:id])
+    if @plan.present?
+      authorize @plan
       load_governance_validations
     else
       redirect_to(plans_path)

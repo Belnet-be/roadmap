@@ -257,7 +257,77 @@ class Plan < ApplicationRecord
       )
   }
 
+  scope :with_validation_topic, lambda { |topic|
+    next all if topic.blank?
+
+    joins(:belnet_validations)
+      .where(belnet_validations: { topic: topic })
+  }
+
   scope :excluding_test_plans, -> { where.not(visibility: visibilities[:is_test]) }
+
+  # Case insensitive substring match on the plan title
+  scope :titled_like, lambda { |term|
+    next all if term.to_s.strip.blank?
+
+    pattern = "%#{term.to_s.strip.downcase}%"
+    where('LOWER(plans.title) LIKE ?', pattern)
+  }
+
+  # Filter by template id
+  scope :using_template, lambda { |template_id|
+    next all if template_id.blank?
+
+    where(template_id: template_id)
+  }
+
+  # Filter by validation topic name. A plan matches when it appears on any
+  # BelnetValidation for the given topic
+  scope :with_validation_topic, lambda { |topic_name|
+    next all if topic_name.blank?
+
+    where(
+      'plans.id IN (SELECT plan_id FROM belnet_validations WHERE validation_topic = :t) ' \
+      'OR plans.id IN (SELECT validated_plan_id FROM belnet_validations WHERE validation_topic = :t)',
+      t: topic_name
+    )
+  }
+
+  # Same pattern as with_validation_topic but keyed on validation_status
+  scope :with_validation_status, lambda { |status_name|
+    next all if status_name.blank?
+
+    where(
+      'plans.id IN (SELECT plan_id FROM belnet_validations WHERE validation_status = :s) ' \
+      'OR plans.id IN (SELECT validated_plan_id FROM belnet_validations WHERE validation_status = :s)',
+      s: status_name
+    )
+  }
+
+  # Plans created OR modified since the given time
+  scope :active_since, lambda { |threshold|
+    next all if threshold.nil?
+
+    where('plans.created_at >= :t OR plans.updated_at >= :t', t: threshold)
+  }
+
+  # Restricts to plans that have at least one pending validation (reviewed_at IS NULL)
+  scope :with_pending_validation, lambda {
+    where(
+      'plans.id IN (SELECT plan_id FROM belnet_validations WHERE reviewed_at IS NULL) ' \
+      'OR plans.id IN (SELECT validated_plan_id FROM belnet_validations WHERE reviewed_at IS NULL)'
+    )
+  }
+
+  # Restricts to plans whose #percent_answered is greater than or equal to the given threshold
+  # The threshold is expected to be a string
+  scope :with_completion_at_least, lambda { |percent_threshold|
+    min = percent_threshold.to_i
+    next all if percent_threshold.blank? || min <= 0
+
+    matching_ids = to_a.select { |plan| plan.percent_answered >= min }.map(&:id)
+    where(id: matching_ids)
+  }
 
   scope :grouped_by_family, lambda {
     order(Arel.sql('COALESCE(plans.belnet_family_id, plans.id) DESC'))

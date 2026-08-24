@@ -15,9 +15,9 @@ class BelnetValidationsController < ApplicationController
     @validation.requested_by = current_user
 
     if @validation.save
-      redirect_to share_plan_path(@plan), notice: success_message(@validation, _('requested'))
+      redirect_to validate_plan_path(@plan), notice: success_message(@validation, _('requested'))
     else
-      redirect_to share_plan_path(@plan), alert: failure_message(@validation, _('request'))
+      redirect_to validate_plan_path(@plan), alert: failure_message(@validation, _('request'))
     end
   end
 
@@ -32,9 +32,9 @@ class BelnetValidationsController < ApplicationController
     )
 
     if @validation.update(attrs)
-      redirect_to share_plan_path(@plan), notice: success_message(@validation, _('reviewed'))
+      redirect_to validate_plan_path(@plan), notice: success_message(@validation, _('reviewed'))
     else
-      redirect_to share_plan_path(@plan), alert: failure_message(@validation, _('review'))
+      redirect_to validate_plan_path(@plan), alert: failure_message(@validation, _('review'))
     end
   end
 
@@ -47,7 +47,7 @@ class BelnetValidationsController < ApplicationController
   def set_validation
     @validation = @plan.governance_validations_for_org_topics.find(params[:id])
   rescue ActiveRecord::RecordNotFound
-    redirect_to share_plan_path(@plan), alert: _('Invalid governance validation review.')
+    redirect_to validate_plan_path(@plan), alert: _('Invalid governance validation review.')
   end
 
   # Strongparams only. Values are strings (name_ids);
