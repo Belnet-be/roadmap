@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: API Belnet v1
-  version: 1.0.0-alpha+spr0019.1
+  version: 1.0.0-alpha+spr0021
   description: |-
     The Belnet extension of the standard APIs for the DMPonline application.
 
@@ -11,9 +11,11 @@ info:
     * All list endpoints support pagination, with a default of 100 items per page.
 
     ## Open points
+    * [x] Extra endpoint to query for DMPs.
     * [ ] Write out
-      * GetVersionedPlanResponse and GetEditablePlanResponse
-      * RegularCreatePlanLifecycleStageResponse
+      * [ ] GetVersionedPlanResponse and GetEditablePlanResponse
+      * [ ] RegularCreatePlanLifecycleStageResponse
+      * [ ] Examples for DMP queries with filters
     * [x] Check fields required or not, and allowed values for all request and response schemas
     * [ ] Error messages
     * [x] Update schemas for config payloads
@@ -26,7 +28,7 @@ servers:
     url: https://dmponline-test-1.tl.belnet.be
 tags:
   - name: Plans
-    description: Retrieving a Data Management Plan (DMP), but now extended with metadata for either the _editable_ DMP or an _immutable_ DMP version (read-only snapshot).
+    description: Retrieving Data Management Plans (DMPs), but now either an _editable_ DMP or an _immutable_ version (read-only snapshot) of it.
   - name: Versions of plans
     description: Operations for creating and retrieving versions of Data Management Plans (DMPs).
   - name: Lifecycle stage of a plan
@@ -36,11 +38,12 @@ tags:
   - name: Configurations
     description: Operations for retrieving configuration objects to support governance of Data Management Plans (DMPs). They are centrally managed and can't be modified via this API.
 paths:
-  /api/belnet-v1/plans/{plan_id}:
+  /api/belnet-v1/plans:
     get:
       description: |
-        Retrieves a Data Management Plan (DMP), but now the `plan_id` parameter refers to either the default _editable_ DMP or an _immutable_ DMP version of it.<br>
-        To make the distinction read the `dmp/extension/belnet/dmp_extension_type` value: it is either `editable` or `version`.
+        Retrieves all or filtered Data Management Plans (DMPs) where the authentication account has access to,<br>
+        but now the `plan_id` parameter refers to either an _editable_ DMP or an _immutable_ version (read-only snapshot) of it.<br>
+        To make the distinction check the `dmp/extension/belnet/dmp_extension_type` value: it is either `editable` or `version`.
         * `dmp/dmp_id` refers still to the `plan_id` of the editable DMP.
         * `dmp/extension/belnet/dmp_version/dmp_id` refers to the `plan_id` of the immutable DMP version.
 
@@ -52,7 +55,181 @@ paths:
           * `dmp/extension/belnet/dmp_version` tracks DMP version information and the DMP `lifecycle_stage` at that moment.
           * `dmp/extension/belnet/dmp_validations` tracks ONLY the validation requests for this DMP version.
 
-      operationId: get_plan_versions
+      operationId: get_plans
+      parameters:
+        - $ref: "#/components/parameters/AcceptHeader"
+        - $ref: "#/components/parameters/AuthorizationHeader"
+        - in: query
+          name: response_depth
+          schema:
+            type: string
+            enum:
+              - plan_id
+              - summary
+              - extended
+            example: summary
+          required: true
+          description: |
+            The result depends on the specified depth:
+            * `plan_id`: Returns only the `plan_id`s (only the `dmp_id_number`).
+              * Meant to retrieve only the number of plans via `total_items`.
+            * `summary`: Returns only some basic information to support further queries.
+              * TBC: what fields are included in the summary?
+              * Proposal: only `plan_id` (full url so you can reference it), `title`, either `editable` or its `version_number` and `lifecycle_stage`.
+            * `extended`: Returns only but all the DMP parameters used as query parameters.
+
+            We don't provide a `full` response depth for this endpoint.<br>
+            A full response depth is only supported for the `GET /api/belnet-v1/plans/{plan_id}` endpoint,
+            where you can retrieve a specific plan with all its details and metadata.
+        - in: query
+          name: title_contains
+          schema:
+            type: string
+            example: the impact of
+          required: false
+          description: |
+            If provided, filters the results to include only plans where the DMP project title contains the specified string.
+        - in: query
+          name: time_period
+          schema:
+            type: string
+            enum:
+              - 1d
+              - 7d
+              - 30d
+              - 3m
+              - 6m
+              - 12m
+              - 2y
+            example: 30d
+          required: false
+          description: |
+            If provided, filters the results to include only plans created or modified since the specified time period.
+        - in: query
+          name: template_id
+          schema:
+            type: number
+            example: 3578
+          required: false
+          description: |
+            If provided, filters the results to include only plans created from the specified template ID.
+
+            Template IDs can be obtained from the `GET /api/v1/templates` endpoint, look for the `dmp_template/template_id/identifier` field.
+        - in: query
+          name: lifecycle_stage
+          schema:
+            type: string
+            example: Working Draft
+          required: false
+          description: |
+            If provided, filters the results to include only plans with the specified lifecycle stage.
+
+            For allowed values check the `full_list` via the `GET /api/belnet-v1/configurations/lifecycle-stages` endpoint.
+        - in: query
+          name: validation_topic
+          schema:
+            type: string
+            example: GDPR
+          required: false
+          description: |
+            If provided, filters the results to include only plans with the specified validation topic.
+
+            For allowed values check the `full_list` via the `GET /api/belnet-v1/configurations/validation-topics` endpoint.
+        - in: query
+          name: validation_status
+          schema:
+            type: string
+            example: Pending Review
+          required: false
+          description: |
+            If provided, filters the results to include only plans with the specified validation status.
+
+            For allowed values check the `full_list` via the `GET /api/belnet-v1/configurations/validation-statuses` endpoint.
+        - in: query
+          name: min_completion_rate
+          schema:
+            type: number
+            enum:
+              - 25
+              - 50
+              - 75
+              - 100
+            example: 50
+          required: false
+          description: |
+            If provided, filters the results to include only plans with at least the specified completion rate in percent.
+        - in: query
+          name: include_versions
+          schema:
+            type: boolean
+            example: true
+          required: false
+          description: |
+            If provided, consider also _immutable_ versions (read-only snapshots) of plans in the results.
+        - in: query
+          name: pending_my_review
+          schema:
+            type: boolean
+            example: true
+          required: false
+          description: |
+            If provided, filters the results to include only plans that require my review.
+
+            TBC: what are the criteria for a plan to require my review?
+        - in: query
+          name: exclude_test_plans
+          schema:
+            type: boolean
+            example: true
+          required: false
+          description: |
+            If provided, filters the results to include only real plans.
+
+            TBC: what are the criteria for a plan to be considered a test plan?<br>
+            * Under title "mock project for testing, practice, or educational purposes"
+            * I also saw some plans with visibility "Test"
+
+            How to filter only for test plans? To put some of them in "Archived" lifecycle stage?
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetPlanResponse"
+              # examples:
+              #   versioned:
+              #     $ref: "#/components/examples/GetVersionedPlanResponse"
+              #   editable:
+              #     $ref: "#/components/examples/GetEditablePlanResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorUnauthorizedResponse"
+              # examples:
+              #   Error1:
+              #     $ref: "#/components/examples/Error1"
+          description: Bad Request
+      tags:
+        - Plans
+  /api/belnet-v1/plans/{plan_id}:
+    get:
+      description: |
+        Retrieves a Data Management Plan (DMP), but now the `plan_id` parameter refers to either an _editable_ DMP or an _immutable_ version (read-only snapshot) of it.<br>
+        To make the distinction check the `dmp/extension/belnet/dmp_extension_type` value: it is either `editable` or `version`.
+        * `dmp/dmp_id` refers still to the `plan_id` of the editable DMP.
+        * `dmp/extension/belnet/dmp_version/dmp_id` refers to the `plan_id` of the immutable DMP version.
+
+        Extra metadata:
+        * Editable DMP:
+          * `dmp/extension/belnet/dmp_editable` tracks currently only the DMP `lifecycle_stage`.
+          * `dmp/extension/belnet/dmp_validations` tracks ALL validation requests for this DMP.
+        * Immutable DMP version:
+          * `dmp/extension/belnet/dmp_version` tracks DMP version information and the DMP `lifecycle_stage` at that moment.
+          * `dmp/extension/belnet/dmp_validations` tracks ONLY the validation requests for this DMP version.
+
+      operationId: get_plan
       parameters:
         - $ref: "#/components/parameters/AcceptHeader"
         - $ref: "#/components/parameters/AuthorizationHeader"
