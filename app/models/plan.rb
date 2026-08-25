@@ -319,14 +319,27 @@ class Plan < ApplicationRecord
     )
   }
 
-  # Restricts to plans whose #percent_answered is greater than or equal to the given threshold
-  # The threshold is expected to be a string
   scope :with_completion_at_least, lambda { |percent_threshold|
     min = percent_threshold.to_i
     next all if percent_threshold.blank? || min <= 0
 
-    matching_ids = to_a.select { |plan| plan.percent_answered >= min }.map(&:id)
-    where(id: matching_ids)
+    sql = <<~SQL.squish
+      SELECT p.id FROM plans p
+      JOIN (
+        SELECT templates.id AS template_id, COUNT(DISTINCT questions.id) AS q
+        FROM templates
+        JOIN phases    ON phases.template_id   = templates.id
+        JOIN sections  ON sections.phase_id    = phases.id
+        JOIN questions ON questions.section_id = sections.id
+        GROUP BY templates.id
+      ) tq ON tq.template_id = p.template_id
+      LEFT JOIN (
+        SELECT plan_id, COUNT(*) AS a FROM answers GROUP BY plan_id
+      ) pa ON pa.plan_id = p.id
+      WHERE tq.q > 0 AND (COALESCE(pa.a, 0) * 100.0 / tq.q) >= #{min}
+    SQL
+
+    where("plans.id IN (#{sql})")
   }
 
   scope :grouped_by_family, lambda {
