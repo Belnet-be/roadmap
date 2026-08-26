@@ -1,27 +1,20 @@
 openapi: 3.1.0
 info:
   title: API Belnet v1
-  version: 1.0.0-alpha+spr0021
+  version: 1.0.0-beta+spr0021
   description: |-
-    The Belnet extension of the standard APIs for the DMPonline application.
-
-    ## Goal and scope
+    The Belnet extension of the standard DMPRoadmap v1 API for the DMPonline application.
 
     ## Details
     * All list endpoints support pagination, with a default of 100 items per page.
+    * Note the difference between `lifecycle-stage` as query parameter and `lifecycle_stage` field in request and response bodies.
+      * We use the best practice of using dash-case in URLs and snake_case for request and response bodies.
 
     ## Open points
-    * [x] Extra endpoint to query for DMPs.
     * [ ] Write out
       * [ ] GetVersionedPlanResponse and GetEditablePlanResponse
       * [ ] RegularCreatePlanLifecycleStageResponse
-      * [x] Examples for DMP queries with filters
-    * [x] Check fields required or not, and allowed values for all request and response schemas
     * [ ] Error messages
-    * [x] Update schemas for config payloads
-    * [x] Change `dmp_stages` to `lifecycle_stages` in config responses to make it consistent with other endpoints
-    * [x] Change `validation` to `dmp_validation` in validation responses to make it consistent with other endpoints
-    * [x] Correct the `lifecycle-stage` field to `lifecycle_stage` in all examples and responses
 
 servers:
   - description: Internal TEST environment
@@ -55,6 +48,8 @@ paths:
           * `dmp/extension/belnet/dmp_version` tracks DMP version information and the DMP `lifecycle_stage` at that moment.
           * `dmp/extension/belnet/dmp_validations` tracks ONLY the validation requests for this DMP version.
 
+        **Note**: While in the user interface of the DMPonline application you can filter on plan visibility,
+        this is not supported via this API endpoint because we can't inform you about the setting with the current maDMP schema.
       operationId: get_plans
       parameters:
         - $ref: "#/components/parameters/AcceptHeader"
@@ -182,25 +177,13 @@ paths:
           description: |
             If provided, filters the results to include only plans that require my review.
 
-            TBC: what are the criteria for a plan to require my review?
-        - in: query
-          name: plan-visibility
-          schema:
-            type: string
-            enum:
-              - public
-              - organisational
-              - private
-              - test
-            example: private
-          required: false
-          description: |
-            If provided, filters the results to include only plans with the specified visibility.
+            The current criteria are:
+            * There is a DMP version
+            * There is a validation request for that DMP version with a `validation_status` of `Pending Review`
+            * You have access to this DMP
 
-            **Note**: `test` is a special visibility level:
-            * These plans have `private` visibility, but only for testing purposes.
-            * If selected `private` show only the plans with private visibility, but not the test plans.
-
+            **Note**: There is currently no way to assign a specific reviewer to a validation request,
+            so this filter is only based on the current user having access to the DMP.
       responses:
         "200":
           content:
