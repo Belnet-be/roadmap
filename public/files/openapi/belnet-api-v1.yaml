@@ -15,7 +15,7 @@ info:
     * [ ] Write out
       * [ ] GetVersionedPlanResponse and GetEditablePlanResponse
       * [ ] RegularCreatePlanLifecycleStageResponse
-      * [ ] Examples for DMP queries with filters
+      * [x] Examples for DMP queries with filters
     * [x] Check fields required or not, and allowed values for all request and response schemas
     * [ ] Error messages
     * [x] Update schemas for config payloads
@@ -207,11 +207,13 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/GetPlanResponse"
-              # examples:
-              #   versioned:
-              #     $ref: "#/components/examples/GetVersionedPlanResponse"
-              #   editable:
-              #     $ref: "#/components/examples/GetEditablePlanResponse"
+              examples:
+                by_id:
+                  $ref: "#/components/examples/GetPlansResponseById"
+                by_summary:
+                  $ref: "#/components/examples/GetPlansResponseBySummary"
+                by_extended:
+                  $ref: "#/components/examples/GetPlansResponseByExtended"
           description: OK
         "400":
           content:
@@ -1713,6 +1715,184 @@ components:
         type: string
         example: Bearer <token>
   examples:
+    GetPlansResponseById:
+      summary: Response depth = id
+      description: Simplest list of DMPs.
+      value:
+        application: "DMPonline.be"
+        source: "POST /api/belnet-v1/plans?response_depth=id"
+        time: "2026-07-16T12:01:19+00:00"
+        caller: "Charlie Davis"
+        code: "200"
+        message: "Ok"
+        page: 1
+        per_page: 100
+        total_items: 3
+        items:
+          - dmp:
+              dmp_id:
+                identifier: "https://dmponline-test-1.tl.belnet.be/api/belnet-v1/plans/65875"
+                type: "url"
+          - dmp:
+              dmp_id:
+                identifier: "https://dmponline-test-1.tl.belnet.be/api/belnet-v1/plans/65876"
+                type: "url"
+          - dmp:
+              dmp_id:
+                identifier: "https://dmponline-test-1.tl.belnet.be/api/belnet-v1/plans/65877"
+                type: "url"
+    GetPlansResponseBySummary:
+      summary: Response depth = summary
+      description: List of DMPs with summary information.
+      value:
+        application: "DMPonline.be"
+        source: "POST /api/belnet-v1/plans?response_depth=summary&title-contains=sample"
+        time: "2026-07-16T12:01:19+00:00"
+        caller: "Charlie Davis"
+        code: "200"
+        message: "Ok"
+        page: 1
+        per_page: 100
+        total_items: 3
+        items:
+          - dmp:
+              title: "This is a sample DMP for testing purposes, without belnet extension: by default an editable DMP."
+              dmp_id:
+                identifier: "https://dmponline-test-1.tl.belnet.be/api/belnet-v1/plans/65875"
+                type: "url"
+          - dmp:
+              title: "This is another sample DMP for testing purposes, with belnet extension for editable DMP."
+              dmp_id:
+                identifier: "https://dmponline-test-1.tl.belnet.be/api/belnet-v1/plans/65876"
+                type: "url"
+              extension:
+                belnet:
+                  dmp_extension_type: "editable"
+                  dmp_editable:
+                    lifecycle_stage: "Working Draft"
+          - dmp:
+              title: "This is a third sample DMP for testing purposes, with belnet extension for versioned DMP."
+              dmp_id:
+                identifier: "https://dmponline-test-1.tl.belnet.be/api/belnet-v1/plans/65877"
+                type: "url"
+              extension:
+                belnet:
+                  dmp_extension_type: "version"
+                  dmp_version:
+                    dmp_id:
+                      identifier: "https://dmponline-test-1.tl.belnet.be/api/belnet-v1/plans/65878"
+                      type: "url"
+                    number: 1
+                    lifecycle_stage: "Working Draft"
+    GetPlansResponseByExtended:
+      summary: Response depth = extended
+      description: List of DMPs with extended information.
+      value:
+        application: "DMPonline.be"
+        source: "POST /api/belnet-v1/plans?response_depth=extended&title-contains=sample"
+        time: "2026-07-16T12:01:19+00:00"
+        caller: "Charlie Davis"
+        code: "200"
+        message: "Ok"
+        page: 1
+        per_page: 100
+        total_items: 3
+        items:
+          - dmp:
+              title: "This is a sample DMP for testing purposes, without belnet extension: by default an editable DMP."
+              created: "2026-06-18T14:10:33Z"
+              modified: "2026-06-18T14:10:33Z"
+              dmp_id:
+                identifier: "https://dmponline-test-1.tl.belnet.be/api/belnet-v1/plans/65875"
+                type: "url"
+              extension:
+                dmproadmap:
+                  template:
+                    id: 3578
+                    title: "BELSPO DMP"
+          - dmp:
+              title: "This is another sample DMP for testing purposes, with belnet extension for editable DMP."
+              created: "2026-06-18T14:10:33Z"
+              modified: "2026-06-18T14:10:33Z"
+              dmp_id:
+                identifier: "https://dmponline-test-1.tl.belnet.be/api/belnet-v1/plans/65876"
+                type: "url"
+              extension:
+                dmproadmap:
+                  template:
+                    id: 3578
+                    title: "BELSPO DMP"
+                belnet:
+                  dmp_extension_type: "editable"
+                  dmp_editable:
+                    created: "2026-06-18T14:10:33Z"
+                    modified: "2026-06-18T14:10:33Z"
+                    created_by:
+                      identifier: "https://orcid.org/0000-0000-0000-0000"
+                      type: "orcid"
+                    modified_by:
+                      identifier: "https://orcid.org/0000-0000-0000-0000"
+                      type: "orcid"
+                    lifecycle_stage: "Working Draft"
+                  dmp_validations:
+                    - dmp_validation:
+                        created: "2026-06-18T14:10:33Z"
+                        modified: "2026-06-18T14:10:33Z"
+                        created_by:
+                          identifier: "https://orcid.org/0000-0000-0000-0000"
+                          type: "orcid"
+                        modified_by:
+                          identifier: "https://orcid.org/0000-0000-0000-0000"
+                          type: "orcid"
+                        dmp_version_number: 1
+                        topic: "GDPR"
+                        status: "Approved"
+                        rationale: "The DMP version is valid because it meets all GDPR requirements."
+                        conditions: "No extra conditions."
+          - dmp:
+              title: "This is a third sample DMP for testing purposes, with belnet extension for versioned DMP."
+              created: "2026-06-18T14:10:33Z"
+              modified: "2026-06-18T14:10:33Z"
+              dmp_id:
+                identifier: "https://dmponline-test-1.tl.belnet.be/api/belnet-v1/plans/65877"
+                type: "url"
+              extension:
+                dmproadmap:
+                  template:
+                    id: 3578
+                    title: "BELSPO DMP"
+                belnet:
+                  dmp_extension_type: "version"
+                  dmp_version:
+                    created: "2026-06-18T14:10:33Z"
+                    modified: "2026-06-18T14:10:33Z"
+                    created_by:
+                      identifier: "https://orcid.org/0000-0000-0000-0000"
+                      type: "orcid"
+                    modified_by:
+                      identifier: "https://orcid.org/0000-0000-0000-0000"
+                      type: "orcid"
+                    dmp_id:
+                      identifier: "https://dmponline-test-1.tl.belnet.be/api/belnet-v1/plans/65878"
+                      type: "url"
+                    number: 1
+                    reason: "Updating the plan to include GDPR requirements."
+                    lifecycle_stage: "Working Draft"
+                  dmp_validations:
+                    - dmp_validation:
+                        created: "2026-06-18T14:10:33Z"
+                        modified: "2026-06-18T14:10:33Z"
+                        created_by:
+                          identifier: "https://orcid.org/0000-0000-0000-0000"
+                          type: "orcid"
+                        modified_by:
+                          identifier: "https://orcid.org/0000-0000-0000-0000"
+                          type: "orcid"
+                        dmp_version_number: 1
+                        topic: "GDPR"
+                        status: "Approved"
+                        rationale: "The DMP version is valid because it meets all GDPR requirements."
+                        conditions: "No extra conditions."
     # GetVersionedPlanResponse:
     #   summary: Regular answer
     #   description: DMP version created successfully for DMP with ID 65875.
