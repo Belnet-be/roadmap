@@ -60,29 +60,32 @@ paths:
         - $ref: "#/components/parameters/AcceptHeader"
         - $ref: "#/components/parameters/AuthorizationHeader"
         - in: query
-          name: response_depth
+          name: response-depth
           schema:
             type: string
             enum:
-              - plan_id
+              - id
               - summary
               - extended
             example: summary
-          required: true
+            default: summary
+          required: false
           description: |
             The result depends on the specified depth:
-            * `plan_id`: Returns only the `plan_id`s (only the `dmp_id_number`).
-              * Meant to retrieve only the number of plans via `total_items`.
+            * `id`: Returns only the `plan_id`s (full url so you can reference it).
+              * Prime goal: retrieve number of plans via `total_items`.
             * `summary`: Returns only some basic information to support further queries.
-              * TBC: what fields are included in the summary?
-              * Proposal: only `plan_id` (full url so you can reference it), `title`, either `editable` or its `version_number` and `lifecycle_stage`.
+              * `plan_id` (full url so you can reference it)
+              * `title`
+              * either `editable` or its `version_number`
+              * `lifecycle_stage`
             * `extended`: Returns only but all the DMP parameters used as query parameters.
 
             We don't provide a `full` response depth for this endpoint.<br>
             A full response depth is only supported for the `GET /api/belnet-v1/plans/{plan_id}` endpoint,
             where you can retrieve a specific plan with all its details and metadata.
         - in: query
-          name: title_contains
+          name: title-contains
           schema:
             type: string
             example: the impact of
@@ -90,7 +93,7 @@ paths:
           description: |
             If provided, filters the results to include only plans where the DMP project title contains the specified string.
         - in: query
-          name: time_period
+          name: time-period
           schema:
             type: string
             enum:
@@ -106,7 +109,7 @@ paths:
           description: |
             If provided, filters the results to include only plans created or modified since the specified time period.
         - in: query
-          name: template_id
+          name: template-id
           schema:
             type: number
             example: 3578
@@ -114,9 +117,9 @@ paths:
           description: |
             If provided, filters the results to include only plans created from the specified template ID.
 
-            Template IDs can be obtained from the `GET /api/v1/templates` endpoint, look for the `dmp_template/template_id/identifier` field.
+            For allowed values check the `GET /api/v1/templates` endpoint, and look for the `dmp_template/template_id/identifier` field.
         - in: query
-          name: lifecycle_stage
+          name: lifecycle-stage
           schema:
             type: string
             example: Working Draft
@@ -126,7 +129,7 @@ paths:
 
             For allowed values check the `full_list` via the `GET /api/belnet-v1/configurations/lifecycle-stages` endpoint.
         - in: query
-          name: validation_topic
+          name: validation-topic
           schema:
             type: string
             example: GDPR
@@ -136,7 +139,7 @@ paths:
 
             For allowed values check the `full_list` via the `GET /api/belnet-v1/configurations/validation-topics` endpoint.
         - in: query
-          name: validation_status
+          name: validation-status
           schema:
             type: string
             example: Pending Review
@@ -146,7 +149,7 @@ paths:
 
             For allowed values check the `full_list` via the `GET /api/belnet-v1/configurations/validation-statuses` endpoint.
         - in: query
-          name: min_completion_rate
+          name: min-completion-rate
           schema:
             type: number
             enum:
@@ -159,17 +162,21 @@ paths:
           description: |
             If provided, filters the results to include only plans with at least the specified completion rate in percent.
         - in: query
-          name: include_versions
+          name: include-versions
           schema:
             type: boolean
+            default: false
             example: true
           required: false
           description: |
-            If provided, consider also _immutable_ versions (read-only snapshots) of plans in the results.
+            If `true`, consider also _immutable_ versions (read-only snapshots) of plans in the results.
+
+            Otherwise, only _editable_ plans are considered in the results.
         - in: query
-          name: pending_my_review
+          name: pending-my-review
           schema:
             type: boolean
+            default: false
             example: true
           required: false
           description: |
@@ -177,19 +184,23 @@ paths:
 
             TBC: what are the criteria for a plan to require my review?
         - in: query
-          name: exclude_test_plans
+          name: plan-visibility
           schema:
-            type: boolean
-            example: true
+            type: string
+            enum:
+              - public
+              - organisational
+              - private
+              - test
+            example: private
           required: false
           description: |
-            If provided, filters the results to include only real plans.
+            If provided, filters the results to include only plans with the specified visibility.
 
-            TBC: what are the criteria for a plan to be considered a test plan?<br>
-            * Under title "mock project for testing, practice, or educational purposes"
-            * I also saw some plans with visibility "Test"
+            **Note**: `test` is a special visibility level:
+            * These plans have `private` visibility, but only for testing purposes.
+            * If selected `private` show only the plans with private visibility, but not the test plans.
 
-            How to filter only for test plans? To put some of them in "Archived" lifecycle stage?
       responses:
         "200":
           content:
