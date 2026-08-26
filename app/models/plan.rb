@@ -266,6 +266,13 @@ class Plan < ApplicationRecord
 
   scope :excluding_test_plans, -> { where.not(visibility: visibilities[:is_test]) }
 
+  scope :with_visibility, lambda { |name|
+    next all if name.blank?
+    next none unless visibilities.key?(name.to_s)
+
+    where(visibility: visibilities[name.to_s])
+  }
+
   # Case insensitive substring match on the plan title
   scope :titled_like, lambda { |term|
     next all if term.to_s.strip.blank?

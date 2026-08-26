@@ -115,16 +115,16 @@
       </div>
     </div>
 
-    <div class="col-md-2 m-1 d-flex align-items-end">
-      <div class="form-check">
-        <%= check_box_tag 'exclude_test_plans', '1',
-                          truthy.call(values[:exclude_test_plans]),
-                          class: 'form-check-input m-0',
-                          id: 'filter-exclude-test' %>
-        <label class="form-check-label" for="filter-exclude-test">
-          <%= _('exclude test plans') %>
-        </label>
-      </div>
+    <div class="col-md-2 m-1">
+      <label class="form-label fw-bold" for="filter-visibility"><%= _('Visibility') %></label>
+      <select id="filter-visibility" name="visibility" class="form-select">
+        <option value=""><%= _('All') %></option>
+        <% PlanDashboardFilters::VISIBILITY_OPTIONS.each do |value, label| %>
+          <option value="<%= value %>" <%= 'selected' if values[:visibility] == value %>>
+            <%= _(label) %>
+          </option>
+        <% end %>
+      </select>
     </div>
 
     <div class="col-12 d-flex gap-2 mt-2">

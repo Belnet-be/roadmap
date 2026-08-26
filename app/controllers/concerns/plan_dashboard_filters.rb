@@ -4,9 +4,16 @@ module PlanDashboardFilters
   extend ActiveSupport::Concern
 
   # Constants
-  FILTER_KEYS = %i[title template_id stage exclude_test_plans include_versions
+  FILTER_KEYS = %i[title template_id stage visibility include_versions
                    validation_topic validation_status time_period
                    min_completion_rate pending_my_review].freeze
+
+  VISIBILITY_OPTIONS = {
+    'privately_visible' => 'private',
+    'organisationally_visible' => 'organisational',
+    'publicly_visible' => 'public',
+    'is_test' => 'test'
+  }.freeze
 
   TRUTHY_FILTER_VALUES = %w[1 true on yes].to_set.freeze
 
@@ -43,7 +50,7 @@ module PlanDashboardFilters
     scope = scope.titled_like(filters[:title]) if filters[:title].present?
     scope = scope.using_template(filters[:template_id]) if filters[:template_id].present?
     scope = scope.with_lifecycle_stage(filters[:stage]) if filters[:stage].present?
-    scope = scope.excluding_test_plans if dashboard_filter_truthy?(filters[:exclude_test_plans])
+    scope = scope.with_visibility(filters[:visibility]) if filters[:visibility].present?
     scope = scope.with_validation_topic(filters[:validation_topic]) if filters[:validation_topic].present?
     scope = scope.with_validation_status(filters[:validation_status]) if filters[:validation_status].present?
     if (window = time_period_window(filters[:time_period]))
