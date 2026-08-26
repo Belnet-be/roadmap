@@ -1,0 +1,25 @@
+<%= render partial: 'shared/header', locals: { plan: @plan, title_suffix: _('Validations') } %>
+
+<% content_for :plan_tab_body do %>
+  <%= paginable_renderise(
+    partial: '/branded/paginable/plans/validate',
+    controller: 'paginable/plans',
+    action: 'validate',
+    path_params: { id: @plan.id },
+    remote: true,
+    scope: @governance_validations,
+    locals: {
+      plan: @plan,
+      available_topics: @available_topics,
+      available_validation_statuses: @available_validation_statuses,
+      available_validated_plans: @available_validated_plans
+    }
+  ) %>
+<% end %>
+
+<div class="row">
+  <div class="col-md-12">
+    <%= render layout: 'navigation', locals: { plan: @plan } do %>
+    <% end %>
+  </div>
+</div>

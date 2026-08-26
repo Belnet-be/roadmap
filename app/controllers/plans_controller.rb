@@ -5,6 +5,7 @@
 class PlansController < ApplicationController
   include ConditionalUserMailer
   include OrgSelectable
+  include PlanDashboardFilters
 
   helper PaginableHelper
   helper SettingsTemplateHelper
@@ -15,12 +16,21 @@ class PlansController < ApplicationController
   # rubocop:disable Metrics/AbcSize
   def index
     authorize Plan
-    @plans = Plan.live_versions.includes(:roles).active(current_user).page(1)
+    @plans = apply_plan_dashboard_filters(
+      Plan.includes(:roles).active(current_user)
+    ).page(1)
     @organisationally_or_publicly_visible = if current_user.org.is_other?
                                               []
                                             else
                                               Plan.organisationally_or_publicly_visible(current_user).page(1)
                                             end
+    @dashboard_filter_values = plan_dashboard_filter_params
+    @dashboard_stage_options = current_user.org&.current_valid_belnet_stages || []
+    @dashboard_template_options = Template
+                                  .where(id: Plan.active(current_user).select(:template_id))
+                                  .order(:title)
+    @dashboard_validation_topic_options  = current_user.org&.active_validation_topics || []
+    @dashboard_validation_status_options = current_user.org&.active_validation_statuses || []
     # TODO: Is this still used? We cannot switch this to use the :plan_params
     #       strong params because any calls that do not include `plan` in the
     #       query string will fail
@@ -321,6 +331,15 @@ class PlansController < ApplicationController
     if @plan.present?
       authorize @plan
       @plan_roles = @plan.roles.where(active: true)
+    else
+      redirect_to(plans_path)
+    end
+  end
+
+  def validate
+    @plan = Plan.find(params[:id])
+    if @plan.present?
+      authorize @plan
       load_governance_validations
     else
       redirect_to(plans_path)

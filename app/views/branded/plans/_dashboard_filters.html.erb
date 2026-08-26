@@ -1,0 +1,135 @@
+<% form_action = local_assigns[:form_action] || url_for(only_path: true) %>
+<div class="card card-body bg-light mb-3">
+  <h2 class="h5 mb-3">
+    <i class="fa fa-filter" aria-hidden="true"></i>
+    <%= _('Filters') %>
+  </h2>
+
+  <%= form_with url: form_action, method: :get, local: true, class: 'row g-3' do |f| %>
+    <% values = @dashboard_filter_values || {} %>
+    <%
+      truthy = ->(v) { PlanDashboardFilters::TRUTHY_FILTER_VALUES.include?(v.to_s.downcase) }
+    %>
+
+    <div class="col-md-3 m-1">
+      <label class="form-label fw-bold" for="filter-title"><%= _('Project title') %></label>
+      <%= text_field_tag 'title', values[:title],
+                         class: 'form-control',
+                         id: 'filter-title',
+                         placeholder: _('Contains…') %>
+    </div>
+
+    <div class="col-md-2 m-1">
+      <label class="form-label fw-bold" for="filter-time-period"><%= _('Time period') %></label>
+      <select id="filter-time-period" name="time_period" class="form-select">
+        <option value=""><%= _('All time') %></option>
+        <% PlanDashboardFilters::TIME_PERIOD_OPTIONS.each do |key, cfg| %>
+          <option value="<%= key %>" <%= 'selected' if values[:time_period] == key %>>
+            <%= _(cfg[:label]) %>
+          </option>
+        <% end %>
+      </select>
+    </div>
+
+    <div class="col-md-2 m-1">
+      <label class="form-label fw-bold" for="filter-template"><%= _('Template') %></label>
+      <select id="filter-template" name="template_id" class="form-select">
+        <option value=""><%= _('All') %></option>
+        <% (@dashboard_template_options || []).each do |template| %>
+          <option value="<%= template.id %>" <%= 'selected' if values[:template_id].to_s == template.id.to_s %>>
+            <%= template.title %>
+          </option>
+        <% end %>
+      </select>
+    </div>
+
+    <div class="col-md-2 m-1">
+      <label class="form-label fw-bold" for="filter-stage"><%= _('Stage') %></label>
+      <select id="filter-stage" name="stage" class="form-select">
+        <option value=""><%= _('All') %></option>
+        <% (@dashboard_stage_options || []).each do |stage_name| %>
+          <option value="<%= stage_name %>" <%= 'selected' if values[:stage] == stage_name %>>
+            <%= stage_name %>
+          </option>
+        <% end %>
+      </select>
+    </div>
+
+    <div class="col-md-2 m-1">
+      <label class="form-label fw-bold" for="filter-validation-topic"><%= _('Validation topic') %></label>
+      <select id="filter-validation-topic" name="validation_topic" class="form-select">
+        <option value=""><%= _('All') %></option>
+        <% (@dashboard_validation_topic_options || []).each do |topic_name| %>
+          <option value="<%= topic_name %>" <%= 'selected' if values[:validation_topic] == topic_name %>>
+            <%= topic_name %>
+          </option>
+        <% end %>
+      </select>
+    </div>
+
+    <div class="col-md-2 m-1">
+      <label class="form-label fw-bold" for="filter-validation-status"><%= _('Validation status') %></label>
+      <select id="filter-validation-status" name="validation_status" class="form-select">
+        <option value=""><%= _('All') %></option>
+        <% (@dashboard_validation_status_options || []).each do |status_name| %>
+          <option value="<%= status_name %>" <%= 'selected' if values[:validation_status] == status_name %>>
+            <%= status_name %>
+          </option>
+        <% end %>
+      </select>
+    </div>
+
+    <div class="col-md-2 m-1">
+      <label class="form-label fw-bold" for="filter-completion-rate"><%= _('Completion rate') %></label>
+      <select id="filter-completion-rate" name="min_completion_rate" class="form-select">
+        <option value=""><%= _('Any') %></option>
+        <% PlanDashboardFilters::COMPLETION_RATE_OPTIONS.each do |value, label| %>
+          <option value="<%= value %>" <%= 'selected' if values[:min_completion_rate] == value %>>
+            <%= _(label) %>
+          </option>
+        <% end %>
+      </select>
+    </div>
+
+    <div class="col-md-2 m-1 d-flex align-items-end">
+      <div class="form-check">
+        <%= check_box_tag 'include_versions', '1',
+                          truthy.call(values[:include_versions]),
+                          class: 'form-check-input m-0',
+                          id: 'filter-include-versions' %>
+        <label class="form-check-label" for="filter-include-versions">
+          <%= _('include versions') %>
+        </label>
+      </div>
+    </div>
+
+    <div class="col-md-2 m-1 d-flex align-items-end">
+      <div class="form-check">
+        <%= check_box_tag 'pending_my_review', '1',
+                          truthy.call(values[:pending_my_review]),
+                          class: 'form-check-input m-0',
+                          id: 'filter-pending-my-review' %>
+        <label class="form-check-label" for="filter-pending-my-review">
+          <%= _('pending my review') %>
+        </label>
+      </div>
+    </div>
+
+    <div class="col-md-2 m-1">
+      <label class="form-label fw-bold" for="filter-visibility"><%= _('Visibility') %></label>
+      <select id="filter-visibility" name="visibility" class="form-select">
+        <option value=""><%= _('All') %></option>
+        <% PlanDashboardFilters::VISIBILITY_OPTIONS.each do |value, label| %>
+          <option value="<%= value %>" <%= 'selected' if values[:visibility] == value %>>
+            <%= _(label) %>
+          </option>
+        <% end %>
+      </select>
+    </div>
+
+    <div class="col-12 d-flex gap-2 mt-2">
+      <%= f.submit _('Apply filters'), class: 'btn btn-primary' %>
+      <%= link_to _('Clear'), form_action, class: 'btn btn-secondary' %>
+    </div>
+  <% end %>
+</div>

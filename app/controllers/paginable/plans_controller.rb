@@ -4,15 +4,18 @@ module Paginable
   # Controller for paginating/sorting/searching the plans tables
   class PlansController < ApplicationController
     include Paginable
+    include PlanDashboardFilters
 
     # /paginable/plans/privately_visible/:page
     def privately_visible
       authorize Plan
 
+      filters = plan_dashboard_filter_params
+
       paginable_renderise(
         partial: 'privately_visible',
-        scope: Plan.includes(:roles).active(current_user),
-        query_params: { sort_field: 'plans.updated_at', sort_direction: :desc },
+        scope: apply_plan_dashboard_filters(Plan.includes(:roles).active(current_user), filters),
+        query_params: { sort_field: 'plans.updated_at', sort_direction: :desc }.merge(filters.compact),
         format: :json
       )
     end
@@ -30,6 +33,32 @@ module Paginable
         scope: scope,
         locals: { plan: @plan },
         query_params: { sort_field: 'plans.updated_at', sort_direction: :desc },
+        format: :json
+      )
+    end
+
+    # /paginable/plans/:id/validate/:page
+    # AJAX pagination for the validations tab on the plan detail page. Loads the shared
+    # "available topics/statuses/versions" the render partial needs so the section
+    # renders identically on the initial page and on paginated fetches
+    def validate
+      @plan = Plan.find(params[:id])
+      authorize @plan
+
+      scope = @plan.governance_validations
+                   .includes(:requested_by, :reviewed_by, :validated_plan)
+                   .order(created_at: :desc)
+
+      paginable_renderise(
+        partial: 'validate',
+        scope: scope,
+        locals: {
+          plan: @plan,
+          available_topics: @plan.org.active_validation_topics,
+          available_validation_statuses: @plan.org.active_validation_statuses,
+          available_validated_plans: @plan.plan_versions.order(belnet_version: :desc)
+        },
+        query_params: { id: @plan.id },
         format: :json
       )
     end
@@ -65,11 +94,13 @@ module Paginable
       plans = @super_admin ? Plan.all : current_user.org.org_admin_plans
       plans = plans.joins(:template, roles: [user: :org]).where(Role.creator_condition)
 
+      filters = plan_dashboard_filter_params
+
       paginable_renderise(
         partial: 'org_admin',
-        scope: plans,
+        scope: apply_plan_dashboard_filters(plans, filters, reviewable_check: false),
         view_all: !current_user.can_super_admin?,
-        query_params: { sort_field: 'plans.updated_at', sort_direction: :desc },
+        query_params: { sort_field: 'plans.updated_at', sort_direction: :desc }.merge(filters.compact),
         format: :json
       )
     end

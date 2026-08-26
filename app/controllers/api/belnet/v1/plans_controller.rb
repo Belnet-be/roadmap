@@ -9,6 +9,28 @@ module Api
       class PlansController < BaseApiController
         respond_to :json
 
+        VALID_DEPTHS = %w[id summary extended].freeze
+        TRUTHY = %w[1 true on yes].to_set.freeze
+
+        helper_method :live_plan_for, :validations_for
+
+        # GET /api/belnet-v1/plans
+        def index
+          depth = params[:'response-depth'].presence || 'summary'
+          unless VALID_DEPTHS.include?(depth)
+            render_error(errors: [_("response-depth must be one of: #{VALID_DEPTHS.join(', ')}")],
+                         status: :bad_request)
+            return
+          end
+
+          scope = filtered_index_scope
+          return if performed?
+
+          @depth = depth
+          @items = paginate_response(results: scope)
+          render 'api/belnet/v1/plans/index', status: :ok
+        end
+
         # GET /api/belnet-v1/plans/:id
         # `id` may reference either the editable (LIVE) DMP or one of its
         # version snapshots. The response's `dmp/extension/belnet/dmp_extension_type`
@@ -67,8 +89,52 @@ module Api
           # For a version request, only surface validations targeting this
           # specific version snapshot.
           scope = scope.where(validated_plan_id: plan.id) unless plan.is_plan_live_version?
-
           scope
+        end
+
+        # Returns the filtered scope of plans for the index action, based on the
+        # request params. Renders an error and returns nil if any param is invalid.
+        def filtered_index_scope
+          scope = Api::Belnet::V1::PlansPolicy::Scope.new(client, Plan).resolve
+
+          scope = scope.live_versions unless truthy?(params[:'include-versions'])
+          scope = scope.titled_like(params[:'title-contains']) if params[:'title-contains'].present?
+          scope = scope.using_template(params[:'template-id']) if params[:'template-id'].present?
+          scope = scope.with_lifecycle_stage(params[:'lifecycle-stage']) if params[:'lifecycle-stage'].present?
+          scope = scope.with_validation_topic(params[:'validation-topic']) if params[:'validation-topic'].present?
+          scope = scope.with_validation_status(params[:'validation-status']) if params[:'validation-status'].present?
+
+          if (window = PlanDashboardFilters::TIME_PERIOD_OPTIONS.dig(params[:'time-period'], :window))
+            scope = scope.active_since(window.ago)
+          end
+
+          if params[:'min-completion-rate'].present?
+            scope = scope.with_completion_at_least(params[:'min-completion-rate'])
+          end
+
+          if truthy?(params[:'pending-my-review'])
+            scope = scope.with_pending_validation
+            scope = filter_to_user_reviewable(scope) if client.is_a?(User)
+          end
+
+          scope.includes(
+            :template,
+            :belnet_version_metadata,
+            { belnet_editable_plan_metadata: [
+              { created_by: :identifiers },
+              { updated_by: :identifiers }
+            ] }
+          ).order(updated_at: :desc)
+        end
+
+        def filter_to_user_reviewable(scope)
+          user_id = client.id
+          reviewable_ids = scope.to_a.select { |plan| plan.editable_by?(user_id) }.map(&:id)
+          scope.where(id: reviewable_ids)
+        end
+
+        def truthy?(value)
+          TRUTHY.include?(value.to_s.downcase)
         end
       end
     end

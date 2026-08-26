@@ -34,6 +34,7 @@
         </div>
       </div>
     <% end %>
+    <%= render 'plans/dashboard_filters', form_action: org_admin_plans_path %>
     <% if @plans.any?  %>
       <% unless @super_admin %>
         <%= link_to sanitize(_('Download plans <em class="sr-only">(new window)</em><span class="new-window-popup-info">%{open_in_new_window_text}</span>') %
@@ -51,7 +52,10 @@
           remote: true,
           scope: @plans,
           view_all: !current_user.can_super_admin?,
-          query_params: { sort_field: 'plans.updated_at', sort_direction: :desc }) %>
+          query_params: {
+            sort_field: 'plans.updated_at',
+            sort_direction: :desc
+          }.merge((@dashboard_filter_values || {}).compact)) %>
       </div>
     <% end %>
   </div>

@@ -246,6 +246,115 @@ class Plan < ApplicationRecord
 
   scope :live_versions, -> { where(belnet_version: 0) }
 
+  scope :with_lifecycle_stage, lambda { |stage_name|
+    next all if stage_name.blank?
+
+    left_joins(:belnet_editable_plan_metadata, :belnet_version_metadata)
+      .where(
+        'belnet_editable_plan_metadata.lifecycle_stage = :stage ' \
+        'OR belnet_plan_version_metadata.lifecycle_stage = :stage',
+        stage: stage_name
+      )
+  }
+
+  scope :with_validation_topic, lambda { |topic|
+    next all if topic.blank?
+
+    joins(:belnet_validations)
+      .where(belnet_validations: { topic: topic })
+  }
+
+  scope :excluding_test_plans, -> { where.not(visibility: visibilities[:is_test]) }
+
+  scope :with_visibility, lambda { |name|
+    next all if name.blank?
+    next none unless visibilities.key?(name.to_s)
+
+    where(visibility: visibilities[name.to_s])
+  }
+
+  # Case insensitive substring match on the plan title
+  scope :titled_like, lambda { |term|
+    next all if term.to_s.strip.blank?
+
+    pattern = "%#{term.to_s.strip.downcase}%"
+    where('LOWER(plans.title) LIKE ?', pattern)
+  }
+
+  # Filter by template id
+  scope :using_template, lambda { |template_id|
+    next all if template_id.blank?
+
+    where(template_id: template_id)
+  }
+
+  # Filter by validation topic name. A plan matches when it appears on any
+  # BelnetValidation for the given topic
+  scope :with_validation_topic, lambda { |topic_name|
+    next all if topic_name.blank?
+
+    where(
+      'plans.id IN (SELECT plan_id FROM belnet_validations WHERE validation_topic = :t) ' \
+      'OR plans.id IN (SELECT validated_plan_id FROM belnet_validations WHERE validation_topic = :t)',
+      t: topic_name
+    )
+  }
+
+  # Same pattern as with_validation_topic but keyed on validation_status
+  scope :with_validation_status, lambda { |status_name|
+    next all if status_name.blank?
+
+    where(
+      'plans.id IN (SELECT plan_id FROM belnet_validations WHERE validation_status = :s) ' \
+      'OR plans.id IN (SELECT validated_plan_id FROM belnet_validations WHERE validation_status = :s)',
+      s: status_name
+    )
+  }
+
+  # Plans created OR modified since the given time
+  scope :active_since, lambda { |threshold|
+    next all if threshold.nil?
+
+    where('plans.created_at >= :t OR plans.updated_at >= :t', t: threshold)
+  }
+
+  # Restricts to plans that have at least one pending validation (reviewed_at IS NULL)
+  scope :with_pending_validation, lambda {
+    where(
+      'plans.id IN (SELECT plan_id FROM belnet_validations WHERE reviewed_at IS NULL) ' \
+      'OR plans.id IN (SELECT validated_plan_id FROM belnet_validations WHERE reviewed_at IS NULL)'
+    )
+  }
+
+  scope :with_completion_at_least, lambda { |percent_threshold|
+    min = percent_threshold.to_i
+    next all if percent_threshold.blank? || min <= 0
+
+    sql = <<~SQL.squish
+      SELECT p.id FROM plans p
+      JOIN (
+        SELECT templates.id AS template_id, COUNT(DISTINCT questions.id) AS q
+        FROM templates
+        JOIN phases    ON phases.template_id   = templates.id
+        JOIN sections  ON sections.phase_id    = phases.id
+        JOIN questions ON questions.section_id = sections.id
+        GROUP BY templates.id
+      ) tq ON tq.template_id = p.template_id
+      LEFT JOIN (
+        SELECT plan_id, COUNT(*) AS a FROM answers GROUP BY plan_id
+      ) pa ON pa.plan_id = p.id
+      WHERE tq.q > 0 AND (COALESCE(pa.a, 0) * 100.0 / tq.q) >= #{min}
+    SQL
+
+    where("plans.id IN (#{sql})")
+  }
+
+  scope :grouped_by_family, lambda {
+    order(Arel.sql('COALESCE(plans.belnet_family_id, plans.id) DESC'))
+      .order(Arel.sql('CASE WHEN plans.belnet_version = 0 THEN 0 ELSE 1 END ASC'))
+      .order(belnet_version: :desc)
+  }
+
   ##
   # Settings for the template
   has_settings :export, class_name: 'Settings::Template' do |s|

@@ -27,6 +27,13 @@
          class="nav-link" aria-controls="content"><%= _('Share') %></a>
     </li>
   <% end %>
+  <% if plan.readable_by?(current_user.id) %>
+    <% validations_plan_id = plan.is_plan_live_version? ? plan.id : plan.belnet_family_id %>
+    <li role="presentation" class="nav-item <%= (active_page?(validate_plan_path(validations_plan_id)) ? 'active' : '') %>">
+      <%= link_to _('Validations'), validate_plan_path(validations_plan_id), role: 'tab',
+                  aria: { controls: "content" }, class: 'nav-link' %>
+    </li>
+  <% end %>
   <% if (plan.administerable_by?(current_user.id) || (current_user.can_org_admin? && current_user.org.plans.include?(plan))) && plan.owner_and_coowners.include?(current_user) && plan.owner.org.feedback_enabled? %>
     <li role="presentation" class="nav-item <%= (active_page?(request_feedback_plan_path(plan)) ? 'active' : '') %>">
       <a href="<%= request_feedback_plan_path(plan) %>" role="tab" 

@@ -94,4 +94,8 @@ class PlanPolicy < ApplicationPolicy
   def update_stage?
     @record.readable_by?(@user.id)
   end
+
+  def validate?
+    @record.readable_by?(@user.id)
+  end
 end

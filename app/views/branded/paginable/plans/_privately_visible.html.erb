@@ -2,8 +2,10 @@
   <table class="table table-hover" id="my-plans">
     <thead>
       <tr>
+        <th scope="col" class="text-center text-nowrap sorter-false" style="width: 80px;"><%= _('Version') %></th>
         <th scope="col"><%= _('Project Title') %>&nbsp;<%= paginable_sort_link('plans.title') %></th>
         <th scope="col"><%= _('Template') %>&nbsp;<%= paginable_sort_link('templates.title') %></th>
+        <th scope="col" class="text-nowrap sorter-false"><%= _('Stage') %></th>
         <th scope="col" class="date-column"><%= _('Edited') %>&nbsp;<%= paginable_sort_link('plans.updated_at') %></th>
         <th scope="col"><%= _('Role') %></th>
         <th scope="col"><%= _('Owner') %></th>
@@ -19,11 +21,28 @@
       <% scope.each do |plan| %>
         <% my_plan_roles = plan.roles.select(&:active).select { |r| r.user_id == current_user.id } %>
         <tr id="<%= dom_id(plan) %>">
+          <% if plan.is_plan_live_version? %>
+            <td class="text-center text-nowrap align-middle">
+              <span class="badge text-bg-primary"><%= _('LIVE') %></span>
+            </td>
+          <% else %>
+            <td class="border-0 text-center text-nowrap align-middle">
+              <small class="text-muted"><%= plan.belnet_version %></small>
+            </td>
+          <% end %>
           <td>
             <%= link_to "#{plan.title.length > 60 ? "#{plan.title[0..59]} ..." : plan.title}",
                 plan_path(plan) %>
           </td>
           <td><%= plan.template.title %></td>
+          <td class="text-nowrap">
+            <% stage_name = plan.current_lifecycle_stage_name %>
+            <% if stage_name.present? %>
+              <%= stage_name %>
+            <% else %>
+              <span class="text-muted">-</span>
+            <% end %>
+          </td>
           <td><%= l(plan.updated_at.to_date, formats: :short) %></td>
           <td><%= display_role(my_plan_roles.first) %></td>
           <td>
@@ -57,7 +76,7 @@
           <td>
             <div class="dropdown">
               <button class="btn btn-link dropdown-toggle" type="button"
-                      id="plan-<%= plan.id %>-actions" data-bs-toggle="dropdown" 
+                      id="plan-<%= plan.id %>-actions" data-bs-toggle="dropdown"
                       aria-haspopup="true" aria-expanded="true">
                 <%= _('Actions') %><span class="caret"></span>
               </button>
@@ -66,6 +85,9 @@
               <% if plan.readable_by?(current_user.id) then %>
                 <li class="nav-item"><%= link_to _('Edit'), plan_path(plan), class: 'dropdown-item  px-3' %></li>
                 <li class="nav-item"><%= link_to _('History'), history_plan_path(plan), class: 'dropdown-item  px-3' %></li>
+                <%# Validations always live on the LIVE (editable) plan of the family %>
+                <% review_plan_id = plan.is_plan_live_version? ? plan.id : plan.belnet_family_id %>
+                <li class="nav-item"><%= link_to _('Review'), validate_plan_path(review_plan_id), class: 'dropdown-item  px-3' %></li>
 
                 <% if plan.administerable_by?(current_user.id) %>
                   <li><%= link_to _('Share'), share_plan_path(plan), class: 'dropdown-item  px-3' %></li>

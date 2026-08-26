@@ -161,6 +161,7 @@ Rails.application.routes.draw do
       post 'set_test', constraints: { format: [:json] }
       get 'overview'
       get 'history'
+      get 'validate'
     end
 
     # Ajax endpoint for ResearchOutput.output_type selection
@@ -247,7 +248,7 @@ Rails.application.routes.draw do
                                          only: :show
         end
 
-        resources :plans, only: %i[show] do
+        resources :plans, only: %i[index show] do
           # THese endpoints are for the custom Belnet implementation of the plans versioning feature.
           # They are nested under plans as they require a plan_id to function.
           resources :versions, only: %i[index show create update]
@@ -273,6 +274,7 @@ Rails.application.routes.draw do
     # Paginable actions for plans
     resources :plans, only: [] do
       get ':id/history/:page', action: :history, on: :collection, as: :history
+      get ':id/validate/:page', action: :validate, on: :collection, as: :validate
 
       get 'privately_visible/:page',
           action: :privately_visible, on: :collection, as: :privately_visible

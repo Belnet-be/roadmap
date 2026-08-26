@@ -3,6 +3,8 @@
 module OrgAdmin
   # Controller that handles admin operations for plans
   class PlansController < ApplicationController
+    include PlanDashboardFilters
+
     # GET org_admin/plans
     # rubocop:disable Metrics/AbcSize
     def index
@@ -17,13 +19,21 @@ module OrgAdmin
 
       @super_admin = current_user.can_super_admin?
       @clicked_through = params[:click_through].present?
-      @plans = if @super_admin
-                 puts 'Super admin access: showing all live versions of plans'
-                 Plan.live_versions.page(1).includes(:template, roles: { user: :org })
-               else
-                 puts "Org admin access: showing live versions of plans for org #{current_user.org.name}"
-                 current_user.org.org_admin_plans.where(belnet_version: 0).page(1)
-               end
+      base_scope = if @super_admin
+                     Plan.includes(:template, roles: { user: :org })
+                   else
+                     current_user.org.org_admin_plans
+                   end
+      @plans = apply_plan_dashboard_filters(base_scope, reviewable_check: false).page(1)
+
+      # Locals the shared filter partial expects
+      @dashboard_filter_values             = plan_dashboard_filter_params
+      @dashboard_stage_options             = current_user.org&.current_valid_belnet_stages || []
+      @dashboard_template_options          = Template
+                                             .where(id: current_user.org.org_admin_plans.select(:template_id))
+                                             .order(:title)
+      @dashboard_validation_topic_options  = current_user.org&.active_validation_topics || []
+      @dashboard_validation_status_options = current_user.org&.active_validation_statuses || []
     end
     # rubocop:enable Metrics/AbcSize
 
