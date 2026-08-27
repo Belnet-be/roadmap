@@ -314,11 +314,19 @@ class Org < ApplicationRecord
   end
 
   def active_validation_topics
-    (validation_topic_config&.current_list_order || []).map(&:to_s)
+    validation_config_values(BelnetConfigValidationTopic, :current_list_order)
+  end
+
+  def all_validation_topics
+    validation_config_values(BelnetConfigValidationTopic, :full_list_order)
   end
 
   def active_validation_statuses
-    (validation_status_config&.current_list_order || []).map(&:to_s)
+    validation_config_values(BelnetConfigValidationStatus, :current_list_order)
+  end
+
+  def all_validation_statuses
+    validation_config_values(BelnetConfigValidationStatus, :full_list_order)
   end
 
   def lifecycle_stage_config
@@ -361,6 +369,15 @@ class Org < ApplicationRecord
     config.current_list_order = (config.current_list_order || []) | [name]
     config.full_list_order    = (config.full_list_order    || []) | [name]
     config.save!
+  end
+
+  def validation_config_values(config_class, attribute)
+    global_config = config_class.find_by(org_id: nil)
+    org_config = config_class.find_by(org_id: id)
+    org_values = org_config&.public_send(attribute) || []
+    global_values = global_config&.public_send(attribute) || []
+
+    (global_values + org_values).map(&:to_s).uniq
   end
 
   public

@@ -6,6 +6,10 @@ json.partial! 'api/belnet/v1/standard_response', total_items: 1
 
 json.items [config] do |item|
   json.validation_statuses do
-    json.partial! 'api/belnet/v1/configurations/config', config: item, org: org
+    json.partial! 'api/belnet/v1/configurations/config',
+                  config: item,
+                  org: org,
+                  current_list: org ? org.active_validation_statuses : nil,
+                  full_list: org ? org.all_validation_statuses : nil
   end
 end

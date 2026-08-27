@@ -4,10 +4,10 @@
       <%= form_with model: [plan, BelnetValidation.new], local: true do |f| %>
         <div class="modal-body">
           <p id="request-governance-validation-title">
-            <%= _('Request Governance Validation') %>
+            <%= _('Request Topic Validation') %>
           </p>
           
-          <p class="alert alert-primary"><%= _('Governance Validation is a process to ensure that your plan meets the required standards and guidelines of the organization.') %></p>
+          <p class="alert alert-primary"><%= _('Topic Validation is a process to ensure that your plan meets the required standards and guidelines of the organization.') %></p>
 
           <div class="form-control d-flex flex-column gap-2">
             <%= f.label :validation_topic, _('Validation topic'), class: 'form-label fw-bold mb-0' %>

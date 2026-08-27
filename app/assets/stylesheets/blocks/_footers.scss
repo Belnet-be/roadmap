@@ -11,4 +11,8 @@
   ul {
     padding-right: calc($grid-gutter-width / 2);
   }
+  .navbar-right img {
+    height: 25px;
+    width: auto;
+  }
 }

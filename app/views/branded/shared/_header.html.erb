@@ -53,7 +53,7 @@
             </div>
           <% end %>
           <% if plan.editable_by?(current_user.id) && !plan.is_plan_live_version? %>
-            <%= link_to "Edit", plan_path(plan.belnet_family_id), class: "btn btn-secondary" %>
+            <%= link_to "Return To LIVE Version", plan_path(plan.belnet_family_id), class: "btn btn-secondary" %>
           <% end %>
           <% if plan.submittable_by?(current_user.id) %>
             <div data-controller="confirm-modal">

@@ -18,9 +18,9 @@ json.organization do
 end
 
 json.current_list do
-  json.enum(config.current_list_order || [])
+  json.enum(current_list || config.current_list_order || [])
 end
 
 json.full_list do
-  json.enum(config.full_list_order || [])
+  json.enum(full_list || config.full_list_order || [])
 end
