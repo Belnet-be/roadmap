@@ -1,20 +1,51 @@
 <%= render partial: 'shared/header', locals: { plan: @plan, title_suffix: _('Validations') } %>
 
 <% content_for :plan_tab_body do %>
-  <%= paginable_renderise(
-    partial: '/branded/paginable/plans/validate',
-    controller: 'paginable/plans',
-    action: 'validate',
-    path_params: { id: @plan.id },
-    remote: true,
-    scope: @governance_validations,
-    locals: {
-      plan: @plan,
-      available_topics: @available_topics,
-      available_validation_statuses: @available_validation_statuses,
-      available_validated_plans: @available_validated_plans
-    }
-  ) %>
+  <% has_versions = @available_validated_plans.exists? %>
+  <div class="panel panel-default">
+    <div class="panel-heading clearfix">
+      <h2 class="panel-title pull-left"><%= _('Topic Validations') %></h2>
+      <% if @plan.editable_by?(current_user.id) %>
+        <button type="button"
+                class="btn btn-primary pull-right"
+                data-bs-toggle="modal"
+                data-bs-target="#request-governance-validation-modal"
+                <%= 'disabled' unless has_versions %>
+                title="<%= _('Create a version before requesting a validation.') unless has_versions %>">
+          <%= _('Request Validation') %>
+        </button>
+      <% end %>
+    </div>
+
+    <div class="panel-body">
+      <% unless has_versions %>
+        <p><%= _('Create a version before requesting a topic validation.') %></p>
+      <% end %>
+      <%= paginable_renderise(
+        partial: '/branded/paginable/plans/validate',
+        controller: 'paginable/plans',
+        action: 'validate',
+        path_params: { id: @plan.id },
+        remote: true,
+        scope: @governance_validations,
+        locals: {
+          plan: @plan,
+          available_topics: @available_topics,
+          available_validation_statuses: @available_validation_statuses,
+          available_validated_plans: @available_validated_plans
+        }
+      ) %>
+    </div>
+  </div>
+
+  <% if @plan.editable_by?(current_user.id) && has_versions %>
+    <%= render partial: 'plans/governance_validation_request_modal',
+               locals: {
+                 plan: @plan,
+                 available_topics: @available_topics,
+                 available_validated_plans: @available_validated_plans
+               } %>
+  <% end %>
 <% end %>
 
 <div class="row">

@@ -1,28 +1,13 @@
 <% has_versions = available_validated_plans.any? %>
 
-<div class="panel panel-default">
-  <div class="panel-heading clearfix">
-    <h2 class="panel-title pull-left"><%= _('Governance Validations') %></h2>
-    <% if plan.editable_by?(current_user.id) %>
-      <button type="button"
-              class="btn btn-primary pull-right"
-              data-bs-toggle="modal"
-              data-bs-target="#request-governance-validation-modal"
-              <%= has_versions ? '' : 'disabled' %>>
-        <%= _('Request Validation') %>
-      </button>
-    <% end %>
-  </div>
+<% if has_versions %>
+  <p><%= _("Request a topic validation for one of this plan's frozen version.") %></p>
+<% else %>
+  <p><%= _('Create a version before requesting a topic validation.') %></p>
+<% end %>
 
-  <div class="panel-body">
-    <% if has_versions %>
-      <p><%= _("Request a governance validation for one of this plan's frozen version.") %></p>
-    <% else %>
-      <p><%= _('Create a version before requesting a governance validation.') %></p>
-    <% end %>
-
-    <% if governance_validations.any? %>
-      <div class="table-responsive">
+<% if governance_validations.any? %>
+  <div class="table-responsive">
         <table class="table table-hover table-bordered">
           <thead>
             <tr>
@@ -75,20 +60,9 @@
             <% end %>
           </tbody>
         </table>
-      </div>
-    <% else %>
-      <p class="mb-0"><%= _('No governance validations have been requested for this plan yet.') %></p>
-    <% end %>
   </div>
-</div>
-
-<% if plan.editable_by?(current_user.id) && has_versions %>
-  <%= render partial: 'plans/governance_validation_request_modal',
-             locals: {
-               plan: plan,
-               available_topics: available_topics,
-               available_validated_plans: available_validated_plans
-             } %>
+<% else %>
+  <p class="mb-0"><%= _('No governance validations have been requested for this plan yet.') %></p>
 <% end %>
 
 <% if plan.editable_by?(current_user.id) %>
