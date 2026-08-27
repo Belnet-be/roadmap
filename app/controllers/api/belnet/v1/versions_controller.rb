@@ -50,7 +50,7 @@ module Api
         end
 
         # PUT /api/belnet-v1/plans/:plan_id/versions/:id
-        # :id is the version_number. Updates the reason and/or lifecycle-stage
+        # :id is the version_number. Updates the reason and/or lifecycle_stage
         # of an existing version version, both fields are optional
         # but atleast one is required
         def update
@@ -76,7 +76,7 @@ module Api
           return if performed?
 
           if new_reason.nil? && new_stage.nil?
-            render_error(errors: [_('At least one of reason or lifecycle-stage is required')],
+            render_error(errors: [_('At least one of the parameters reason or lifecycle_stage is required')],
                          status: :bad_request)
             return
           end
@@ -150,11 +150,11 @@ module Api
         end
 
         def resolve_stage_for(_plan)
-          stage_name = params[:'lifecycle-stage'].to_s.strip
+          stage_name = params[:lifecycle_stage].to_s.strip
           stage_name.presence
         end
 
-        # lifecycle-stage is optional. When omitted, fall back to the most
+        # lifecycle_stage is optional. When omitted, fall back to the most
         # recent versions stage, then to the live plan's current stage.
         def resolve_version_stage(plan)
           stage_name = params[:lifecycle_stage]

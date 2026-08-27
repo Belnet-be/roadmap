@@ -84,7 +84,7 @@ module Api
           stage_name = params[:lifecycle_stage].to_s.strip
           return stage_name if stage_name.present?
 
-          render_error(errors: [_('lifecycle-stage is required')], status: :bad_request)
+          render_error(errors: [_('parameter lifecycle_stage is required')], status: :bad_request)
           nil
         end
 
