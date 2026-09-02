@@ -128,9 +128,8 @@ module Api
         end
 
         def filter_to_user_reviewable(scope)
-          user_id = client.id
-          reviewable_ids = scope.to_a.select { |plan| plan.editable_by?(user_id) }.map(&:id)
-          scope.where(id: reviewable_ids)
+          reviewable_plan_ids = Role.editor.where(user_id: client.id, active: true).select(:plan_id)
+          scope.where(id: reviewable_plan_ids)
         end
 
         def truthy?(value)

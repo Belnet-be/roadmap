@@ -506,15 +506,23 @@ class PlansController < ApplicationController
   def create_new_version
     original_plan = Plan.find(params[:id])
     authorize original_plan
-    stage_param = params[:belnet_stage].to_s
-    stage = stage_param if original_plan.org.current_valid_belnet_stages.include?(stage_param)
+
+    stage_param = params[:belnet_stage].to_s.strip
+    if stage_param.blank?
+      flash[:alert] = 'Failed to create version: a lifecycle stage is required.'
+      return redirect_to(action: :index)
+    end
+    unless original_plan.org.current_valid_belnet_stages.include?(stage_param)
+      flash[:alert] = "Failed to create version: '#{stage_param}' is not an active lifecycle stage."
+      return redirect_to(action: :index)
+    end
 
     # Capture reason from the Stimulus modal
     new_version = original_plan.create_plan_with_new_version!(
       reason: params[:belnet_reason],
       current_user: current_user,
       original_plan: original_plan,
-      new_stage: stage
+      new_stage: stage_param
     )
 
     flash[:notice] = "Version #{new_version.belnet_version} has been created."

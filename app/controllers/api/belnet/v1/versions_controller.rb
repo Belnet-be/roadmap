@@ -83,6 +83,7 @@ module Api
 
           acting_user = client.is_a?(User) ? client : nil
 
+          stage_change_failed = false
           version.transaction do
             if new_reason
               metadata = version.belnet_version_metadata || version.touch_version_metadata!(acting_user)
@@ -91,7 +92,17 @@ module Api
               metadata.updated_at = Time.current
               metadata.save!(context: :versioning)
             end
-            version.update_stage(new_stage, acting_user) if new_stage
+            if new_stage && !version.update_stage(new_stage, acting_user)
+              stage_change_failed = true
+              raise ActiveRecord::Rollback
+            end
+          end
+
+          if stage_change_failed
+            errors = version.last_stage_change_errors.presence ||
+                     [_('Failed to update lifecycle stage')]
+            render_error(errors: errors, status: :unprocessable_entity)
+            return
           end
 
           version.reload
