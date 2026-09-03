@@ -134,7 +134,7 @@ class ApplicationController < ActionController::Base
       ApiClient: _('API client'),
       ExportedPlan: _('plan'),
       GuidanceGroup: _('guidance group'),
-      BelnetValidation: _('governance validation'),
+      BelnetValidation: _('topic validation'),
       Note: _('comment'),
       Org: _('organisation'),
       Perm: _('permission'),

@@ -3,7 +3,7 @@
 module Api
   module Belnet
     module V1
-      # Handles CRUD operations for governance validations in API V1 for Belnet.
+      # Handles CRUD operations for topic validations in API V1 for Belnet.
       # Exposed publicly under /api/belnet-v1/plans/:plan_id/validations.
       class GovernanceValidationsController < BaseApiController
         respond_to :json
@@ -67,6 +67,7 @@ module Api
         def create
           plan = find_editable_plan
           return if performed?
+
           require_param(:topic)
           return if performed?
 
@@ -121,7 +122,6 @@ module Api
           render_error(errors: [_('Validation not found')], status: :not_found)
           nil
         end
-
 
         def resolve_version(plan)
           version_number = params[:dmp_version_number]

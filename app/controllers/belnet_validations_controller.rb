@@ -48,7 +48,7 @@ class BelnetValidationsController < ApplicationController
   def set_validation
     @validation = @plan.governance_validations_for_org_topics.find(params[:id])
   rescue ActiveRecord::RecordNotFound
-    redirect_to validate_plan_path(@plan), alert: _('Invalid governance validation review.')
+    redirect_to validate_plan_path(@plan), alert: _('Invalid topic validation review.')
   end
 
   # Strongparams only. Values are strings (name_ids);
