@@ -15,7 +15,7 @@
 ### Functional changes
 - Governance features:
   - The posibility to create *versions of DMP's* (read-only snapshots),
-  so reviewers can work on a read-only version, while researchers can still proceed with the editable version.
+  so reviewers can work on a read-only version, while researchers can still proceed with the *Live Version* (editable version).
     - You can find created versions under the extra **History** tab.
     - You can visual compare versions with the **Compare** button (only UI).
   - The possibility to add and change a *lifecycle stage* of a DMP.
@@ -25,6 +25,10 @@
   - There are default values for *lifecycle stages*, *validation topics* and *validation statuses*.  
     But they are configurable: organisations can ask Belnet to add or replace values for their organisation.
   - All these governance features, except for version compare, have an API variant. Consult the **API Reference** for more details.
+  - All these governance features are also added when you **Download** a plan:
+    - For the Live Version the lifecycle stage is added.
+    - For a DMP version next to the lifecycle stage also the version number, the version reason,
+    and at the end of the pdf its topic validations are added.
 - Documentation under the **Help** menu is expanded:
   * **Getting started**: The initial steps to start with DMPonline.be.
   * **Concepts**: Learn the parts of the DMPonline.be system to obtain a deeper understanding of how it works.
@@ -48,6 +52,7 @@
 - Added script (rails task) for creating and updating the default values for *lifecycle stages*, *validation topics* and *validation statuses*.
 
 ### Known limitations
+- While in the user interface of the DMPonline application you can filter on *plan visibility*, this is not supported via this API endpoint because we can't inform you about the setting with the current maDMP schema
 
 </div>
 </div>
