@@ -6,7 +6,7 @@ More in depth guidance on how to use DMPonline.be.
 ## Understanding the Dashboard
 After logging in, you will arrive at DMPonline.be’s landing page titled **My Dashboard**.
 
-The dashboard displays all the DMPs you have access to, that is::
+The dashboard displays all the DMPs you have access to, that is:
 
 *	The DMPs you own or co-own,
 *	The DMPs that have been shared with you, 
@@ -246,7 +246,7 @@ The practice of Versioning a DMP consists in creating a snapshot of its content 
 
 Creating a Version of a DMP also enables its co-owners to submit it for Validation. 
 
-A Version is a read-only snapshot of a DMP at a specific point in time. Once created, it can no longer be edited. However, work on the DMP can continue in the LIVE Version (the working version), allowing the plan to evolve while preserving previous states. There is no limit to the number of Versions that can be created, although we recommend creating them at key project milestones to keep the version history meaningful and manageable. 
+A <abbr title="Read-only snapshot of a DMP">[Version](/help_concepts#glossary_version)</abbr> is a read-only snapshot of a DMP at a specific point in time. Once created, it can no longer be edited. However, work on the DMP can continue in the <abbr title="Editable DMP">[Live Version](/help_concepts#glossary_live_version)</abbr> (the working version), allowing the plan to evolve while preserving previous states. There is no limit to the number of Versions that can be created, although we recommend creating them at key project milestones to keep the version history meaningful and manageable. 
 
 Versions are numbered automatically and sequentially. Versions can be assigned a Plan Stage tag for further tracking of DMP writing progress. For more information about Plan Stage, please see Tracking the stage of a DMP. 
 
