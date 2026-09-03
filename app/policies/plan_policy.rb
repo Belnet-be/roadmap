@@ -14,9 +14,10 @@ class PlanPolicy < ApplicationPolicy
   end
 
   def share?
-    @record.editable_by?(@user.id) ||
+    @record.is_plan_live_version? &&
+      (@record.editable_by?(@user.id) ||
       (@user.can_org_admin? &&
-       @user.org.plans.include?(@record))
+       @user.org.plans.include?(@record)))
   end
 
   def export?
@@ -60,7 +61,7 @@ class PlanPolicy < ApplicationPolicy
   end
 
   def request_feedback?
-    @record.administerable_by?(@user.id)
+    @record.is_plan_live_version? && @record.administerable_by?(@user.id)
   end
 
   def overview?

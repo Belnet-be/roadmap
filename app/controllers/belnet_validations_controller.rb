@@ -13,11 +13,12 @@ class BelnetValidationsController < ApplicationController
 
     @validation = @plan.governance_validations.new(create_validation_params)
     @validation.requested_by = current_user
+    validation_target = Plan.find_by(id: @validation.validated_plan_id) || @plan
 
     if @validation.save
-      redirect_to validate_plan_path(@plan), notice: success_message(@validation, _('requested'))
+      redirect_to validate_plan_path(validation_target), notice: success_message(@validation, _('requested'))
     else
-      redirect_to validate_plan_path(@plan), alert: failure_message(@validation, _('request'))
+      redirect_to validate_plan_path(validation_target), alert: failure_message(@validation, _('request'))
     end
   end
 

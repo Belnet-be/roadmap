@@ -85,9 +85,7 @@
               <% if plan.readable_by?(current_user.id) then %>
                 <li class="nav-item"><%= link_to _('Edit'), plan_path(plan), class: 'dropdown-item  px-3' %></li>
                 <li class="nav-item"><%= link_to _('History'), history_plan_path(plan), class: 'dropdown-item  px-3' %></li>
-                <%# Validations always live on the LIVE (editable) plan of the family %>
-                <% review_plan_id = plan.is_plan_live_version? ? plan.id : plan.belnet_family_id %>
-                <li class="nav-item"><%= link_to _('Review'), validate_plan_path(review_plan_id), class: 'dropdown-item  px-3' %></li>
+                <li class="nav-item"><%= link_to _('Review'), validate_plan_path(plan), class: 'dropdown-item  px-3' %></li>
 
                 <% if plan.administerable_by?(current_user.id) %>
                   <li><%= link_to _('Share'), share_plan_path(plan), class: 'dropdown-item  px-3' %></li>

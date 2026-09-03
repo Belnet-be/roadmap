@@ -28,9 +28,8 @@
     </li>
   <% end %>
   <% if plan.readable_by?(current_user.id) %>
-    <% validations_plan_id = plan.is_plan_live_version? ? plan.id : plan.belnet_family_id %>
-    <li role="presentation" class="nav-item <%= (active_page?(validate_plan_path(validations_plan_id)) ? 'active' : '') %>">
-      <%= link_to _('Validations'), validate_plan_path(validations_plan_id), role: 'tab',
+    <li role="presentation" class="nav-item <%= (active_page?(validate_plan_path(plan)) ? 'active' : '') %>">
+      <%= link_to _('Validations'), validate_plan_path(plan), role: 'tab',
                   aria: { controls: "content" }, class: 'nav-link' %>
     </li>
   <% end %>

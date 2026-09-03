@@ -621,12 +621,13 @@ class PlansController < ApplicationController
   end
 
   def load_governance_validations
-    @governance_validations = @plan.governance_validations
-                                   .includes(:requested_by, :reviewed_by, :validated_plan)
-                                   .order(created_at: :desc)
+    validation_plan = @plan.is_plan_live_version? ? @plan : Plan.find(@plan.belnet_family_id)
+    @governance_validations = validation_plan.governance_validations
+                                             .includes(:requested_by, :reviewed_by, :validated_plan)
+                                             .order(created_at: :desc)
     @available_topics = @plan.org.active_validation_topics
-    @available_validation_statuses = @plan.org.active_validation_statuses
-    @available_validated_plans = @plan.plan_versions.order(belnet_version: :desc)
+    @available_validation_statuses = validation_plan.org.active_validation_statuses
+    @available_validated_plans = validation_plan.plan_versions.order(belnet_version: :desc)
   end
 end
 # rubocop:enable Metrics/ClassLength

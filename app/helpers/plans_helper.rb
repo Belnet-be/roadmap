@@ -45,6 +45,17 @@ module PlansHelper
     hash[:phases].many? ? "#{plan.title} - #{phase[:title]}" : plan.title
   end
 
+  def plan_version_path(plan, version)
+    return plan_path(version) if live_only_tab? && !version.is_plan_live_version?
+
+    path = request.path.sub("/plans/#{plan.id}", "/plans/#{version.id}")
+    request.query_parameters.present? ? "#{path}?#{request.query_parameters.to_query}" : path
+  end
+
+  def live_only_tab?
+    %w[share request_feedback].include?(request.path.split('/').last)
+  end
+
   def display_section?(customization, section, show_custom_sections)
     display = !customization
     display ||= customization && !section[:modifiable]

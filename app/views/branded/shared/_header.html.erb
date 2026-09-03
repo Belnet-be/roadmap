@@ -15,7 +15,7 @@
                   aria-labelledby="plan-version-menu">
                 <% plan.plan_versions_with_live_version.each do |version| %>
                   <li>
-                    <%= link_to version.is_plan_live_version? ? _('LIVE') : version.belnet_version, plan_path(version), class: "dropdown-item #{'active' if version == plan}" %>
+                    <%= link_to version.is_plan_live_version? ? _('LIVE') : version.belnet_version, plan_version_path(plan, version), class: "dropdown-item #{'active' if version == plan}" %>
                   </li>
                 <% end %>
               </ul>

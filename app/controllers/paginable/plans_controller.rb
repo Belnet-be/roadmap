@@ -45,18 +45,19 @@ module Paginable
       @plan = Plan.find(params[:id])
       authorize @plan
 
-      scope = @plan.governance_validations
-                   .includes(:requested_by, :reviewed_by, :validated_plan)
-                   .order(created_at: :desc)
+      validation_plan = @plan.is_plan_live_version? ? @plan : Plan.find(@plan.belnet_family_id)
+      scope = validation_plan.governance_validations
+                             .includes(:requested_by, :reviewed_by, :validated_plan)
+                             .order(created_at: :desc)
 
       paginable_renderise(
         partial: 'validate',
         scope: scope,
         locals: {
           plan: @plan,
-          available_topics: @plan.org.active_validation_topics,
-          available_validation_statuses: @plan.org.active_validation_statuses,
-          available_validated_plans: @plan.plan_versions.order(belnet_version: :desc)
+          available_topics: validation_plan.org.active_validation_topics,
+          available_validation_statuses: validation_plan.org.active_validation_statuses,
+          available_validated_plans: validation_plan.plan_versions.order(belnet_version: :desc)
         },
         query_params: { id: @plan.id },
         format: :json
