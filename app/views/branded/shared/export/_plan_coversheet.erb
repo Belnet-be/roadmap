@@ -85,6 +85,11 @@
       <% end %>
   <% end %>
 
+  <% lifecycle_stage = @plan.current_lifecycle_stage_name %>
+  <% if lifecycle_stage.present? %>
+    <p><b><%= _("Lifecycle stage: ") %></b><%= lifecycle_stage %></p> <br>
+  <% end %>
+
   <% if @public_plan %>
     <p><b><%= _("Copyright information:") %></b></p>
     <div style="margin-left: 15px;">
