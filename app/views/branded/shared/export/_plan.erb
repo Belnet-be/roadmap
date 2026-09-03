@@ -93,5 +93,49 @@
     <% if @show_research_outputs %>
       <%= render partial: 'shared/export/plan_outputs', locals: { outputs: @plan.research_outputs } %>
     <% end %>
+
+    <% reviewed_validations = @plan.version_validations.where.not(reviewed_at: nil) %>
+    <% if reviewed_validations.any? %>
+      <div style="page-break-before: always;"></div>
+      <h1>Topic Validations:</h1>
+      <table class="table table-condensed">
+        <thead>
+          <tr>
+            <th><%= _('Topic') %></th>
+            <th><%= _('Status') %></th>
+            <th><%= _('Requested') %></th>
+            <th><%= _('Reviewed') %></th>
+            <th><%= _('Rationale') %></th>
+            <th><%= _('Conditions') %></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% reviewed_validations.each do |validation| %>
+            <tr>
+              <td><%= validation.validation_topic %></td>
+              <td><%= validation.validation_status %></td>
+              <td>
+                <%= validation.requested_by&.name || _('Unknown') %>
+                <% if validation.requested_by&.email.present? %>
+                  (<%= validation.requested_by.email %>)
+                <% end %>
+                <br>
+                <%= l(validation.requested_at, format: :long) if validation.requested_at.present? %>
+              </td>
+              <td>
+                <%= validation.reviewed_by&.name || _('Unknown') %>
+                <% if validation.reviewed_by&.email.present? %>
+                  (<%= validation.reviewed_by.email %>)
+                <% end %>
+                <br>
+                <%= l(validation.reviewed_at, format: :long) %>
+              </td>
+              <td><%= validation.rationale.presence || '' %></td>
+              <td><%= validation.conditions.presence || '' %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    <% end %>
   </body>
 </html>

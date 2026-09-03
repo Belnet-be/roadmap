@@ -5,10 +5,23 @@
       <div class="d-flex justify-content-between align-items-center">
         <div>
           <h1><%= plan.title %></h1>
-          <% if plan.belnet_version == 0 %>
-            <h4 class="fs-5"><%= _('LIVE version') %></h4>
+          <% if plan.readable_by?(current_user.id) && plan.plan_versions_with_live_version.any? %>
+            <div class="dropdown">
+              <a href="#" class="dropdown-toggle align-center btn btn-secondary text-white" role="button" id="plan-version-menu" data-bs-toggle="dropdown" data-bs-display="static" aria-haspopup="true" aria-expanded="false">
+                <%= plan.is_plan_live_version? ? _('LIVE') : _("Version #{plan.belnet_version}") %>
+                <span class="caret"></span>
+              </a>
+              <ul class="dropdown-menu"
+                  aria-labelledby="plan-version-menu">
+                <% plan.plan_versions_with_live_version.each do |version| %>
+                  <li>
+                    <%= link_to version.is_plan_live_version? ? _('LIVE') : version.belnet_version, plan_path(version), class: "dropdown-item #{'active' if version == plan}" %>
+                  </li>
+                <% end %>
+              </ul>
+            </div>
           <% else %>
-            <h4 class="fs-5">Version <%= plan.belnet_version %></h4>
+            <h4 class="fs-5"><%= plan.is_plan_live_version? ? _('LIVE version') : _("Version #{plan.belnet_version}") %></h4>
           <% end %>
         </div>
         <div class="d-flex gap-2">
