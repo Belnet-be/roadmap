@@ -646,11 +646,17 @@ paths:
         - Validations of plans
   /api/belnet-v1/configurations/lifecycle-stages:
     get:
-      description: Retrieves all allowed values for the `lifecycle_stage` field of a specific Data Management Plan (DMP).
+      description: |
+        Retrieves all allowed values for the `lifecycle_stage` field of a specific Data Management Plan (DMP).
+
+        The configuration is `org-id` based:
+        * When the `plan-id` query parameter is provided, the organization of that plan is used.
+        * When the `plan-id` query parameter is omitted, the organization of the authenticated client (`client.org`) is used.
       operationId: get_config_lifecycle_stages
       parameters:
         - $ref: "#/components/parameters/AcceptHeader"
         - $ref: "#/components/parameters/AuthorizationHeader"
+        - $ref: "#/components/parameters/PlanIdQueryParam"
       responses:
         "200":
           content:
@@ -676,11 +682,17 @@ paths:
         - Configurations
   /api/belnet-v1/configurations/validation-topics:
     get:
-      description: Retrieves all allowed validation topics that can be used to validate a specific Data Management Plan (DMP).
+      description: |
+        Retrieves all allowed validation topics that can be used to validate a specific Data Management Plan (DMP).
+
+        The configuration is `org-id` based:
+        * When the `plan-id` query parameter is provided, the organization of that plan is used.
+        * When the `plan-id` query parameter is omitted, the organization of the authenticated client (`client.org`) is used.
       operationId: get_config_validation_topics
       parameters:
         - $ref: "#/components/parameters/AcceptHeader"
         - $ref: "#/components/parameters/AuthorizationHeader"
+        - $ref: "#/components/parameters/PlanIdQueryParam"
       responses:
         "200":
           content:
@@ -701,11 +713,17 @@ paths:
         - Configurations
   /api/belnet-v1/configurations/validation-statuses:
     get:
-      description: Retrieves all allowed validation statuses that can be used to indicate the status of a validation request for a Data Management Plan (DMP).
+      description: |
+        Retrieves all allowed validation statuses that can be used to indicate the status of a validation request for a Data Management Plan (DMP).
+
+        The configuration is `org-id` based:
+        * When the `plan-id` query parameter is provided, the organization of that plan is used.
+        * When the `plan-id` query parameter is omitted, the organization of the authenticated client (`client.org`) is used.
       operationId: get_config_validation_statuses
       parameters:
         - $ref: "#/components/parameters/AcceptHeader"
         - $ref: "#/components/parameters/AuthorizationHeader"
+        - $ref: "#/components/parameters/PlanIdQueryParam"
       responses:
         "200":
           content:
@@ -1648,6 +1666,19 @@ components:
       required: true
       schema:
         $ref: "#/components/schemas/PlanIdSchema"
+    PlanIdQueryParam:
+      name: plan-id
+      description: |
+        Optional. The unique identifier of a Data Management Plan (DMP), used to resolve the organization for which the configuration is returned.
+
+        * When provided, the `org-id` of the specified plan is used to resolve the configuration.
+        * When omitted, the `org-id` of the authenticated client (`client.org`) is used.
+      in: query
+      required: false
+      schema:
+        allOf:
+          - $ref: "#/components/schemas/PlanIdSchema"
+          - example: 123
     VersionedPlanIdParam:
       name: plan_id
       description: The unique identifier of a Data Management Plan (DMP).
