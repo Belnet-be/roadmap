@@ -341,33 +341,111 @@ class Org < ApplicationRecord
     @validation_status_config ||= BelnetConfigValidationStatus.for_org(self)
   end
 
-  def add_lifecycle_stage!(name)
-    append_config_name!(BelnetConfigLifecycleStage, name)
+  # Add a lifecycle stage at separate 1-based positions in this org's config.
+  def add_lifecycle_stage!(name, current_position:, full_position:)
+    insert_config_name!(BelnetConfigLifecycleStage, name,
+                        current_position: current_position, full_position: full_position)
     @lifecycle_stage_config = nil
     self
   end
 
-  def add_validation_topic!(name)
-    append_config_name!(BelnetConfigValidationTopic, name)
+  # Add a validation topic at separate 1-based positions in this org's config.
+  def add_validation_topic!(name, current_position:, full_position:)
+    insert_config_name!(BelnetConfigValidationTopic, name,
+                        current_position: current_position, full_position: full_position)
     @validation_topic_config = nil
     self
   end
 
-  def add_validation_status!(name)
-    append_config_name!(BelnetConfigValidationStatus, name)
+  # Add a validation status at separate 1-based positions in this org's config.
+  def add_validation_status!(name, current_position:, full_position:)
+    insert_config_name!(BelnetConfigValidationStatus, name,
+                        current_position: current_position, full_position: full_position)
+    @validation_status_config = nil
+    self
+  end
+
+  # Remove a lifecycle stage identified by name_id from this org's CURRENT
+  # list only; the full list is deliberately preserved so historical
+  # references still resolve.
+  def remove_lifecycle_stage!(name_id)
+    remove_from_current_list!(BelnetConfigLifecycleStage, name_id)
+    @lifecycle_stage_config = nil
+    self
+  end
+
+  # Remove a validation topic identified by name_id from this org's CURRENT
+  # list only; the full list is deliberately preserved.
+  def remove_validation_topic!(name_id)
+    remove_from_current_list!(BelnetConfigValidationTopic, name_id)
+    @validation_topic_config = nil
+    self
+  end
+
+  # Remove a validation status identified by name_id from this org's CURRENT
+  # list only; the full list is deliberately preserved.
+  def remove_validation_status!(name_id)
+    remove_from_current_list!(BelnetConfigValidationStatus, name_id)
     @validation_status_config = nil
     self
   end
 
   private
 
-  def append_config_name!(config_class, name)
-    config = config_class.find_or_initialize_by(org_id: id) do |c|
-      c.current_list_order = []
-      c.full_list_order    = []
+  # Insert +name+ at separate 1-based positions into the org's config for
+  # +config_class+. The name is added to BOTH the current and full lists;
+  # if the name already exists in a given list, that list is left as-is
+  # (no duplicates, no reordering).
+  #
+  # When the org has no row of its own yet, the fresh row is seeded from
+  # the GLOBAL row (org_id IS NULL) — copy-on-write for org overrides,
+  # matching what the API's `for_org` fallback returned to the org until
+  # now. If no global row exists either, the fresh row starts empty.
+  def insert_config_name!(config_class, name, current_position:, full_position:)
+    raise ArgumentError, 'name is required' if name.blank?
+
+    current_idx = Integer(current_position) - 1
+    full_idx = Integer(full_position) - 1
+
+    config = config_class.find_or_initialize_by(org_id: id)
+    if config.new_record?
+      global = config_class.find_by(org_id: nil)
+      config.current_list_order = (global&.current_list_order || []).dup
+      config.full_list_order    = (global&.full_list_order    || []).dup
     end
-    config.current_list_order = (config.current_list_order || []) | [name]
-    config.full_list_order    = (config.full_list_order    || []) | [name]
+    current = (config.current_list_order || []).dup
+    full    = (config.full_list_order    || []).dup
+
+    if current_idx.negative? || current_idx > current.length
+      raise ArgumentError,
+            "current_position must be between 1 and #{current.length + 1} (got #{current_position})"
+    end
+
+    if full_idx.negative? || full_idx > full.length
+      raise ArgumentError,
+            "full_position must be between 1 and #{full.length + 1} (got #{full_position})"
+    end
+
+    current.insert(current_idx, name) unless current.include?(name)
+    full.insert(full_idx, name) unless full.include?(name)
+
+    config.current_list_order = current
+    config.full_list_order    = full
+    config.save!
+  end
+
+  # Remove +name_id+ from current_list_order of this org's config for
+  # +config_class+. full_list_order is intentionally NOT touched — items
+  # are never removed from the full list. Org-level only; there is no
+  # global-delete counterpart.
+  def remove_from_current_list!(config_class, name_id)
+    raise ArgumentError, 'name_id is required' if name_id.blank?
+
+    config = config_class.find_by(org_id: id)
+    return unless config
+
+    current = config.current_list_order || []
+    config.current_list_order = current.reject { |n| n.to_s == name_id.to_s }
     config.save!
   end
 

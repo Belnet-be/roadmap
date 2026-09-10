@@ -28,12 +28,12 @@ module OrgAdmin
 
       # Locals the shared filter partial expects
       @dashboard_filter_values             = plan_dashboard_filter_params
-      @dashboard_stage_options             = current_user.org&.current_valid_belnet_stages || []
+      @dashboard_stage_options             = current_user.org&.all_belnet_stages || []
       @dashboard_template_options          = Template
                                              .where(id: current_user.org.org_admin_plans.select(:template_id))
                                              .order(:title)
-      @dashboard_validation_topic_options  = current_user.org&.active_validation_topics || []
-      @dashboard_validation_status_options = current_user.org&.active_validation_statuses || []
+      @dashboard_validation_topic_options  = current_user.org&.all_validation_topics || []
+      @dashboard_validation_status_options = current_user.org&.all_validation_statuses || []
     end
     # rubocop:enable Metrics/AbcSize
 
