@@ -314,19 +314,19 @@ class Org < ApplicationRecord
   end
 
   def active_validation_topics
-    validation_config_values(BelnetConfigValidationTopic, :current_list_order)
+    (validation_topic_config&.current_list_order || []).map(&:to_s)
   end
 
   def all_validation_topics
-    validation_config_values(BelnetConfigValidationTopic, :full_list_order)
+    (validation_topic_config&.full_list_order || []).map(&:to_s)
   end
 
   def active_validation_statuses
-    validation_config_values(BelnetConfigValidationStatus, :current_list_order)
+    (validation_status_config&.current_list_order || []).map(&:to_s)
   end
 
   def all_validation_statuses
-    validation_config_values(BelnetConfigValidationStatus, :full_list_order)
+    (validation_status_config&.full_list_order || []).map(&:to_s)
   end
 
   def lifecycle_stage_config
@@ -438,24 +438,26 @@ class Org < ApplicationRecord
   # +config_class+. full_list_order is intentionally NOT touched — items
   # are never removed from the full list. Org-level only; there is no
   # global-delete counterpart.
+  #
+  # When the org has no row of its own yet, the fresh row is seeded from
+  # the GLOBAL row before removing (same copy-on-write as inserts) —
+  # otherwise the delete would be a no-op while reads keep falling back
+  # to GLOBAL, and the name would stay visible.
   def remove_from_current_list!(config_class, name_id)
     raise ArgumentError, 'name_id is required' if name_id.blank?
 
-    config = config_class.find_by(org_id: id)
-    return unless config
+    config = config_class.find_or_initialize_by(org_id: id)
+    if config.new_record?
+      global = config_class.find_by(org_id: nil)
+      config.current_list_order = (global&.current_list_order || []).dup
+      config.full_list_order    = (global&.full_list_order    || []).dup
+    end
 
-    current = config.current_list_order || []
-    config.current_list_order = current.reject { |n| n.to_s == name_id.to_s }
+    current = (config.current_list_order || []).map(&:to_s)
+    return unless current.include?(name_id.to_s)
+
+    config.current_list_order = current.reject { |n| n == name_id.to_s }
     config.save!
-  end
-
-  def validation_config_values(config_class, attribute)
-    global_config = config_class.find_by(org_id: nil)
-    org_config = config_class.find_by(org_id: id)
-    org_values = org_config&.public_send(attribute) || []
-    global_values = global_config&.public_send(attribute) || []
-
-    (global_values + org_values).map(&:to_s).uniq
   end
 
   public
