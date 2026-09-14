@@ -8,6 +8,7 @@ services:
     volumes:
       - ./log:/opt/roadmap/log
     environment:
+      - TZ=Europe/Brussels
       - DB_ADAPTER=${DB_ADAPTER:-mysql2}
       - DB_NAME=${DB_NAME:?DB_NAME must be set}
       - DB_USERNAME=${DB_USERNAME:?DB_USERNAME must be set}
