@@ -13,7 +13,7 @@ class BelnetValidationsController < ApplicationController
 
     @validation = @plan.governance_validations.new(create_validation_params)
     @validation.requested_by = current_user
-    validation_target = Plan.find_by(id: @validation.validated_plan_id) || @plan
+    validation_target = Plan.find_by(id: @validation.validated_plan_id) || @viewed_plan
 
     if @validation.save
       redirect_to validate_plan_path(validation_target), notice: success_message(@validation, _('requested'))
@@ -33,22 +33,26 @@ class BelnetValidationsController < ApplicationController
     )
 
     if @validation.update(attrs)
-      redirect_to validate_plan_path(@plan), notice: success_message(@validation, _('reviewed'))
+      redirect_to validate_plan_path(@viewed_plan), notice: success_message(@validation, _('reviewed'))
     else
-      redirect_to validate_plan_path(@plan), alert: failure_message(@validation, _('review'))
+      redirect_to validate_plan_path(@viewed_plan), alert: failure_message(@validation, _('review'))
     end
   end
 
   private
 
+  # The validations tab can be opened from the LIVE plan or from one of its
+  # versions, so :plan_id may be a version. Validations always belong to the
+  # editable (LIVE) plan, which is the family head (belnet_family_id).
   def set_plan
-    @plan = Plan.find(params[:plan_id])
+    @viewed_plan = Plan.find(params[:plan_id])
+    @plan = @viewed_plan.is_plan_live_version? ? @viewed_plan : Plan.find(@viewed_plan.belnet_family_id)
   end
 
   def set_validation
     @validation = @plan.governance_validations_for_org_topics.find(params[:id])
   rescue ActiveRecord::RecordNotFound
-    redirect_to validate_plan_path(@plan), alert: _('Invalid topic validation review.')
+    redirect_to validate_plan_path(@viewed_plan), alert: _('Invalid topic validation review.')
   end
 
   # Strongparams only. Values are strings (name_ids);
