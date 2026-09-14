@@ -1,6 +1,7 @@
 x-defaults: &defaults
   # DB_ADAPTER values can be mysql2 or postgresql
-  adapter: <%= ENV['DB_ADAPTER'] || 'mysql2' %>
+  # adapter: <%= ENV['DB_ADAPTER'] || 'mysql2' %>
+  adapter: <%= ENV.fetch('DB_ADAPTER', 'mysql2') %>
   # Default encoding is utf8
   encoding: <%= ENV['DB_ADAPTER'] == "mysql2" ? "utf8mb4" : "" %>
   username: <%= ENV.fetch('DB_USERNAME', 'root') %>

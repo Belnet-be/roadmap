@@ -132,3 +132,7 @@ vendor/bundle
 app/assets/videos
 public/assets
 #ugent - end
+
+# Belnet - start
+belnet/db-postgres
+# Belnet - end

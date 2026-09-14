@@ -139,3 +139,8 @@ cloud9-start.sh
 vendor/bundle
 /env.sh
 #ugent - end
+
+# Belnet - start
+belnet/db-postgres/import/*
+!belnet/db-postgres/import/.gitkeep
+# Belnet - end

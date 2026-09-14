@@ -1,0 +1,85 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    image: dmponline-dev
+    container_name: dmponline-dev
+    volumes:
+      - .:/opt/roadmap
+    environment:
+      - TZ=Europe/Brussels
+      - DB_ADAPTER=${DB_ADAPTER:-mysql2}
+      - DB_NAME=${DB_NAME:?DB_NAME must be set}
+      - DB_USERNAME=${DB_USERNAME:?DB_USERNAME must be set}
+      - DB_PASSWORD=${DB_PASSWORD:?DB_PASSWORD must be set}
+      - DB_HOST=${DB_HOST:-mysql}
+      - DB_POOL=${DB_POOL:-5}
+      - MALLOC_ARENA_MAX=${MALLOC_ARENA_MAX:-2}
+      - RAILS_LOG_TO_STDOUT=${RAILS_LOG_TO_STDOUT:-true}
+      - DMP_LOCAL_LOGIN=${DMP_LOCAL_LOGIN:-true}
+      - RAILS_SERVE_STATIC_FILES=${RAILS_SERVE_STATIC_FILES:-false}
+      - EXECJS_RUNTIME=Node
+      - WEB_CONCURRENCY=${WEB_CONCURRENCY:-0}
+      - RAILS_MAX_THREADS=${RAILS_MAX_THREADS:-1}
+      - DMP_SMTP_ADDRESS=mail
+      - DMP_SMTP_PORT=1025
+      - BINDING=0.0.0.0
+      - BELNET_SPLITTED_LOGS=${BELNET_SPLITTED_LOGS:-false}
+      - SECRET_KEY_BASE=${SECRET_KEY_BASE:?SECRET_KEY_BASE must be set}
+      - BELNET_DRAGONFLY_SECRET=${BELNET_DRAGONFLY_SECRET:?BELNET_DRAGONFLY_SECRET must be set}
+      - BELNET_DEVISE_PEPPER=${BELNET_DEVISE_PEPPER:?BELNET_DEVISE_PEPPER must be set}
+      - DMP_ENVIRONMENT=${DMP_ENVIRONMENT:?DMP_ENVIRONMENT must be set}
+      - DMP_ENVIRONMENT_COLOR_CODE=${DMP_ENVIRONMENT_COLOR_CODE:?DMP_ENVIRONMENT_COLOR_CODE must be set}
+      - BELNET_DMPONLINE_VERSION=${BELNET_DMPONLINE_VERSION:?BELNET_DMPONLINE_VERSION must be set}
+      - RECAPTCHA_SITE_KEY=${RECAPTCHA_SITE_KEY}
+      - RECAPTCHA_SECRET_KEY=${RECAPTCHA_SECRET_KEY}
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+    ports:
+      - "3000:3000"
+
+  postgres:
+    image: postgres:17.5
+    environment:
+      TZ: Europe/Brussels
+      # Sets the superuser and password for PostgreSQL
+      POSTGRES_USER: ${POSTGRES_USER:?POSTGRES_USER must be set}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set}
+      # Provide the parameters for the db-init scripts on startup.
+      DB_NAME: ${DB_NAME:?DB_NAME must be set}
+      DB2_NAME: ${DB2_NAME}
+      DB_USERNAME: ${DB_USERNAME:?DB_USERNAME must be set}
+      DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD must be set}
+      DB_IMPORT_FILE: ${DB_IMPORT_FILE}
+    volumes:
+      # Named volume to persist database data outside of container.
+      # Format is "named_volume:path/in/container"
+      - dmponline_data:/var/lib/postgresql/data
+      # Host mount for one-time initialization.
+      # Format is "./path/on/host:/path/in/container"
+      # - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./belnet/db-postgres/scripts:/docker-entrypoint-initdb.d
+      - ./belnet/db-postgres/import:/data-import
+    ports:
+      # Map to something other than default 5432 on host in case Postgres
+      # is also running natively on host.
+      # Format is "host:container"
+      - "127.0.0.1:5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d ${DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  mail:
+    image: mailhog/mailhog
+    container_name: mail
+    ports:
+      - 8025:8025
+
+volumes:
+  dmponline_data:
