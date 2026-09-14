@@ -192,12 +192,16 @@ class Plan < ApplicationRecord
   # ==========
 
   # Retrieves any plan in which the user has an active role and
-  # is not a reviewer
+  # is not a reviewer. Versions are included through the user's role on the
+  # live plan of their family (see #access_roles)
   scope :active, lambda { |user|
-    plan_ids = Role.where(active: true, user_id: user.id).pluck(:plan_id)
+    role_plan_ids = Role.where(active: true, user_id: user.id).pluck(:plan_id)
+    live_plans = Plan.where(id: role_plan_ids, belnet_version: 0)
+    family_ids = live_plans.where.not(belnet_family_id: nil).pluck(:belnet_family_id)
+    version_ids = Plan.where(belnet_family_id: family_ids).pluck(:id)
 
     includes(:template, :roles)
-      .where(id: plan_ids)
+      .where(id: live_plans.pluck(:id) + version_ids)
   }
 
   # Retrieves any plan organisationally or publicly visible for a given org id
@@ -524,7 +528,7 @@ class Plan < ApplicationRecord
   #
   # Returns Boolean
   def editable_by?(user_id)
-    roles.any? { |r| r.user_id == user_id && r.active && r.editor }
+    access_roles.any? { |r| r.user_id == user_id && r.active && r.editor }
   end
 
   ##
@@ -558,7 +562,7 @@ class Plan < ApplicationRecord
   #
   # Returns Boolean
   def commentable_by?(user_id)
-    roles.any? { |r| r.user_id == user_id && r.active && r.commenter } ||
+    access_roles.any? { |r| r.user_id == user_id && r.active && r.commenter } ||
       reviewable_by?(user_id)
   end
 
@@ -568,7 +572,7 @@ class Plan < ApplicationRecord
   #
   # Returns Boolean
   def administerable_by?(user_id)
-    roles.any? { |r| r.user_id == user_id && r.active && r.administrator }
+    access_roles.any? { |r| r.user_id == user_id && r.active && r.administrator }
   end
 
   # determines if the plan is reviewable by the specified user
@@ -621,6 +625,22 @@ class Plan < ApplicationRecord
 
   def is_plan_live_version?
     belnet_version == 0
+  end
+
+  # The live (belnet_version 0) plan of this plan's family
+  def live_plan
+    return self if is_plan_live_version?
+    return nil if belnet_family_id.nil?
+    return @live_plan if defined?(@live_plan)
+
+    @live_plan = Plan.includes(:roles).find_by(belnet_family_id: belnet_family_id, belnet_version: 0)
+  end
+
+  # Collaborators are managed on the live plan, so every version of the family
+  # grants access based on the live plan's roles instead of its own copied roles.
+  # Falls back to the plan's own roles when there is no live plan
+  def access_roles
+    live_plan&.roles || roles
   end
 
   def update_stage(new_stage_name, current_user)
@@ -738,8 +758,8 @@ class Plan < ApplicationRecord
   # Returns User
   # Returns nil
   def owner
-    r = roles.select { |rr| rr.active && rr.administrator }
-             .min_by(&:created_at)
+    r = access_roles.select { |rr| rr.active && rr.administrator }
+                    .min_by(&:created_at)
     r&.user
   end
 
@@ -793,7 +813,7 @@ class Plan < ApplicationRecord
   def owner_and_coowners
     # We only need to search for :administrator in the bitflag
     # since :creator includes :administrator rights
-    roles.select { |r| r.active && r.administrator && !r.user.nil? }.map(&:user).uniq
+    access_roles.select { |r| r.active && r.administrator && !r.user.nil? }.map(&:user).uniq
   end
 
   # The creator, administrator and editors

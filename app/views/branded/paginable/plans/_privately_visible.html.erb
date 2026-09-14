@@ -19,7 +19,7 @@
     </thead>
     <tbody>
       <% scope.each do |plan| %>
-        <% my_plan_roles = plan.roles.select(&:active).select { |r| r.user_id == current_user.id } %>
+        <% my_plan_roles = plan.access_roles.select(&:active).select { |r| r.user_id == current_user.id } %>
         <tr id="<%= dom_id(plan) %>">
           <% if plan.is_plan_live_version? %>
             <td class="text-center text-nowrap align-middle">

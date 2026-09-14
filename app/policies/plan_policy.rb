@@ -84,8 +84,9 @@ class PlanPolicy < ApplicationPolicy
     @user.present?
   end
 
+  # Read only users (and admins without an editing role on the plan) may not version it
   def create_new_version?
-    @record.submittable_by?(@user.id)
+    @record.is_plan_live_version? && @record.editable_by?(@user.id)
   end
 
   def history?
@@ -93,7 +94,7 @@ class PlanPolicy < ApplicationPolicy
   end
 
   def update_stage?
-    @record.readable_by?(@user.id)
+    @record.editable_by?(@user.id)
   end
 
   def validate?
