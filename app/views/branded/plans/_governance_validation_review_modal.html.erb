@@ -9,6 +9,94 @@
           
           <p class="alert alert-primary"><%= _('Please review the validation request, update its status, and provide your rationale') %></p>
 
+          <%
+            validated_plan = validation.validated_plan
+            presenter = PlanPresenter.new(validated_plan)
+            version_metadata = validated_plan.belnet_version_metadata
+            requester = validation.requested_by
+          %>
+          <div class="border rounded p-3 mb-3">
+            <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-2">
+              <h3 class="h6 fw-bold mb-0"><%= _('Validation request') %></h3>
+              <%= link_to plan_path(validated_plan), target: '_blank', rel: 'noopener',
+                                                     class: 'btn btn-secondary btn-sm',
+                                                     title: _('Opens in a new window') do %>
+                <i class="bi bi-box-arrow-up-right" aria-hidden="true"></i>
+                <%= format(_('Open Version %{version}'), version: validated_plan.belnet_version) %>
+              <% end %>
+            </div>
+            <dl class="row mb-0">
+              <dt class="col-sm-4"><%= _('Topic') %></dt>
+              <dd class="col-sm-8"><%= validation.validation_topic %></dd>
+
+              <dt class="col-sm-4"><%= _('Requested by') %></dt>
+              <dd class="col-sm-8">
+                <%= requester&.name || _('Unknown') %>
+                <% if requester&.email.present? %>
+                  (<%= mail_to requester.email %>)
+                <% end %>
+              </dd>
+
+              <dt class="col-sm-4"><%= _('Requested at') %></dt>
+              <dd class="col-sm-8"><%= l(validation.requested_at, format: :long) %></dd>
+            </dl>
+          </div>
+
+          <div class="border rounded p-3 mb-3">
+            <h3 class="h6 fw-bold mb-2"><%= format(_('Version %{version} under review'), version: validated_plan.belnet_version) %></h3>
+            <dl class="row mb-0">
+              <dt class="col-sm-4"><%= _('Project Title') %></dt>
+              <dd class="col-sm-8"><%= validated_plan.title %></dd>
+
+              <dt class="col-sm-4"><%= _('Version created') %></dt>
+              <dd class="col-sm-8">
+                <%= l(validated_plan.created_at, format: :long) %>
+                <% if version_metadata&.created_by.present? %>
+                  <%= format(_('by %{name}'), name: version_metadata.created_by.name) %>
+                <% end %>
+              </dd>
+
+              <% if version_metadata&.reason.present? %>
+                <dt class="col-sm-4"><%= _('Reason For Version') %></dt>
+                <dd class="col-sm-8"><%= version_metadata.reason %></dd>
+              <% end %>
+
+              <dt class="col-sm-4"><%= _('Stage') %></dt>
+              <dd class="col-sm-8"><%= validated_plan.current_lifecycle_stage_name.presence || _('None') %></dd>
+
+              <dt class="col-sm-4"><%= _('Owner') %></dt>
+              <dd class="col-sm-8"><%= validated_plan.owner&.name || _('Unknown') %></dd>
+
+              <dt class="col-sm-4"><%= _('Organisation') %></dt>
+              <dd class="col-sm-8"><%= validated_plan.org&.name %></dd>
+
+              <dt class="col-sm-4"><%= _('Template') %></dt>
+              <dd class="col-sm-8"><%= validated_plan.template&.title %></dd>
+
+              <% if validated_plan.funder.present? %>
+                <dt class="col-sm-4"><%= _('Funder') %></dt>
+                <dd class="col-sm-8"><%= validated_plan.funder.name %></dd>
+              <% end %>
+
+              <% grant = validated_plan.grant %>
+              <% if grant&.value.present? %>
+                <dt class="col-sm-4"><%= _('Grant Number') %></dt>
+                <dd class="col-sm-8"><%= grant.value %></dd>
+              <% end %>
+
+              <dt class="col-sm-4"><%= _('Start and End Dates') %></dt>
+              <dd class="col-sm-8"><%= presenter.project_dates_to_readonly_display %></dd>
+
+              <dt class="col-sm-4"><%= _('Answered') %></dt>
+              <dd class="col-sm-8"><%= "#{validated_plan.num_answered_questions}/#{validated_plan.num_questions}" %></dd>
+
+              <% if validated_plan.description.present? %>
+                <dt class="col-sm-4"><%= _('Project Abstract') %></dt>
+                <dd class="col-sm-8 overflow-auto" style="max-height: 10rem;"><%= sanitize validated_plan.description %></dd>
+              <% end %>
+            </dl>
+          </div>
+
           <div class="form-control d-flex flex-column gap-2">
             <%= f.label :validation_status, _('Status'), class: 'form-label fw-bold mb-0' %>
             <%= f.select :validation_status,
