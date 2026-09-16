@@ -2275,7 +2275,7 @@ components:
         The response is the same as the organization specific list, but resolved via the organization of the plan instead of the organization of the current logged-in user.
       value:
         application: "DMPonline.be"
-        source: "GET /api/belnet-v1/configurations/lifecycle-stages"
+        source: "GET /api/belnet-v1/configurations/lifecycle-stages?plan-id=5000"
         time: "2026-07-16T12:01:19+00:00"
         caller: "Charlie Davis"
         code: "200"
@@ -2422,7 +2422,7 @@ components:
         The response is the same as the organization specific list, but resolved via the organization of the plan instead of the organization of the current logged-in user.
       value:
         application: "DMPonline.be"
-        source: "GET /api/belnet-v1/configurations/validation-topics"
+        source: "GET /api/belnet-v1/configurations/validation-topics?plan-id=10000"
         time: "2026-07-16T12:01:19+00:00"
         caller: "Charlie Davis"
         code: "200"
@@ -2558,7 +2558,7 @@ components:
         The response is the same as the organization specific list, but resolved via the organization of the plan instead of the organization of the current logged-in user.
       value:
         application: "DMPonline.be"
-        source: "GET /api/belnet-v1/configurations/validation-statuses"
+        source: "GET /api/belnet-v1/configurations/validation-statuses?plan-id=10000"
         time: "2026-07-16T12:01:19+00:00"
         caller: "Charlie Davis"
         code: "200"
