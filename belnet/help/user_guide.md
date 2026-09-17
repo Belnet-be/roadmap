@@ -121,6 +121,8 @@ The collaboration settings offer the following possibilities:
 
 Invitees will receive an email notification that they have access to this plan. Plan (co-)owners are listed as "creators" on plan exports, and "Principal investigators" are also included in some export formats. JSON exports include all types of contributors.
 
+Collaborators can be anyone, they do not need to belong to the same organisation or even any organisation in DMPonline. If the collaborator does not belong to any organisation within DMPonline they are considered a ‘guest’, meaning they can work on plans they’ve been invited to but cannot create their own. While administrators can view their users plans, they cannot invite themselves as editors, the users themselves need to do that if it is desired.
+
 ### Download
 This tab provides the export of the plan in available formats: csv, html, pdf, txt, docx, json. 
 
@@ -251,9 +253,9 @@ A <abbr title="Read-only snapshot of a DMP">[Version](/help_concepts#glossary_ve
 Versions are numbered automatically and sequentially. Versions can be assigned a Plan Stage tag for further tracking of DMP writing progress. For more information about Plan Stage, please see Tracking the stage of a DMP. 
 
 ### Creating a Version
-To create a Version of a DMP, click on the Create Version button at the top right of the DMP editor interface. A pop-up window will appear, prompting you to provide a brief description (10-500 characters) of the reason for creating teh Version.  the reason that justifies the versioning, this is how you document a DMP history. This description serves as a record of the DMP's evolution and helps collaborators understand the context of the changes made over time.
+To create a Version of a DMP, click on the Create Version button at the top right of the DMP editor interface. A pop-up window will appear, prompting you to provide a brief description (10-500 characters) of the reason for creating the Version.  the reason that justifies the versioning, this is how you document a DMP history. This description serves as a record of the DMP's evolution and helps collaborators understand the context of the changes made over time.
 
-You may also assign a Plan Stage tag to the Version in the drop-down list at the bottom of the pop-up window. This tag indicates the stage of the project that the Version represents and helps distinguish between snapshots created at different milestones. For more information, please refer to Tracking the Stage of a DMP.
+You may also assign a Stage tag to the Version in the drop-down list at the bottom of the pop-up window. This tag indicates the stage of the project that the Version represents and helps distinguish between snapshots created at different milestones. For more information, please refer to Tracking the Stage of a DMP.
 
 ### Accessing Version history
 To get an overview of the successive versions of a DMP, select the plan from your dashboard, open the plan editor and click on the History tab in the top navigation bar. This opens a table displaying all Versions of a DMP, ordered from most recent to oldest. 
@@ -272,37 +274,59 @@ To switch between different Versions in comparison view, click on the Version nu
 
 To return to the editable DMP, click Return to LIVE Version in the top-right corner of the page.
 
-## Tracking the stage of a DMP 
-For further documentation of progress of a DMP between Versions, you can assign a Plan Stage tag to a Version of a DMP. These tags document major DMP advances from draft to finalized and ready for submission if relevant. Please note that a Stage can only be assigned to a Version, not to the LIVE (working) DMP. 
+## Tracking the stage of a DMP
+To document the progression of a DMP throughout the lifecycle of a project and between Versions, you can assign a <abbr title="Tag indicating the completeness or maturity level of a DMP">[Stage](/help_concepts#glossary_stage)</abbr> tag to any Version of a DMP. Stages represent key milestones in the development of a DMP, from initial drafts to finalized versions ready for submission or implementation, depending on organisational practices. They help distinguish between successive versions of a DMP and provide a clear record of its progress over time.
 
-A Plan stage can be assigned upon Version creation (see Create a Version) or from the History table of a DMP (see Accessing Version History). 
+To assign a Stage to the Live version of a DMP:
 
-## Requesting Feedback
-Some organisations offer a feedback service through DMPOnline.be.
+1.	Open the DMP 
+2.	On the upper right corner of the screen, locate the **Select Stage** button and de-collapse the drop-down menu 
+3.	A pop-up appears to let you select a Stage in the drop-down list. Please note that this list can be custom to your organisation.
 
-If enabled:
+To assign a Stage to a Version of a DMP upon version creation, please refer to Creating a Version. 
 
-1.	Open the plan.
-2.	Select **Request Feedback**.
-3.	Provide any requested information.
-4.	Submit the request.
+To assign a Stage to any other version of a DMP after Version creation:
 
-Reviewers will be notified and may provide feedback through comments associated with individual questions.
-
-You may receive notifications when feedback is available.
-
-*difference with validation*
+1.	Open the DMP 
+2.	Browse to the History 
+3.	On the History table, you can see a list of all Versions created for this DMP. In the Stage column, you can see the Stage currently assigned to each Version. To change that Stage, de-collapse the drop-down list by clicking on the cell that corresponds to the Stage you want to change. 
+4.	A pop-up appears to let you select a Stage in the drop-down list. Please note that this list can be custom to your organisation.
 
 ## Submitting a Plan for Validation
-Some templates or workflows may require submission for validation.
+The Validation feature can be found in all DMPs under the "Validation" tab. It makes it possible for DMP collaborators to provide formal validation on certain topics on a DMP. Topic Validation is a process to ensure that your plan meets the required standards and guidelines of the organisation. 
 
-Where available:
+To request validation, the validator must first have access to the DMP as an Editor or Co-owner. Once a validation request has been submitted, the validator can approve or reject the topic and provide feedback if needed. All validation requests and their outcomes are available in the Validation tab. 
 
-1.	Open the validation or submission function.
-2.	Share the plan with the relevant reviewer or validation authority.
-3.	Follow any instructions provided by your organisation or funder.
+Each validation request results in a validation status being assigned to a specific topic within the DMP. A Validation can only take place on a non-LIVE Version of a DMP, to ensure traceability.
 
-Validation workflows may differ depending on the template or institutional configuration.
+To request Topic Validation:
+
+1.	Open the plan
+2.	First, make sure the validator(s) have access as Editors or Co-Owners of the DMP via the **Share** tab (see Sharing a Plan)
+3.	Browse to the **Validations** tab
+4.	Click on **Request Validation**
+5.	A pop-up appears that lets you select for which topic and which version of the DMP you are requesting a specific validation. Please note that the list of topics can be custom to your organisation. 
+6.	Click on **Request Validation**. 
+
+Validation workflows may differ depending on institutional processes. Once a validator logs in, they can access the DMP that is pending review (please note that they can use the dashboard filters to easily locate DMPs that are waiting for their review). To provide a Validation outcome:
+
+1.	Open the plan
+2.	Browse to the **Validations** tab
+3.	On the table, you can see the Validation requests history. Locate the Validation request you want to address and click on the **Review** button in the last column of the table. 
+4.	A pop-up appears that let you select a Validation status or outcome. Please note that the list of topics can be custom to your organisation. Fill out the Rationale and Conditions fields to document your Validation decision if applicable. 
+5.	Click on **Save review** 
+
+All DMP collaborators then have access to the Validation history of a DMP. The significance and consequences of the validation outcome depend on the processes and practices in place within the organisation. For example, a successful GDPR validation may indicate that the information is ready to be exported from DMPonline.be to the GDPR register, or to proceed assign an ulterior stage to the DMP.
+
+## Requesting Feedback
+Some organisations offer a feedback service through DMPOnline.be. The Request Feedback feature enables all users to request feedback for a specific plan. It sends a notification to Admins, or to a general research data management helpdesk if any, that a user needs feedback on their plan. Unlike Validation, Feedback is an informal review process: it does not result in a Validation status, approval decision, or other structured metadata associated with the DMP. Feedback may be provided within the application via comments, if the person giving feedback has access to the DMP, or through other communication channels, depending on the organisations practices. Feedback can take place before a Validation is requested, for example.  
+
+If the functionality is enabled, to request feedback:
+
+1.	Open the plan.
+2.	Browse to the **Request Feedback** tab.
+3.	Provide any requested information.
+4.	Submit the request.
 
 ## Exporting a Plan
 Plans can be exported and downloaded in a variety of formats. For more information about Downloading a plan, please see “Download” under “Navigating a plan”, 
@@ -335,8 +359,10 @@ Exported files can be used for a variety of purposes, including but not limited 
 If you need assistance:
 
 * Consult the guidance available within your plan.
-* Contact your local DMPOnline.be support team or institutional support service (organisations can provide contact info that you can access in the top ribbon at any point in DMPonline.be).
+* Contact your local DMPOnline.be support team or institutional support service (organisations provide contact info that you can access in the top ribbon at any point in DMPonline.be).
 * Use the feedback and commenting features where available.
+
+*[GDPR]: General Data Protection Regulation
 
 
 
