@@ -96,7 +96,8 @@ The phases of the DMP template presented in “Plan overview” can be seen as t
 
 Depending on the template, questions may be grouped into sections or sub-sections. Each section appears as a collapsible header bar and can be de-collapsed by clicking on the “+” button on the right, to make its questions appear. For further instructions on how to fill out a DMP, please see “Filling out a DMP”
 
-* 
+### Validations
+This tab takes you to the Validation feature and the plan' s history of validations. It makes it possible for DMP collaborators to provide formal validation on certain topics on a DMP. Topic Validation is a process to ensure that your plan meets the required standards and guidelines of the organisation. Validation workflows may differ depending on institutional processes. Please see Submitting a Plan for Validation.
 
 ### Share
 This tab helps you manage collaborators and visibility settings of the specific plan you're working on. Here, you can change the plans visibility between 
@@ -147,17 +148,6 @@ To answer the DMP questions:
 Between the Phases tabs and the sections, at the top of the screen, a progress indicator is displayed to help track completion.
 
 On the right side of the plan editor, Comments and Guidance panels can be found. For more instructions on how to use these panels, please see Guidance and Comments.
-
-## Importing Answers from Another Plan
-If another DMP uses the same template, you may be able to reuse existing answers.
-
-1.	Open the question you want to answer.
-2.	Select **Import**.
-3.	Choose a plan that uses the same template.
-4.	Select the answer to import.
-5.	Review and edit the imported content as needed.
-
-Imported answers remain editable.
 
 ## Setting Plan Visibility
 Plan visibility controls who can view a plan. Available visibility settings include:
@@ -292,12 +282,13 @@ To assign a Stage to any other version of a DMP after Version creation:
 3.	On the History table, you can see a list of all Versions created for this DMP. In the Stage column, you can see the Stage currently assigned to each Version. To change that Stage, de-collapse the drop-down list by clicking on the cell that corresponds to the Stage you want to change. 
 4.	A pop-up appears to let you select a Stage in the drop-down list. Please note that this list can be custom to your organisation.
 
-## Submitting a Plan for Validation
+## Topic Validation
 The Validation feature can be found in all DMPs under the "Validation" tab. It makes it possible for DMP collaborators to provide formal validation on certain topics on a DMP. Topic Validation is a process to ensure that your plan meets the required standards and guidelines of the organisation. 
 
+### Submitting a plan for validation
 To request validation, the validator must first have access to the DMP as an Editor or Co-owner. Once a validation request has been submitted, the validator can approve or reject the topic and provide feedback if needed. All validation requests and their outcomes are available in the Validation tab. 
 
-Each validation request results in a validation status being assigned to a specific topic within the DMP. A Validation can only take place on a non-LIVE Version of a DMP, to ensure traceability.
+Each validation request results in a Validation Status being assigned to a specific topic within the DMP. A Validation can only take place on a non-LIVE Version of a DMP, to ensure traceability.
 
 To request Topic Validation:
 
@@ -308,7 +299,14 @@ To request Topic Validation:
 5.	A pop-up appears that lets you select for which topic and which version of the DMP you are requesting a specific validation. Please note that the list of topics can be custom to your organisation. 
 6.	Click on **Request Validation**. 
 
-Validation workflows may differ depending on institutional processes. Once a validator logs in, they can access the DMP that is pending review (please note that they can use the dashboard filters to easily locate DMPs that are waiting for their review). To provide a Validation outcome:
+### Providing validation outcome
+Validation workflows may differ depending on institutional processes. Please note that validation topics and validation statuses lists may be configured at institutional level. 
+
+Any collaborator with access to the DMP as a Co-Owner or an Editor can provide a validation review. If you need a specific collaborator to provide a validation review, please notify them directly that they are expected to be the validator. 
+
+Once a validator logs in, they can access the DMP that is pending review. They can do so through their dashboard, either by directly accessing the plan in question, or by using the dashboard filters to easily locate DMPs that are waiting for their review, using the default tag "pending review" or any other tag configured locally.
+
+To provide a Validation outcome:
 
 1.	Open the plan
 2.	Browse to the **Validations** tab
@@ -316,7 +314,7 @@ Validation workflows may differ depending on institutional processes. Once a val
 4.	A pop-up appears that let you select a Validation status or outcome. Please note that the list of topics can be custom to your organisation. Fill out the Rationale and Conditions fields to document your Validation decision if applicable. 
 5.	Click on **Save review** 
 
-All DMP collaborators then have access to the Validation history of a DMP. The significance and consequences of the validation outcome depend on the processes and practices in place within the organisation. For example, a successful GDPR validation may indicate that the information is ready to be exported from DMPonline.be to the GDPR register, or to proceed assign an ulterior stage to the DMP.
+All DMP collaborators then have access to the Validation history of a DMP. The significance and consequences of the validation outcome depend on the processes and practices in place within the organisation. For example, a successful GDPR validation may indicate that the information is ready to be exported from DMPonline.be to the GDPR register, or to proceed assign an ulterior Stage to the DMP. The validation feature has been intentionnally designed as flexible and configurable to support different possible workflows. To inquire about local validation practice at your institution, please contact your organisational Admin or local helpdesk, which can be usually found through the organisational information provided in the grey banner at the top of any DMPonline.be page.
 
 ## Requesting Feedback
 Some organisations offer a feedback service through DMPOnline.be. The Request Feedback feature enables all users to request feedback for a specific plan. It sends a notification to Admins, or to a general research data management helpdesk if any, that a user needs feedback on their plan. Unlike Validation, Feedback is an informal review process: it does not result in a Validation status, approval decision, or other structured metadata associated with the DMP. Feedback may be provided within the application via comments, if the person giving feedback has access to the DMP, or through other communication channels, depending on the organisations practices. Feedback can take place before a Validation is requested, for example.  
@@ -360,7 +358,7 @@ If you need assistance:
 
 * Consult the guidance available within your plan.
 * Contact your local DMPOnline.be support team or institutional support service (organisations provide contact info that you can access in the top ribbon at any point in DMPonline.be).
-* Use the feedback and commenting features where available.
+* Use the feedback, validation and commenting features where available.
 
 *[GDPR]: General Data Protection Regulation
 
