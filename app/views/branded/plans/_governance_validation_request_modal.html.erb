@@ -10,7 +10,7 @@
           <p class="alert alert-primary"><%= _('Validation can be requested for any version of your DMP.
 To act as a validator, a collaborator must first be granted Editor or Co-owner access via the Share tab.') %></p>
 
-          <p class="alert alert-primary"><%= _('Please select the topic to be validated. Once the request has been submitted, inform the collaborator responsible for the validation. The status and outcome of all validation requests will then be available in the Validation tab. Please review the Validation user manual for more detail.') %></p>
+          <p class="alert alert-primary"><%= _('Please select the topic to be validated. Once the request has been submitted, inform the collaborator responsible for the validation. The status and outcome of all validation requests will then be available in the Validations tab. Please review Topic Validation in the Help > User Guide for more detail.') %></p>
 
           <div class="form-control d-flex flex-column gap-2">
             <%= f.label :validation_topic, _('Validation topic'), class: 'form-label fw-bold mb-0' %>
@@ -19,7 +19,7 @@ To act as a validator, a collaborator must first be granted Editor or Co-owner a
                          { include_blank: _('Select a topic') },
                          { class: 'form-select', required: true } %>
 
-            <%= f.label :validated_plan_id, _('version'), class: 'form-label fw-bold mb-0 mt-2' %>
+            <%= f.label :validated_plan_id, _('Version'), class: 'form-label fw-bold mb-0 mt-2' %>
             <%= f.select :validated_plan_id,
                          options_for_select(available_validated_plans.map { |validated_plan| ["#{_('Version')} #{validated_plan.belnet_version} - #{l(validated_plan.created_at.to_date, format: :readable)}", validated_plan.id] }),
                          { include_blank: _('Select a version') },

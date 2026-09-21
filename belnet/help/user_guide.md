@@ -96,9 +96,6 @@ The phases of the DMP template presented in “Plan overview” can be seen as t
 
 Depending on the template, questions may be grouped into sections or sub-sections. Each section appears as a collapsible header bar and can be de-collapsed by clicking on the “+” button on the right, to make its questions appear. For further instructions on how to fill out a DMP, please see “Filling out a DMP”
 
-### Validations
-This tab takes you to the Validation feature and the plan' s history of validations. It makes it possible for DMP collaborators to provide formal validation on certain topics on a DMP. Topic Validation is a process to ensure that your plan meets the required standards and guidelines of the organisation. Validation workflows may differ depending on institutional processes. Please see Submitting a Plan for Validation.
-
 ### Share
 This tab helps you manage collaborators and visibility settings of the specific plan you're working on. Here, you can change the plans visibility between 
 
@@ -123,6 +120,9 @@ The collaboration settings offer the following possibilities:
 Invitees will receive an email notification that they have access to this plan. Plan (co-)owners are listed as "creators" on plan exports, and "Principal investigators" are also included in some export formats. JSON exports include all types of contributors.
 
 Collaborators can be anyone, they do not need to belong to the same organisation or even any organisation in DMPonline. If the collaborator does not belong to any organisation within DMPonline they are considered a ‘guest’, meaning they can work on plans they’ve been invited to but cannot create their own. While administrators can view their users plans, they cannot invite themselves as editors, the users themselves need to do that if it is desired.
+
+### Validations
+This tab takes you to the [Topic Validation](#topic-validation) feature and the plan' s history of validations. It makes it possible for DMP collaborators to provide formal validation on certain topics on a DMP. Topic Validation is a process to ensure that your plan meets the required standards and guidelines of the organisation. Validation workflows may differ depending on institutional processes. Please see [Submitting a Plan for Validation](#submitting-a-plan-for-validation).
 
 ### Download
 This tab provides the export of the plan in available formats: csv, html, pdf, txt, docx, json. 
@@ -283,10 +283,10 @@ To assign a Stage to any other version of a DMP after Version creation:
 4.	A pop-up appears to let you select a Stage in the drop-down list. Please note that this list can be custom to your organisation.
 
 ## Topic Validation
-The Validation feature can be found in all DMPs under the "Validation" tab. It makes it possible for DMP collaborators to provide formal validation on certain topics on a DMP. Topic Validation is a process to ensure that your plan meets the required standards and guidelines of the organisation. 
+The Validation feature can be found in all DMPs under the **Validations** tab. It makes it possible for DMP collaborators to provide formal validation on certain topics on a DMP. Topic Validation is a process to ensure that your plan meets the required standards and guidelines of the organisation. 
 
-### Submitting a plan for validation
-To request validation, the validator must first have access to the DMP as an Editor or Co-owner. Once a validation request has been submitted, the validator can approve or reject the topic and provide feedback if needed. All validation requests and their outcomes are available in the Validation tab. 
+### Submitting a Plan for Validation
+To request validation, the validator must first have access to the DMP as an Editor or Co-owner. Once a validation request has been submitted, the validator can approve or reject the topic and provide feedback if needed. All validation requests and their outcomes are available in the **Validations** tab. 
 
 Each validation request results in a Validation Status being assigned to a specific topic within the DMP. A Validation can only take place on a non-LIVE Version of a DMP, to ensure traceability.
 
