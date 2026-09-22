@@ -24,7 +24,7 @@ class BelnetValidationsController < ApplicationController
 
   # PUT /plans/:plan_id/governance_validations/:id
   def update
-    authorize @plan, :update?
+    authorize @plan, :review_validation?
 
     attrs = update_validation_params.merge(
       # Use actual timezone time, way better than time.now
