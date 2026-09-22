@@ -30,7 +30,7 @@ Users cannot be created manually by admins. A user must first register and log i
 ### What rights do Admin users have?
 As an Admin within your institution, you will have access to an Admin menu in the top right corner of your screen:
 
-![The Admin drop-down menu, listing Plans, Templates, Guidance, Organisation details, Users and Usage](/images/help/admin_guide/admin_options.png){:.img-fluid}
+![The Admin drop-down menu, listing Plans, Templates, Guidance, Organisation details, Users and Usage](/belnet/help/admin_guide/admin_options.png){:.img-fluid}
 
 1.	Under the « Plans » tab, you can consult all the plans that have been created by users in your institutions.
 2.	Under the « Templates » tab, you can:
@@ -44,7 +44,7 @@ As an Admin within your institution, you will have access to an Admin menu in th
     *	activate, deactivate or customise the Request Feedback feature. When active, the Request Feedback feature enables all users to request feedback for a specific plan. This triggers a notification to Admins that a user needs feedback on their plan, which can then take place according to institutional processes if any.
 5.	On the « Users » tab, you can define the permissions, privileges and access of end users in your institution.
 
-    ![The Editing privileges dialog, with checkboxes for Organisational admin privileges: Manage user privileges, Manage templates, Manage guidance, Manage organisation details and Review plans](/images/help/admin_guide/editing_privileges.png){:.img-fluid width="302"}
+    ![The Editing privileges dialog, with checkboxes for Organisational admin privileges: Manage user privileges, Manage templates, Manage guidance, Manage organisation details and Review plans](/belnet/help/admin_guide/editing_privileges.png){:.img-fluid width="302"}
 6.	On the « Usage » tab, you can view overall statistics on usage of the platform, that is, numbers of plans and users added per month, and download reports.
 
 ### What are the tasks of an Admin User?
@@ -62,7 +62,7 @@ By clicking on the "Reference" tab in the header menu, you will find different "
 
 For example, templates by: BELSPO (Belgian Federal Science Policy Office); FWO (The Research Foundation – Flanders); the DCC (Digital Curation Centre) Template; ELIXIR Belgium; the ERC (European Research Council); Horizon 2020 (European Commission) FAIR DMP.
 
-![The DMP Templates list, showing funder templates from BELSPO, the DCC, the ERC, FWO and the European Commission, each with Word and PDF download links](/images/help/admin_guide/dmp_templates.png){:.img-fluid width="472"}
+![The DMP Templates list, showing funder templates from BELSPO, the DCC, the ERC, FWO and the European Commission, each with Word and PDF download links](/belnet/help/admin_guide/dmp_templates.png){:.img-fluid width="472"}
 
 The end user can create a new plan based on these templates. He/she will only have to select a plan by clicking on "Action".
 
@@ -86,11 +86,11 @@ As an Admin, you can customise and modify templates by adding phases, sections a
 
 For example, in a phase you have just created, you can add new sections by clicking on the "+" button of "Add a new section". In each section you can add new questions via the "Add question" button.
 
-![The Add new phase tab of the template editor, showing the Phase details form with Title, Order of display and Description fields](/images/help/admin_guide/add_new_phase.png){:.img-fluid width="472"}
+![The Add new phase tab of the template editor, showing the Phase details form with Title, Order of display and Description fields](/belnet/help/admin_guide/add_new_phase.png){:.img-fluid width="472"}
 
 For the new questions, it is possible to change the format of the answer (e.g. Check box, Date, Dropdown, Radio buttons), add a default answer, adjust the theme of the question and adapt the specific guidance. You can also add conditional questions, etc.
 
-![The New question form, with the Answer format drop-down open on Check box, Date, Dropdown, Radio buttons, RDA Metadata Standards, Text area and Text field](/images/help/admin_guide/questions.png){:.img-fluid width="457"}
+![The New question form, with the Answer format drop-down open on Check box, Date, Dropdown, Radio buttons, RDA Metadata Standards, Text area and Text field](/belnet/help/admin_guide/questions.png){:.img-fluid width="457"}
 
 Once saved, the custom template can be found in the "Own templates" section in the Admin menu on the right. This template will be added to the default templates of your end users.
 
@@ -108,7 +108,7 @@ Once you have saved all your questions, you will see the "Add conditions" option
 
 *	**Themed guidance:** In DMPonline, there are themes that represent the most common topics addressed in DMPs (e.g. data format, metadata and documentation, data repository). See the themes page for an overview. Themes work as tags to link questions and guidance.
 
-    ![The Themes checkboxes when creating guidance, ranging from Budget to Storage & Security, followed by the Guidance group field and the Published? checkbox](/images/help/admin_guide/themes.png){:.img-fluid width="472"}
+    ![The Themes checkboxes when creating guidance, ranging from Budget to Storage & Security, followed by the Guidance group field and the Published? checkbox](/belnet/help/admin_guide/themes.png){:.img-fluid width="472"}
 
     Each question in a template can be tagged with one or more themes. Administrators can then create guidelines per topic to be applied in all templates related to that topic at once. This avoids having to update the content of the guidelines every time a new version of a template is released.
 
@@ -126,7 +126,7 @@ Guidance can be created on topics that are flagged with one or several tags, suc
 
 1.	In the Admin menu, click on "Guidance", then click on "Create guidance" at the lower end of the Guidance list.
 
-    ![The Guidance admin page, with the Guidance group list above and the Create guidance button at the bottom of the Guidance list](/images/help/admin_guide/guidance.png){:.img-fluid width="472"}
+    ![The Guidance admin page, with the Guidance group list above and the Create guidance button at the bottom of the Guidance list](/belnet/help/admin_guide/guidance.png){:.img-fluid width="472"}
 2.	Fill in the form and enter the content of the guidance in the text box.
 3.	Choose one or more topics. Your guidance will be displayed to users whenever a question in a template is tagged with the corresponding topic(s).
 4.	Select the "Guidance Group" to which the guidance relates.
