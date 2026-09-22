@@ -3,20 +3,23 @@
   Partial for handling the answer status (e.g. saving, error-saving, data-status)
 -->
 <%
-  helpdesk_email = Rails.configuration.x.organisation.helpdesk_email
-  email_subject = _('Plan writing error related to %{tool_name}') %{ :tool_name => tool_name }
+  # Override the default Rails route helper for the contact_us page IF an alternate contact_us url was defined
+  # in the dmproadmap.rb initializer
+  contact_us = Rails.configuration.x.organisation.contact_us_url || contact_us_path
+  # Open in a new tab: navigating away from this page loses the unsaved answer
+  contact_us_link = link_to(_('Contact us'), contact_us, target: '_blank', rel: 'noopener noreferrer')
 %>
 <span class="badge bg-warning text-dark status" style="display:none;" data-status="saving">
   <%= _("Saving...Please do not refresh or go to another page!") %>
   <br><br>
-  <%= sanitize(_("If you stuck on this message, please save your plan to a separate file and contact us at %{helpdesk_email} .") % {
-      helpdesk_email: mail_to(helpdesk_email, helpdesk_email,subject: email_subject)
-    }) %>
+  <%= sanitize(_("If you are stuck on this message, please save your plan to a separate file and reach out to us via our %{contact_us} page.") % {
+      contact_us: contact_us_link
+    }, attributes: %w[href target rel]) %>
 </span>
 <span class="badge bg-danger status" style="display: none;" data-status="error-saving">
-<%= sanitize(_("Sorry, we had trouble saving your data. Please contact us at %{helpdesk_email} .") % {
-      helpdesk_email: mail_to(helpdesk_email, helpdesk_email,subject: email_subject)
-    }) %>
+<%= sanitize(_("Sorry, we had trouble saving your data. Please reach out to us via our %{contact_us} page.") % {
+      contact_us: contact_us_link
+    }, attributes: %w[href target rel]) %>
 <br><br>
 <%= _("Save your plan content to a separate file now. You will LOSE them after refreshing or closing this page.") %>
 </span>
