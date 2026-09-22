@@ -14,11 +14,8 @@ require "csv"
 #
 # This file's name begins with an underscore so that it is processed first and its
 # values are available to all other initializers within this directory!
-# rubocop:disable Layout/LineLength
 module DMPRoadmap
-
   class Application < Rails::Application
-
     # --------------------- #
     # ORGANISATION SETTINGS #
     # --------------------- #
@@ -38,7 +35,7 @@ module DMPRoadmap
     # This email is used in email communications
     config.x.organisation.helpdesk_email = "servicedesk@belnet.be"
     # Your organisation's telephone number - used on the contact us page
-    #config.x.organisation.telephone = "+32 2 790 33 33"
+    # config.x.organisation.telephone = "+32 2 790 33 33"
     config.x.organisation.telephone = ""
     # Your organisation's address - used on the contact us page
     config.x.organisation.address = {
@@ -258,26 +255,25 @@ module DMPRoadmap
     # ------------------------------------------------------------------------ #
     # reCAPTCHA - recaptcha appears on the create account and contact us forms #
     # ------------------------------------------------------------------------ #
-    config.x.recaptcha.enabled = false
+    config.x.recaptcha.enabled = true
 
     ENV["DMP_HOST"] ||= "localhost:3000"
     ENV["DMP_PROTOCOL"] ||= "http"
 
     # default url options for mailers
     config.action_mailer.default_url_options ||= {}
-    config.action_mailer.default_url_options[:host] = ENV["DMP_HOST"]
-    config.action_mailer.default_url_options[:protocol] = ENV["DMP_PROTOCOL"]
+    config.action_mailer.default_url_options[:host] = ENV.fetch("DMP_HOST", nil)
+    config.action_mailer.default_url_options[:protocol] = ENV.fetch("DMP_PROTOCOL", nil)
 
     # default settings for mailing
     config.action_mailer.smtp_settings ||= {}
     config.action_mailer.smtp_settings[:address] = ENV.fetch("DMP_SMTP_ADDRESS", "localhost")
     config.action_mailer.smtp_settings[:port] = ENV.fetch("DMP_SMTP_PORT", 25)
 
-
     # default url options for route helpers (outside of request context)
     Rails.application.routes.default_url_options ||= {}
-    Rails.application.routes.default_url_options[:host] = ENV["DMP_HOST"]
-    Rails.application.routes.default_url_options[:protocol] = ENV["DMP_PROTOCOL"]
+    Rails.application.routes.default_url_options[:host] = ENV.fetch("DMP_HOST", nil)
+    Rails.application.routes.default_url_options[:protocol] = ENV.fetch("DMP_PROTOCOL", nil)
 
     # "rails assets:precompile" crashes with segmentation fault without this
     # cf. https://github.com/sass/sassc-ruby/issues/207
@@ -286,6 +282,4 @@ module DMPRoadmap
       env.export_concurrent = false
     end
   end
-
 end
-# rubocop:enable Layout/LineLength
