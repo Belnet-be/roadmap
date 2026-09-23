@@ -4,7 +4,7 @@
 # for more information
 ContactUs.setup do |config|
   config.mailer_from = "dmponline@belnet.be"
-  config.mailer_to = "adminsupport@belnet.be"
+  config.mailer_to = "patrik.schrey@belnet.be"
   config.require_name = true
   config.require_subject = true
   config.localize_routes = false
