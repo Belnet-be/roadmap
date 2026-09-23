@@ -1,7 +1,7 @@
 <div class="card mb-4" markdown="1">
 
 <div class="card-header" markdown="1">
-## Release Notes v5.0.0-beta-spr0021.1
+## Release Notes v5.0.0-rc.1
 </div>
 <div class="card-body" markdown="1">
 
@@ -50,6 +50,7 @@
 - Added Mailhog service to capture outgoing emails in non-production environments.
 - Added script (rails task) for creating and removing test users in non-production environments.
 - Added script (rails task) for creating and updating the default values for *lifecycle stages*, *validation topics* and *validation statuses*.
+- DMPonline receiving email address is changed, but also removed from UI. Users are advised to use the **Contact Us** form.
 
 ### Known limitations
 - While in the user interface of the DMPonline application you can filter on *plan visibility*, this is not supported via this API endpoint because we can't inform you about the setting with the current maDMP schema

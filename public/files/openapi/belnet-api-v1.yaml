@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: API Belnet v1
-  version: 1.0.0-beta+spr0021
+  version: 1.0.0-rc.1
   description: |-
     The Belnet extension of the standard DMPRoadmap v1 API for the DMPonline application.
 
@@ -16,9 +16,6 @@ info:
       * [ ] RegularCreatePlanLifecycleStageResponse
     * [ ] Error messages
 
-servers:
-  - description: Internal TEST environment
-    url: https://dmponline-test-1.tl.belnet.be
 tags:
   - name: Plans
     description: Retrieving Data Management Plans (DMPs), but now either an _editable_ DMP or an _immutable_ version (read-only snapshot) of it.
