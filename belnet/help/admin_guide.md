@@ -149,15 +149,21 @@ Lifecycle stages indicate where a DMP stands within the lifecycle of a research 
 As a project progresses, a DMP may move through several stages, from early drafts to finalized and archived versions. These stages can help demonstrate compliance with funder requirements, such as intermediate or provisional DMP deliverables, and support internal project management and review processes.
 
 ### Can my organisation have custom stages lists or validation topics list?
-By default, the list of validation topic is the following:
+By default, the list of validation topics is the following:
 
-* GDPR
-* Ethics
+* General
 * FAIR
+* GDPR
 * Data security
-* Data storage
 
-Upon request to Belnet, Admins can ask to edit the validation topics list to customise it, so it best matches the needs and processes of their institutions.
+The default list of validation statuses is the following:
+
+* Pending Review
+* Approved
+* Denied
+* Rework Needed
+
+Upon request to Belnet, Admins can ask to edit the validation topics list, their organisation's lifecycle stages and validation statuses so they best match the needs and processes of their institutions.
 
 The same is true for lifecycle stages, for which the default list is:
 
