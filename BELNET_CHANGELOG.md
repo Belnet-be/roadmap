@@ -1,7 +1,7 @@
 <div class="card mb-4" markdown="1">
 
 <div class="card-header" markdown="1">
-## Release Notes v5.0.0-rc.1
+## Release Notes v5.0.0-rc.2
 </div>
 <div class="card-body" markdown="1">
 
