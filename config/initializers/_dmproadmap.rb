@@ -38,7 +38,7 @@ module DMPRoadmap
     # Your organisation's telephone number - used on the contact us page
     config.x.organisation.telephone = '+1-123-123-1234'
     # Your organisation's address - used on the contact us page
-    # rubocop:disable Naming/VariableNumber
+    # rubocop:disable-next Naming/VariableNumber
     config.x.organisation.address = {
       line_1: 'Princess Elisabeth Station',
       line_2: '123 Freezing Cold Street',
@@ -46,7 +46,6 @@ module DMPRoadmap
       line_4: 'Polar Vortex, ABC-345',
       country: 'Antarctica'
     }
-    # rubocop:enable Naming/VariableNumber
 
     # The Google maps link to your organisation's location - used to display the
     # Google map on the contact us page.

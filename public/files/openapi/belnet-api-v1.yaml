@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: API Belnet v1
-  version: 1.0.0-beta+spr0021
+  version: 1.0.0
   description: |-
     The Belnet extension of the standard DMPRoadmap v1 API for the DMPonline application.
 
@@ -16,9 +16,6 @@ info:
       * [ ] RegularCreatePlanLifecycleStageResponse
     * [ ] Error messages
 
-servers:
-  - description: Internal TEST environment
-    url: https://dmponline-test-1.tl.belnet.be
 tags:
   - name: Plans
     description: Retrieving Data Management Plans (DMPs), but now either an _editable_ DMP or an _immutable_ version (read-only snapshot) of it.
@@ -668,6 +665,8 @@ paths:
                   $ref: "#/components/examples/RegularGetConfigLifecycleStagesResponse"
                 org_specific:
                   $ref: "#/components/examples/OrganizationGetConfigLifecycleStagesResponse"
+                plan_specific:
+                  $ref: "#/components/examples/PlanGetConfigLifecycleStagesResponse"
           description: OK
         "400":
           content:
@@ -702,6 +701,10 @@ paths:
               examples:
                 regular:
                   $ref: "#/components/examples/RegularGetConfigValidationTopicsResponse"
+                org_specific:
+                  $ref: "#/components/examples/OrganizationGetConfigValidationTopicsResponse"
+                plan_specific:
+                  $ref: "#/components/examples/PlanGetConfigValidationTopicsResponse"
           description: OK
         "400":
           content:
@@ -733,6 +736,10 @@ paths:
               examples:
                 regular:
                   $ref: "#/components/examples/RegularGetConfigValidationStatusesResponse"
+                org_specific:
+                  $ref: "#/components/examples/OrganizationGetConfigValidationStatusesResponse"
+                plan_specific:
+                  $ref: "#/components/examples/PlanGetConfigValidationStatusesResponse"
           description: OK
         "400":
           content:
@@ -2258,6 +2265,45 @@ components:
                   - "External Review"
                   - "Finalized"
                   - "Archived"
+    PlanGetConfigLifecycleStagesResponse:
+      summary: Plan specific list (plan-id query parameter)
+      description: |
+        DMP stages available for the organization of the plan given in the `plan-id` query parameter.
+        The response is the same as the organization specific list, but resolved via the organization of the plan instead of the organization of the current logged-in user.
+      value:
+        application: "DMPonline.be"
+        source: "GET /api/belnet-v1/configurations/lifecycle-stages?plan-id=5000"
+        time: "2026-07-16T12:01:19+00:00"
+        caller: "Charlie Davis"
+        code: "200"
+        message: "OK"
+        page: 1
+        per_page: 100
+        total_items: 1
+        items:
+          - lifecycle_stages:
+              modified: "2026-06-18T14:12:17Z"
+              organization:
+                org_id: 62
+                org_name: "Université de Liège"
+                org_abbreviation: "ULiege"
+              current_list:
+                enum:
+                  - "Initial Draft"
+                  - "Working Draft"
+                  - "Internal Review"
+                  - "External Review"
+                  - "Finalized"
+                  - "Archived"
+              full_list:
+                enum:
+                  - "Initial Draft"
+                  - "Working Draft"
+                  - "Intermediate"
+                  - "Internal Review"
+                  - "External Review"
+                  - "Finalized"
+                  - "Archived"
     # RegularGetConfigValidationTopicsResponse:
     #   summary: Regular answer
     #   description: DMP validation topics available for current logged-in user.
@@ -2331,6 +2377,78 @@ components:
                   - "FAIR"
                   - "Data Security"
                   - "Data Storage"
+    OrganizationGetConfigValidationTopicsResponse:
+      summary: Organization specific list
+      description: DMP validation topics available for your organization for current logged-in user.
+      value:
+        application: "DMPonline.be"
+        source: "GET /api/belnet-v1/configurations/validation-topics"
+        time: "2026-07-16T12:01:19+00:00"
+        caller: "Charlie Davis"
+        code: "200"
+        message: "OK"
+        page: 1
+        per_page: 100
+        total_items: 1
+        items:
+          - validation_topics:
+              modified: "2026-06-18T14:12:17Z"
+              organization:
+                org_id: 62
+                org_name: "Université de Liège"
+                org_abbreviation: "ULiege"
+              current_list:
+                enum:
+                  - "GDPR"
+                  - "Ethics"
+                  - "FAIR"
+                  - "Data Security"
+                  - "Data Sharing"
+              full_list:
+                enum:
+                  - "GDPR"
+                  - "Ethics"
+                  - "FAIR"
+                  - "Data Security"
+                  - "Data Storage"
+                  - "Data Sharing"
+    PlanGetConfigValidationTopicsResponse:
+      summary: Plan specific list (plan-id query parameter)
+      description: |
+        DMP validation topics available for the organization of the plan given in the `plan-id` query parameter.
+        The response is the same as the organization specific list, but resolved via the organization of the plan instead of the organization of the current logged-in user.
+      value:
+        application: "DMPonline.be"
+        source: "GET /api/belnet-v1/configurations/validation-topics?plan-id=10000"
+        time: "2026-07-16T12:01:19+00:00"
+        caller: "Charlie Davis"
+        code: "200"
+        message: "OK"
+        page: 1
+        per_page: 100
+        total_items: 1
+        items:
+          - validation_topics:
+              modified: "2026-06-18T14:12:17Z"
+              organization:
+                org_id: 62
+                org_name: "Université de Liège"
+                org_abbreviation: "ULiege"
+              current_list:
+                enum:
+                  - "GDPR"
+                  - "Ethics"
+                  - "FAIR"
+                  - "Data Security"
+                  - "Data Sharing"
+              full_list:
+                enum:
+                  - "GDPR"
+                  - "Ethics"
+                  - "FAIR"
+                  - "Data Security"
+                  - "Data Storage"
+                  - "Data Sharing"
     # RegularGetConfigValidationStatusesResponse:
     #   summary: Regular answer
     #   description: DMP validation statuses available for current logged-in user.
@@ -2395,6 +2513,74 @@ components:
                 enum:
                   - "Pending Review"
                   - "Approved"
+                  - "Denied"
+                  - "Rework Needed"
+    OrganizationGetConfigValidationStatusesResponse:
+      summary: Organization specific list
+      description: DMP validation statuses available for your organization for current logged-in user.
+      value:
+        application: "DMPonline.be"
+        source: "GET /api/belnet-v1/configurations/validation-statuses"
+        time: "2026-07-16T12:01:19+00:00"
+        caller: "Charlie Davis"
+        code: "200"
+        message: "OK"
+        page: 1
+        per_page: 100
+        total_items: 1
+        items:
+          - validation_statuses:
+              modified: "2026-06-18T14:12:17Z"
+              organization:
+                org_id: 62
+                org_name: "Université de Liège"
+                org_abbreviation: "ULiege"
+              current_list:
+                enum:
+                  - "Pending Review"
+                  - "Approved"
+                  - "Conditionally Approved"
+                  - "Rework Needed"
+              full_list:
+                enum:
+                  - "Pending Review"
+                  - "Approved"
+                  - "Conditionally Approved"
+                  - "Denied"
+                  - "Rework Needed"
+    PlanGetConfigValidationStatusesResponse:
+      summary: Plan specific list (plan-id query parameter)
+      description: |
+        DMP validation statuses available for the organization of the plan given in the `plan-id` query parameter.
+        The response is the same as the organization specific list, but resolved via the organization of the plan instead of the organization of the current logged-in user.
+      value:
+        application: "DMPonline.be"
+        source: "GET /api/belnet-v1/configurations/validation-statuses?plan-id=10000"
+        time: "2026-07-16T12:01:19+00:00"
+        caller: "Charlie Davis"
+        code: "200"
+        message: "OK"
+        page: 1
+        per_page: 100
+        total_items: 1
+        items:
+          - validation_statuses:
+              modified: "2026-06-18T14:12:17Z"
+              organization:
+                org_id: 62
+                org_name: "Université de Liège"
+                org_abbreviation: "ULiege"
+              current_list:
+                enum:
+                  - "Pending Review"
+                  - "Approved"
+                  - "Conditionally Approved"
+                  - "Rework Needed"
+              full_list:
+                enum:
+                  - "Pending Review"
+                  - "Approved"
+                  - "Conditionally Approved"
                   - "Denied"
                   - "Rework Needed"
 security:

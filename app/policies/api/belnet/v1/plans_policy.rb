@@ -18,10 +18,19 @@ module Api
           # User (admin) can view: all from users of their organisation
           def resolve
             ids = @user.is_a?(ApiClient) ? plans_for_client : plans_for_user
-            Plan.where(id: ids.uniq)
+            Plan.where(id: with_versions(ids).uniq)
           end
 
           private
+
+          # Versions get their access from the live plan of their family, so include
+          # every version of the live plans the client can access
+          def with_versions(ids)
+            family_ids = Plan.where(id: ids, belnet_version: 0)
+                             .where.not(belnet_family_id: nil)
+                             .pluck(:belnet_family_id)
+            ids + Plan.where(belnet_family_id: family_ids).pluck(:id)
+          end
 
           def plans_for_client
             return [] unless @user.present?

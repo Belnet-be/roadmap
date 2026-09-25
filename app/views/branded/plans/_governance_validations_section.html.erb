@@ -1,4 +1,6 @@
 <% has_versions = available_validated_plans.any? %>
+<%# plan may be a version; validations are reviewed on the live plan %>
+<% can_review_validations = policy(plan.live_plan || plan).review_validation? %>
 
 <% if has_versions %>
   <p><%= _("Request a topic validation for one of this plan's frozen version.") %></p>
@@ -45,7 +47,7 @@
                 <td><%= validation.rationale.presence || '' %></td>
                 <td><%= validation.conditions.presence || '' %></td>
                 <td>
-                  <% if plan.editable_by?(current_user.id) && reviewable %>
+                  <% if can_review_validations && reviewable %>
                     <button type="button"
                             class="btn btn-secondary btn-sm"
                             data-bs-toggle="modal"
@@ -65,7 +67,7 @@
   <p class="mb-0"><%= _('No topic validations have been requested for this plan yet.') %></p>
 <% end %>
 
-<% if plan.editable_by?(current_user.id) %>
+<% if can_review_validations %>
   <% governance_validations.each do |validation| %>
     <% if validation.reviewed_at.blank? %>
       <%= render partial: 'plans/governance_validation_review_modal',

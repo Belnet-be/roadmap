@@ -16,14 +16,7 @@ telephone=Rails.configuration.x.organisation.telephone
 if telephone.present? %>
   <strong><%= "#{_('Helpline')} #{telephone}" %></strong>
 <% end %>
-<%
-email=Rails.configuration.x.organisation.email
-if email.present? %>
-  <address>
-    <strong><%= _('Email') %></strong>
-      <a href="<%= "mailto:#{email}" %>"><%= email %></a>
-    </address>
-<% end %>
+<!-- Although present, Belnet prefers to not show the email address on the Contact Us page -->
 <%
 link=Rails.configuration.x.organisation.google_maps_link
 if link.present? %>

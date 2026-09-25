@@ -30,25 +30,29 @@
           </td>
           <td class="text-center text-nowrap align-middle">
             <% current_stage = plan_version.current_lifecycle_stage_name %>
-            <% stage_history = plan_version.belnet_stage_histories.map do |history|
-                 {
-                   stage: history.lifecycle_stage,
-                   user: history.user&.name(false),
-                   date: l(history.created_at, format: :long),
-                   motivation: history.motivation
-                 }
-               end %>
-            <%= button_to current_stage.presence || _('Select stage'),
-              update_stage_plan_path(plan_version),
-              class: "btn btn-secondary w-100 color-white dropdown-toggle",
-              data: { action: "change-stage-modal#open",
-                plan_id: plan_version.id,
-                plan_path: update_stage_plan_path(plan_version),
-                stage_modal_stage_param: current_stage,
-                stage_modal_version_param: plan_version.belnet_version,
-                stage_modal_history_param: stage_history.to_json
-              },
-              method: :put %>
+            <% if policy(plan_version).update_stage? %>
+              <% stage_history = plan_version.belnet_stage_histories.map do |history|
+                   {
+                     stage: history.lifecycle_stage,
+                     user: history.user&.name(false),
+                     date: l(history.created_at, format: :long),
+                     motivation: history.motivation
+                   }
+                 end %>
+              <%= button_to current_stage.presence || _('Select stage'),
+                update_stage_plan_path(plan_version),
+                class: "btn btn-secondary w-100 color-white dropdown-toggle",
+                data: { action: "change-stage-modal#open",
+                  plan_id: plan_version.id,
+                  plan_path: update_stage_plan_path(plan_version),
+                  stage_modal_stage_param: current_stage,
+                  stage_modal_version_param: plan_version.belnet_version,
+                  stage_modal_history_param: stage_history.to_json
+                },
+                method: :put %>
+            <% else %>
+              <%= current_stage.presence || _('None') %>
+            <% end %>
           </td>
           <td class="text-center text-nowrap">
             <%= link_to _('View'), plan_path(plan_version), class: "dmp_table_link" %>

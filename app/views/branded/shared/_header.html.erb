@@ -25,9 +25,9 @@
           <% end %>
         </div>
         <div class="d-flex gap-2">
-          <% if plan.editable_by?(current_user.id) %>
+          <% current_stage = plan.current_lifecycle_stage_name %>
+          <% if policy(plan).update_stage? %>
             <%
-              current_stage = plan.current_lifecycle_stage_name
               stage_history = plan.belnet_stage_histories.map do |history|
                 {
                   stage: history.lifecycle_stage,
@@ -48,6 +48,10 @@
                 stage_modal_history_param: stage_history.to_json
               },
               method: :put %>
+          <% else %>
+            <span class="d-inline-flex align-items-center text-nowrap">
+              <%= format(_('Stage: %{stage}'), stage: current_stage.presence || _('None')) %>
+            </span>
           <% end %>
           <% if plan.readable_by?(current_user.id) && plan.plan_versions_with_live_version.any? %>
             <div class="dropdown">
@@ -65,10 +69,10 @@
               </ul>
             </div>
           <% end %>
-          <% if plan.editable_by?(current_user.id) && !plan.is_plan_live_version? %>
+          <% if plan.readable_by?(current_user.id) && !plan.is_plan_live_version? %>
             <%= link_to "Return To LIVE Version", plan_path(plan.belnet_family_id), class: "btn btn-secondary" %>
           <% end %>
-          <% if plan.submittable_by?(current_user.id) %>
+          <% if policy(plan).create_new_version? %>
             <div data-controller="confirm-modal">
               <%= button_to _("Create Version (V#{plan.latest_belnet_version + 1})"),
                             create_new_version_plan_path(plan),
@@ -164,7 +168,7 @@
     </div>
   </div>
 
-  <% if plan.editable_by?(current_user.id) %>
+  <% if policy(plan).update_stage? %>
     <%= render partial: 'plans/change_stage_modal', locals: { plan: plan } %>
   <% end %>
 </div>
