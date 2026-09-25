@@ -1,7 +1,7 @@
 <div class="card mb-4" markdown="1">
 
 <div class="card-header" markdown="1">
-## Release Notes v5.0.0
+## Release Notes v5.0.1
 </div>
 <div class="card-body" markdown="1">
 
@@ -42,6 +42,7 @@
 - Admin panel is again accessible. Caused by timestamptz (Time Stamp Time Zone) not correctly being able to be read.
 - Fix Organizations index page items query: took very long before and sometimes the application hangs.
 - Fix crash when logging in via ORCID and no email address is provided (email is not made public yet).
+- v5.0.1: Temporary hotfix to allow users already registered with ORCID account to log in again.
 
 ### Other changes without functional impact
 - Upgrade to latest available DMPRoadmap version: from 4.2.0 to 5.0.2 (Rails 7.1.x and Ruby 3.1.x).
@@ -53,7 +54,7 @@
 - DMPonline receiving email address is changed, but also removed from UI. Users are advised to use the **Contact Us** form.
 
 ### Known limitations
-- While in the user interface of the DMPonline application you can filter on *plan visibility*, this is not supported via this API endpoint because we can't inform you about the setting with the current maDMP schema
+- While in the user interface of the DMPonline application you can filter on *plan visibility*, this is not supported via this API endpoint because we can't inform you about the setting with the current maDMP schema.
 
 </div>
 </div>
