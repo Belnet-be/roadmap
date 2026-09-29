@@ -675,25 +675,14 @@ module Users
     def handle_orcid(scheme)
       auth = request.env["omniauth.auth"]
 
-      # uid (the ORCID iD) comes from ORCID's token response (server to server, using our client secret),
-      # so it cannot be tampered with by the user
-      if auth.nil? || auth.uid.blank?
-        Rails.logger.info("orcid callback without uid")
-        flash[:alert] = _("Unable to login with ORCID.")
-        return redirect_to root_url
-      end
+      Rails.logger.info("orcid callback for uid #{auth.try(:uid)}, email provided: #{auth.try(:[], 'info').try(:[], 'email').present?}")
 
-      Rails.logger.info("orcid callback for uid #{auth.uid}, email provided: #{auth['info'].try('[]', 'email').present?}")
-
-      # when saved, identifier of scheme "orcid" is prefixed with the identifier_prefix of the corresponding scheme,
-      # joined with a "/" when the prefix does not end with one (cf. Identifier#value=). Build it the same way here.
-      prefix = scheme.identifier_prefix.to_s
-      prefix += "/" if prefix.present? && !prefix.end_with?("/")
-      full_uid = "#{prefix}#{auth.uid.to_s.strip}"
+      # when saved, identifier of scheme "orcid" is prefixed with the identifier_prefix of the corresponding scheme
+      full_uid = scheme.identifier_prefix + auth.uid
 
       # auth hash stored with the identifier, without the ORCID access and refresh tokens
       orcid_attrs = auth.to_hash.except("credentials")
-
+ 
       # The user is already logged in and just registering the uid with us
       # Action: attach id and redirect to profile page
       if current_user.present?
@@ -737,8 +726,14 @@ module Users
  
       # User is not logged in
 
+      # ORCID id login without email, set with env ORCID_LOGIN_WITHOUT_EMAIL (default "false"):
+      #   "false": an email address from ORCID is always required
+      #   "true":  a user whose ORCID id was linked before can log in on that id alone,
+      #            also when ORCID does not return an email address, secure because ORCID id
+      #            was linked to user before
+      login_without_email = ENV.fetch("ORCID_LOGIN_WITHOUT_EMAIL", "false") == "true"
+
       # Match orcid with one of more users
-      # Orcid has recently started returning no emails in the response
       orcid_users = Identifier.where(identifiable_type: "User", identifier_scheme_id: scheme.id, value: full_uid)
                               .map(&:identifiable)
                               .reject(&:nil?)
@@ -747,17 +742,16 @@ module Users
       # downcase without !
       email = email.downcase if email.present?
 
-      # The email address is only needed when no user has this ORCID iD linked yet
-      # (to match an existing account by email, or to create a new account)
-      if orcid_users.empty? && email.blank?
+      # Without email we can only continue when ORCID id login without email is on and the
+      # ORCID id is linked to a user. Otherwise the email is needed (to match an existing
+      # account by email, or to create a new account)
+      if email.blank? && (!login_without_email || orcid_users.empty?)
         # In this case the user has no email adress exposed to the public or trusted parties
         # in orcid so we cannot log in the user. We could ask the user to make his email address
         # visible in orcid, but that is not a good user experience.
         # So we just show an error message and ask the user to try again after making
-        # the email address visible in orcid, or to link the ORCID iD to an existing account first.
-        flash[:alert] = _("Unable to login with ORCID: no email is provided by ORCID. Make sure your email address is visible in your ORCID profile (set the visibility of your email address to \"everyone\" or \"trusted parties\" in your <a href=\"https://orcid.org/my-orcid\">ORCID profile</a>), and try again.") +
-                        " " +
-                        _("If you already have an account, sign in another way and link your ORCID iD on your profile page (\"Create or connect your ORCID iD\"). After that you can sign in with ORCID.")
+        # the email address visible in orcid.
+        flash[:alert] = _("Unable to login with ORCID: no email is provided by ORCID. Make sure your email address is visible in your ORCID profile (set the visibility of your email address to \"everyone\" or \"trusted parties\" in your <a href=\"https://orcid.org/my-orcid\">ORCID profile</a>), and try again.")
         return redirect_to root_url
       end
 
@@ -802,7 +796,7 @@ module Users
                           .first
  
         if existing_id.nil?
-
+ 
           if Identifier.create(identifier_scheme: scheme,
                                value: auth.uid,
                                attrs: orcid_attrs,
@@ -845,7 +839,7 @@ module Users
                              value: auth.uid,
                              attrs: orcid_attrs,
                              identifiable: user)
-
+ 
           flash[:notice] = _("Your account has been successfully linked to %{scheme}.") % {
             scheme: scheme.description
           }
