@@ -143,6 +143,20 @@ Each validation request results in a validation status being assigned to a speci
 
 The Request Feedback feature enables all users to request feedback for a specific plan. It sends a notification to Admins, or to a general research data management helpdesk if any, that a user needs feedback on their plan. Unlike Validation, Feedback is an informal review process: it does not result in a Validation status, approval decision, or other structured metadata associated with the DMP. Feedback may be provided within the application, if the person giving feedback has access to the DMP, or through other communication channels, depending on the organisations practices. Feedback can take place before a Validation is requested, for example.
 
+### Can Admins review validation requests?
+Yes. Admins with the "Review plans" privilege can review topic validation requests on the DMPs of their organisation, even when they are not an Editor or Co-owner of the DMP. This concerns the DMPs that Admins can already open in read-only mode because of their Admin status.
+
+To review a validation request:
+
+1. Open the DMP. Without an Editor or Co-owner role, you see the DMP in read-only mode.
+2. Go to the "Validations" tab.
+3. Click "Review" next to a validation request that is still pending review.
+4. In the "Review Topic Validation" window, choose a status, give your rationale and, if needed, the conditions to meet, and click "Save review".
+
+The "Review plans" privilege does not give editing rights: the content of the DMP stays read-only, and reviewing validation requests is the only action it adds. A validation request that has already been reviewed cannot be reviewed again. Requesting a validation still requires Editor or Co-owner access to the DMP.
+
+The "Review plans" privilege is granted on the « Users » tab, in the Editing privileges of the Admin (see [What rights do Admin users have?](#what-rights-do-admin-users-have)).
+
 ### What are lifecycle stages?
 Lifecycle stages indicate where a DMP stands within the lifecycle of a research project. You can assign a lifecycle stage to any version of a DMP, including the <abbr title="Editable DMP">[Live Version](/help-concepts#glossary_live_version)</abbr>.
 
