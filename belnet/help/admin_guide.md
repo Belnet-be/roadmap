@@ -144,7 +144,7 @@ Each validation request results in a validation status being assigned to a speci
 The Request Feedback feature enables all users to request feedback for a specific plan. It sends a notification to Admins, or to a general research data management helpdesk if any, that a user needs feedback on their plan. Unlike Validation, Feedback is an informal review process: it does not result in a Validation status, approval decision, or other structured metadata associated with the DMP. Feedback may be provided within the application, if the person giving feedback has access to the DMP, or through other communication channels, depending on the organisations practices. Feedback can take place before a Validation is requested, for example.
 
 ### What are lifecycle stages?
-Lifecycle stages indicate where a DMP stands within the lifecycle of a research project. You can assign a lifecycle stage to any version of a DMP, including the <abbr title="Editable DMP">[Live Version](/help_concepts#glossary_live_version)</abbr>.
+Lifecycle stages indicate where a DMP stands within the lifecycle of a research project. You can assign a lifecycle stage to any version of a DMP, including the <abbr title="Editable DMP">[Live Version](/help-concepts#glossary_live_version)</abbr>.
 
 As a project progresses, a DMP may move through several stages, from early drafts to finalized and archived versions. These stages can help demonstrate compliance with funder requirements, such as intermediate or provisional DMP deliverables, and support internal project management and review processes.
 

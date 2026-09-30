@@ -238,7 +238,7 @@ The practice of Versioning a DMP consists in creating a snapshot of its content 
 
 Creating a Version of a DMP also enables its co-owners to submit it for Validation. 
 
-A <abbr title="Read-only snapshot of a DMP">[Version](/help_concepts#glossary_version)</abbr> is a read-only snapshot of a DMP at a specific point in time. Once created, it can no longer be edited. However, work on the DMP can continue in the <abbr title="Editable DMP">[Live Version](/help_concepts#glossary_live_version)</abbr> (the working version), allowing the plan to evolve while preserving previous states. There is no limit to the number of Versions that can be created, although we recommend creating them at key project milestones to keep the version history meaningful and manageable. 
+A <abbr title="Read-only snapshot of a DMP">[Version](/help-concepts#glossary_version)</abbr> is a read-only snapshot of a DMP at a specific point in time. Once created, it can no longer be edited. However, work on the DMP can continue in the <abbr title="Editable DMP">[Live Version](/help-concepts#glossary_live_version)</abbr> (the working version), allowing the plan to evolve while preserving previous states. There is no limit to the number of Versions that can be created, although we recommend creating them at key project milestones to keep the version history meaningful and manageable. 
 
 Versions are numbered automatically and sequentially. Versions can be assigned a Plan Stage tag for further tracking of DMP writing progress. For more information about Plan Stage, please see Tracking the stage of a DMP. 
 
@@ -265,7 +265,7 @@ To switch between different Versions in comparison view, click on the Version nu
 To return to the editable DMP, click Return to LIVE Version in the top-right corner of the page.
 
 ## Tracking the stage of a DMP
-To document the progression of a DMP throughout the lifecycle of a project and between Versions, you can assign a <abbr title="Tag indicating the completeness or maturity level of a DMP">[Stage](/help_concepts#glossary_stage)</abbr> tag to any Version of a DMP. Stages represent key milestones in the development of a DMP, from initial drafts to finalized versions ready for submission or implementation, depending on organisational practices. They help distinguish between successive versions of a DMP and provide a clear record of its progress over time.
+To document the progression of a DMP throughout the lifecycle of a project and between Versions, you can assign a <abbr title="Tag indicating the completeness or maturity level of a DMP">[Stage](/help-concepts#glossary_stage)</abbr> tag to any Version of a DMP. Stages represent key milestones in the development of a DMP, from initial drafts to finalized versions ready for submission or implementation, depending on organisational practices. They help distinguish between successive versions of a DMP and provide a clear record of its progress over time.
 
 To assign a Stage to the Live version of a DMP:
 
