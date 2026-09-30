@@ -1,7 +1,7 @@
 <div class="card mb-4" markdown="1">
 
 <div class="card-header" markdown="1">
-## Release Notes v5.0.1
+## Release Notes v5.0.2
 </div>
 <div class="card-body" markdown="1">
 
@@ -43,6 +43,7 @@
 - Fix Organizations index page items query: took very long before and sometimes the application hangs.
 - Fix crash when logging in via ORCID and no email address is provided (email is not made public yet).
 - v5.0.1: Temporary hotfix to allow users already registered with ORCID account to log in again.
+- v5.0.2: ORCID accounts are again fully supported: registration of new accounts, link to existing accounts and ORCID login.
 
 ### Other changes without functional impact
 - Upgrade to latest available DMPRoadmap version: from 4.2.0 to 5.0.2 (Rails 7.1.x and Ruby 3.1.x).
