@@ -100,6 +100,7 @@ paths:
           required: false
           description: |
             If provided, filters the results to include only plans created or modified since the specified time period.
+            Any other value returns a `400 Bad Request` listing the allowed values.
         - in: query
           name: template-id
           schema:

@@ -104,7 +104,16 @@ module Api
           scope = scope.with_validation_topic(params[:'validation-topic']) if params[:'validation-topic'].present?
           scope = scope.with_validation_status(params[:'validation-status']) if params[:'validation-status'].present?
 
-          if (window = PlanDashboardFilters::TIME_PERIOD_OPTIONS.dig(params[:'time-period'], :window))
+          if params[:'time-period'].present?
+            window = PlanDashboardFilters::TIME_PERIOD_OPTIONS.dig(params[:'time-period'], :window)
+            # an unrecognised value is rejected instead of silently ignored, so the caller
+            # never receives unfiltered results while believing the filter was applied
+            unless window
+              render_error(errors: [_('time-period must be one of: %{values}') % {
+                values: PlanDashboardFilters::TIME_PERIOD_OPTIONS.keys.join(', ')
+              }], status: :bad_request)
+              return
+            end
             scope = scope.active_since(window.ago)
           end
 
