@@ -33,8 +33,11 @@ class OrgsController < ApplicationController
     @org = Org.find(params[:id])
     authorize @org
 
-    # If a new logo was supplied then use it, otherwise retain the existing one
-    attrs[:logo] = attrs[:logo].present? ? attrs[:logo] : @org.logo
+    # If a new logo was supplied then use it, otherwise retain the existing one by not touching it.
+    # Reassigning the existing logo makes Dragonfly reprocess it (resize_image), which raises
+    # Dragonfly::Job::Fetch::NotFound when its file is missing from the datastore.
+    # Throwing an error straight up in prod
+    attrs.delete(:logo) if attrs[:logo].blank?
     # Remove the logo if the user checked the box
     attrs[:logo] = nil if attrs[:remove_logo] == '1'
 
