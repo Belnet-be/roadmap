@@ -82,11 +82,12 @@
               },
               "examples": [
                 [
-                  "GDPR",
-                  "Ethics",
+                  "General",
                   "FAIR",
-                  "Data Security",
-                  "Data Storage"
+                  "GDPR",
+                  "Data security",
+                  "Ethics",
+                  "Data Sharing"
                 ]
               ]
             }
@@ -116,11 +117,13 @@
               },
               "examples": [
                 [
-                  "GDPR",
-                  "Ethics",
+                  "General",
                   "FAIR",
-                  "Data Security",
-                  "Data Storage"
+                  "GDPR",
+                  "Data security",
+                  "Ethics",
+                  "Data Storage",
+                  "Data Sharing"
                 ]
               ]
             }

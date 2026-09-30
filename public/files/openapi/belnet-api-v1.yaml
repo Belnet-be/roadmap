@@ -2366,18 +2366,16 @@ components:
                 org_abbreviation: "All"
               current_list:
                 enum:
-                  - "GDPR"
-                  - "Ethics"
+                  - "General"
                   - "FAIR"
-                  - "Data Security"
-                  - "Data Storage"
+                  - "GDPR"
+                  - "Data security"
               full_list:
                 enum:
-                  - "GDPR"
-                  - "Ethics"
+                  - "General"
                   - "FAIR"
-                  - "Data Security"
-                  - "Data Storage"
+                  - "GDPR"
+                  - "Data security"
     OrganizationGetConfigValidationTopicsResponse:
       summary: Organization specific list
       description: DMP validation topics available for your organization for current logged-in user.
@@ -2400,17 +2398,19 @@ components:
                 org_abbreviation: "ULiege"
               current_list:
                 enum:
-                  - "GDPR"
-                  - "Ethics"
+                  - "General"
                   - "FAIR"
-                  - "Data Security"
+                  - "GDPR"
+                  - "Data security"
+                  - "Ethics"
                   - "Data Sharing"
               full_list:
                 enum:
-                  - "GDPR"
-                  - "Ethics"
+                  - "General"
                   - "FAIR"
-                  - "Data Security"
+                  - "GDPR"
+                  - "Data security"
+                  - "Ethics"
                   - "Data Storage"
                   - "Data Sharing"
     PlanGetConfigValidationTopicsResponse:
@@ -2437,17 +2437,19 @@ components:
                 org_abbreviation: "ULiege"
               current_list:
                 enum:
-                  - "GDPR"
-                  - "Ethics"
+                  - "General"
                   - "FAIR"
-                  - "Data Security"
+                  - "GDPR"
+                  - "Data security"
+                  - "Ethics"
                   - "Data Sharing"
               full_list:
                 enum:
-                  - "GDPR"
-                  - "Ethics"
+                  - "General"
                   - "FAIR"
-                  - "Data Security"
+                  - "GDPR"
+                  - "Data security"
+                  - "Ethics"
                   - "Data Storage"
                   - "Data Sharing"
     # RegularGetConfigValidationStatusesResponse:
