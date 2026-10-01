@@ -51,12 +51,8 @@ Rails.application.routes.draw do
 
   root to: 'home#index'
   get 'about_us' => 'static_pages#about_us'
-  get 'help' => 'static_pages#help'
-  get 'version' => 'static_pages#version'
-  get 'api_documentation_overview' => 'static_pages#api_documentation_overview'
-  get 'api_documentation_v0' => 'static_pages#api_documentation_v0'
-  get 'api_documentation_v1' => 'static_pages#api_documentation_v1'
-  get 'api_documentation_belnet_v1' => 'static_pages#api_documentation_belnet_v1'
+  # get 'help' => 'static_pages#help'
+  get 'help' => 'static_pages#help_overview'
   get 'help-overview' => 'static_pages#help_overview', as: :help_overview
   get 'help-getting-started' => 'static_pages#help_getting_started', as: :help_getting_started
   get 'help-concepts' => 'static_pages#help_concepts', as: :help_concepts
@@ -68,7 +64,10 @@ Rails.application.routes.draw do
   get 'help-reference-api-v1' => 'static_pages#help_reference_api_v1', as: :help_reference_api_v1
   get 'help-reference-api-belnet-v1' => 'static_pages#help_reference_api_belnet_v1', as: :help_reference_api_belnet_v1
   get 'help-whats-new' => 'static_pages#help_whats_new', as: :help_whats_new
-  get 'belnet_changelog' => 'static_pages#belnet_changelog'
+
+  # Till next (minor) release, we will keep the old route for help_whats_new to avoid breaking links in the wild.
+  get 'help_whats_new' => 'static_pages#help_whats_new'
+
   get 'terms' => 'static_pages#termsuse'
   get 'privacy' => 'static_pages#privacy'
   get 'public_plans' => 'public_pages#plan_index'

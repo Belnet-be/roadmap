@@ -14,37 +14,6 @@ class StaticPagesController < ApplicationController
 
   def help; end
 
-  def version
-    @app_name = ApplicationService.application_name
-    @provider = Rails.configuration.x.organisation.name
-    @ruby_version = RUBY_VERSION
-    @rails_version = Rails.version
-    @app_version = ENV.fetch('BELNET_DMPONLINE_VERSION', 'Unknown')
-    @build_date = "#{BOOTED_AT.strftime('%Y-%m-%d %H:%M:%S %Z')} (#{time_ago_in_words(BOOTED_AT)} ago)"
-    @app_based_on = {
-      'name' => 'DMPRoadmap v5.0.2',
-      'url' => 'https://github.com/DMPRoadmap/roadmap/releases/tag/v5.0.2'
-    }
-    # We get the list of js dependencies from package.json
-    @js_dependencies = parse_package_json
-    # We get the list of ruby gems straight from bundler
-    @gems = Bundler.load.specs.map do |spec|
-      { name: spec.name, version: spec.version.to_s }
-    end.sort_by { |gem| gem[:name].downcase }
-  end
-
-  def api_documentation_overview
-  end
-
-  def api_documentation_v0
-  end
-
-  def api_documentation_v1
-  end
-
-  def api_documentation_belnet_v1
-  end
-
   def help_overview
   end
 
@@ -68,8 +37,8 @@ class StaticPagesController < ApplicationController
     @app_version = ENV.fetch('BELNET_DMPONLINE_VERSION', 'Unknown')
     @build_date = "#{BOOTED_AT.strftime('%Y-%m-%d %H:%M:%S %Z')} (#{time_ago_in_words(BOOTED_AT)} ago)"
     @app_based_on = {
-      'name' => 'DMPRoadmap v5.0.2',
-      'url' => 'https://github.com/DMPRoadmap/roadmap/releases/tag/v5.0.2'
+      'name' => 'DMPRoadmap v5.0.3',
+      'url' => 'https://github.com/DMPRoadmap/roadmap/releases/tag/v5.0.3'
     }
     # We get the list of js dependencies from package.json
     @js_dependencies = parse_package_json
@@ -92,9 +61,6 @@ class StaticPagesController < ApplicationController
   end
 
   def help_whats_new
-  end
-
-  def belnet_changelog
   end
 
   private
