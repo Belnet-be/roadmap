@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: API Belnet v1
-  version: 1.0.0
+  version: 1.0.1
   description: |-
     The Belnet extension of the standard DMPRoadmap v1 API for the DMPonline application.
 
@@ -15,6 +15,9 @@ info:
       * [ ] GetVersionedPlanResponse and GetEditablePlanResponse
       * [ ] RegularCreatePlanLifecycleStageResponse
     * [ ] Error messages
+
+    ## Resolved issues
+    * [x] Invalid time periods in the `time-period` query parameter of the `GET /api/belnet-v1/plans` endpoint now return a `400 Bad Request` with a list of allowed values.
 
 tags:
   - name: Plans
