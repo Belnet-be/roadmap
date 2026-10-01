@@ -26,9 +26,7 @@ class PlansController < ApplicationController
                                             end
     @dashboard_filter_values = plan_dashboard_filter_params
     @dashboard_stage_options = current_user.org&.all_belnet_stages || []
-    @dashboard_template_options = Template
-                                  .where(id: Plan.active(current_user).select(:template_id))
-                                  .order(:title)
+    @dashboard_template_options = dashboard_template_options(Plan.active(current_user))
     @dashboard_validation_topic_options  = current_user.org&.all_validation_topics || []
     @dashboard_validation_status_options = current_user.org&.all_validation_statuses || []
     # TODO: Is this still used? We cannot switch this to use the :plan_params

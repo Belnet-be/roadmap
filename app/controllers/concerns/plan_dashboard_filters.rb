@@ -43,6 +43,13 @@ module PlanDashboardFilters
     params.permit(*FILTER_KEYS).to_h.symbolize_keys
   end
 
+  def dashboard_template_options(scope)
+    family_ids = scope.joins(:template).distinct.pluck('templates.family_id')
+    return Template.none if family_ids.empty?
+
+    Template.latest_version(family_ids).order(:title, :id).to_a.uniq(&:title)
+  end
+
   # Applies the filters to the given scope based on the provided filter params
   def apply_plan_dashboard_filters(scope, filters = plan_dashboard_filter_params,
                                    reviewable_check: default_reviewable_check)

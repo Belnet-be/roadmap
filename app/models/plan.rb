@@ -289,7 +289,14 @@ class Plan < ApplicationRecord
   scope :using_template, lambda { |template_id|
     next all if template_id.blank?
 
-    where(template_id: template_id)
+    selected_template = Template.find_by(id: template_id)
+    next none unless selected_template
+
+    selected_title = Template.latest_version(selected_template.family_id).pick(:title)
+    family_ids = Template.latest_version.where(title: selected_title)
+                         .select('templates.family_id')
+    template_ids = Template.where(family_id: family_ids).select(:id)
+    where(template_id: template_ids)
   }
 
   # Filter by validation topic name. A plan matches when it appears on any
