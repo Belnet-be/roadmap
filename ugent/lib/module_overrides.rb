@@ -766,25 +766,33 @@ module Users
         return redirect_to root_url
       end
 
-      # Accounts whose email is one of the verified addresses
-      # (case insensitive: older accounts may have been stored with capitals)
-      matching_users = User.where("LOWER(email) IN (?)", verified_emails).to_a
+      # Several verified addresses: always let the user choose which one to log in with, the existing
+      # account of that address or a new account for it (see Ugent::SelectableUserController).
+      # Stored in the (cookie) session, so keep it small: not the full auth hash
+      if verified_emails.size > 1
 
-      # only log ids: the full attributes contain the password hash and tokens
-      Rails.logger.info("orcid login, users with a verified email: #{matching_users.map(&:id)}")
+        Rails.logger.info("orcid login, #{verified_emails.size} verified emails: redirect to account choice")
 
-      # Several matches (the ORCID record has several verified addresses): let the user choose
-      if matching_users.size > 1
-
-        session[:selectable_user_ids] = matching_users.map(&:id)
+        session[:orcid_login] = {
+          "uid" => auth.uid,
+          "emails" => verified_emails,
+          "first_name" => auth["info"].try("first_name"),
+          "last_name" => auth["info"].try("last_name"),
+          "created_at" => Time.now.to_i
+        }
         redirect_to edit_selectable_user_path
         return
 
       end
 
-      user = matching_users.first
+      # One verified address: the account of that address, if any
+      # (case insensitive: older accounts may have been stored with capitals)
+      user = User.where("LOWER(email) = ?", verified_emails.first).first
 
-      # One match: log in to that account
+      # only log ids: the full attributes contain the password hash and tokens
+      Rails.logger.info("orcid login, user with the verified email: #{user&.id.inspect}")
+
+      # Account exists: log in to that account
       if user
 
         # link the ORCID iD when the account has none yet
@@ -799,9 +807,9 @@ module Users
         user.firstname = auth["info"].try("first_name") if user.firstname.blank? || user.firstname == User.nemo
         user.surname = auth["info"].try("last_name") if user.surname.blank? || user.surname == User.nemo
 
-      # No match: NEW USER, with the first verified address (the primary one when it is verified).
-      # This also applies when other accounts are linked to this ORCID iD, but none of them has a
-      # verified address of this ORCID record (e.g. the old address was removed from ORCID)
+      # No account: NEW USER, with the verified address.
+      # This also applies when other accounts are linked to this ORCID iD, but none of them has
+      # the verified address of this ORCID record (e.g. the old address was removed from ORCID)
       else
 
         user = User.new(
