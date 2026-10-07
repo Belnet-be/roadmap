@@ -2381,7 +2381,12 @@ components:
                   - "Data security"
     OrganizationGetConfigValidationTopicsResponse:
       summary: Organization specific list
-      description: DMP validation topics available for your organization for current logged-in user.
+      description: |-
+        DMP validation topics available for your organization for current logged-in user.
+
+        In this example, the organization is "Université de Liège" (ULiege)
+        and for the validation topics the default "Data security" is dropped and "Ethics" is added.
+        Both must be listed in the full list of validation topics when searching for existing DMPs.
       value:
         application: "DMPonline.be"
         source: "GET /api/belnet-v1/configurations/validation-topics"
@@ -2404,9 +2409,7 @@ components:
                   - "General"
                   - "FAIR"
                   - "GDPR"
-                  - "Data security"
                   - "Ethics"
-                  - "Data Sharing"
               full_list:
                 enum:
                   - "General"
@@ -2414,13 +2417,15 @@ components:
                   - "GDPR"
                   - "Data security"
                   - "Ethics"
-                  - "Data Storage"
-                  - "Data Sharing"
     PlanGetConfigValidationTopicsResponse:
       summary: Plan specific list (plan-id query parameter)
-      description: |
+      description: |-
         DMP validation topics available for the organization of the plan given in the `plan-id` query parameter.
         The response is the same as the organization specific list, but resolved via the organization of the plan instead of the organization of the current logged-in user.
+
+        In this example, the organization is "Université de Liège" (ULiege)
+        and for the validation topics the default "Data security" is dropped and "Ethics" is added.
+        Both must be listed in the full list of validation topics when searching for existing DMPs.
       value:
         application: "DMPonline.be"
         source: "GET /api/belnet-v1/configurations/validation-topics?plan-id=10000"
@@ -2443,9 +2448,7 @@ components:
                   - "General"
                   - "FAIR"
                   - "GDPR"
-                  - "Data security"
                   - "Ethics"
-                  - "Data Sharing"
               full_list:
                 enum:
                   - "General"
@@ -2453,8 +2456,6 @@ components:
                   - "GDPR"
                   - "Data security"
                   - "Ethics"
-                  - "Data Storage"
-                  - "Data Sharing"
     # RegularGetConfigValidationStatusesResponse:
     #   summary: Regular answer
     #   description: DMP validation statuses available for current logged-in user.
