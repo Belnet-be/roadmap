@@ -539,6 +539,26 @@ class Org
 
 end
 
+# Also provide all verified email addresses of the ORCID record, primary address first,
+# in auth["info"]["verified_emails"]. The gem itself only provides the address that is both
+# verified and primary (auth["info"]["email"]). ORCID only returns the addresses that are
+# visible to this application (visibility "everyone" or "trusted parties").
+# request_info (the ORCID /person response) is overridden in config/initializers/devise_ugent.rb
+require "omniauth/strategies/orcid"
+class OmniAuth::Strategies::ORCID
+
+  def info
+    emails = Array(request_info.dig("emails", "email"))
+               .select { |e| e.is_a?(Hash) && e["verified"] == true && e["email"].present? }
+               .sort_by { |e| e["primary"] == true ? 0 : 1 }
+               .map { |e| e["email"].to_s.strip.downcase }
+               .uniq
+
+    super.merge(verified_emails: emails)
+  end
+
+end
+
 module Users
 
   class OmniauthCallbacksController
@@ -581,13 +601,14 @@ module Users
       # If the user isn't logged in
       if current_user.nil?
 
-        # no user found: two reasons:
-        #   1) no user in table users
-        #   2) no identifier of scheme shibboleth yet
+        # One email address always yields the same account, whether logging in via Shibboleth,
+        # ORCID or password: look up the account by email (uid is the email address).
+        # A Shibboleth identifier linked to an account with another email address does not
+        # give access to that account.
+        # (case insensitive: older accounts may have been stored with capitals)
+        user = User.where("LOWER(email) = ?", auth.uid).first
 
-        user = User.find_by_email(auth.uid) if user.nil?
-
-        # still no user: create one
+        # no user with this email: create one
         if user.nil?
 
           email = auth["extra"].try("raw_info").try("mail")
@@ -662,7 +683,7 @@ module Users
       # already been attached to another account (likely the user has 2 accounts)
       elsif user.id != current_user.id
 
-        flash[:alert] = _("The current #{scheme.description} iD has been already linked to a user with email #{identifier.user.email}")
+        flash[:alert] = _("The current #{scheme.description} iD has been already linked to a user with email #{user.email}")
 
       end
 
@@ -675,10 +696,11 @@ module Users
     def handle_orcid(scheme)
       auth = request.env["omniauth.auth"]
 
-      Rails.logger.info("orcid callback for uid #{auth.try(:uid)}, email provided: #{auth.try(:[], 'info').try(:[], 'email').present?}")
+      Rails.logger.info("orcid callback for uid #{auth.try(:uid)}, verified emails provided: #{Array(auth.try(:[], 'info').try(:[], 'verified_emails')).size}")
 
-      # when saved, identifier of scheme "orcid" is prefixed with the identifier_prefix of the corresponding scheme
-      full_uid = scheme.identifier_prefix + auth.uid
+      # build the value exactly as Identifier#value= stores it (prefix + "/" + uid), so the
+      # comparison also works when the scheme's identifier_prefix does not end with "/"
+      full_uid = Identifier.new(identifier_scheme: scheme, value: auth.uid).value
 
       # auth hash stored with the identifier, without the ORCID access and refresh tokens
       orcid_attrs = auth.to_hash.except("credentials")
@@ -726,141 +748,104 @@ module Users
  
       # User is not logged in
 
-      # ORCID id login without email, set with env ORCID_LOGIN_WITHOUT_EMAIL (default "false"):
-      #   "false": an email address from ORCID is always required
-      #   "true":  a user whose ORCID id was linked before can log in on that id alone,
-      #            also when ORCID does not return an email address, secure because ORCID id
-      #            was linked to user before
-      login_without_email = ENV.fetch("ORCID_LOGIN_WITHOUT_EMAIL", "false") == "true"
+      # Only verified email addresses of the ORCID record count, primary address first
+      # (see OmniAuth::Strategies::ORCID#info above). ORCID only returns the addresses whose
+      # visibility is "everyone" or "trusted parties".
+      #
+      # An ORCID iD linked to an account is never enough to log in to that account: the account's
+      # email must be one of these verified addresses. Several accounts may share one ORCID iD,
+      # but each one can only be reached with an ORCID record that has verified its email.
+      verified_emails = Array(auth["info"].try("[]", "verified_emails"))
+                          .map { |e| e.to_s.strip.downcase }
+                          .reject(&:blank?)
+                          .uniq
 
-      # Match orcid with one of more users
-      orcid_users = Identifier.where(identifiable_type: "User", identifier_scheme_id: scheme.id, value: full_uid)
-                              .map(&:identifiable)
-                              .reject(&:nil?)
-
-      email = auth["info"].try("[]", "email")
-      # downcase without !
-      email = email.downcase if email.present?
-
-      # Without email we can only continue when ORCID id login without email is on and the
-      # ORCID id is linked to a user. Otherwise the email is needed (to match an existing
-      # account by email, or to create a new account)
-      if email.blank? && (!login_without_email || orcid_users.empty?)
-        # In this case the user has no email adress exposed to the public or trusted parties
-        # in orcid so we cannot log in the user. We could ask the user to make his email address
-        # visible in orcid, but that is not a good user experience.
-        # So we just show an error message and ask the user to try again after making
-        # the email address visible in orcid.
-        flash[:alert] = _("Unable to login with ORCID: no email is provided by ORCID. Make sure your email address is visible in your ORCID profile (set the visibility of your email address to \"everyone\" or \"trusted parties\" in your <a href=\"https://orcid.org/my-orcid\">ORCID profile</a>), and try again.")
+      # Without a verified email we can neither match an existing account nor create a new one
+      if verified_emails.empty?
+        flash[:alert] = _("Unable to login with ORCID: no verified email address is provided by ORCID. Make sure your ORCID record has a verified email address that is visible (set its visibility to \"everyone\" or \"trusted parties\" in your <a href=\"https://orcid.org/my-orcid\">ORCID profile</a>), and try again.")
         return redirect_to root_url
       end
 
-      selectable_users = orcid_users
+      # Several verified addresses: always let the user choose which one to log in with, the existing
+      # account of that address or a new account for it (see Ugent::SelectableUserController).
+      # Stored in the (cookie) session, so keep it small: not the full auth hash
+      if verified_emails.size > 1
 
-      # Also match on primary email address
-      # as the user may be registered before with another email
-      # address, and he/she is stuck
-      # (never query on a blank email: that would match users without an email)
-      selectable_users += User.where(email: email).to_a if email.present?
+        Rails.logger.info("orcid login, #{verified_emails.size} verified emails: redirect to account choice")
 
-      selectable_users.uniq!
- 
-      # TODO: create controller
-      if selectable_users.size > 1
- 
-        session[:selectable_user_ids] = selectable_users.map(&:id)
+        session[:orcid_login] = {
+          "uid" => auth.uid,
+          "emails" => verified_emails,
+          "first_name" => auth["info"].try("first_name"),
+          "last_name" => auth["info"].try("last_name"),
+          "created_at" => Time.now.to_i
+        }
         redirect_to edit_selectable_user_path
         return
- 
+
       end
- 
+
+      # One verified address: the account of that address, if any
+      # (case insensitive: older accounts may have been stored with capitals)
+      user = User.where("LOWER(email) = ?", verified_emails.first).first
+
       # only log ids: the full attributes contain the password hash and tokens
-      Rails.logger.info("selectable_users: #{selectable_users.map(&:id)}")
- 
-      user = selectable_users.first
- 
-      # Match on ORCID: OK
+      Rails.logger.info("orcid login, user with the verified email: #{user&.id.inspect}")
+
+      # Account exists: log in to that account
       if user
- 
+
+        # link the ORCID iD when the account has none yet
+        if user.identifier_orcid.nil?
+          Identifier.create(identifier_scheme: scheme,
+                            value: auth.uid,
+                            attrs: orcid_attrs,
+                            identifiable: user)
+        end
+
         # set firstname and surname when not present yet
         user.firstname = auth["info"].try("first_name") if user.firstname.blank? || user.firstname == User.nemo
         user.surname = auth["info"].try("last_name") if user.surname.blank? || user.surname == User.nemo
- 
-      # Match on primary email: OK
-      # this user's orcid must be empty or different
-      # attribute 'email' is unique (enforced by devise?)
-      elsif email.present? && (user = User.where(email: email).first)
- 
-        existing_id = user.identifiers
-                          .select { |id| id.value == full_uid && id.identifier_scheme_id == scheme.id }
-                          .first
- 
-        if existing_id.nil?
- 
-          if Identifier.create(identifier_scheme: scheme,
-                               value: auth.uid,
-                               attrs: orcid_attrs,
-                               identifiable: user)
- 
-            flash[:notice] = _("Your account has been successfully linked to %{scheme}.") % {
-              scheme: scheme.description
-            }
- 
-          else
- 
-            flash[:alert] = _("Unable to link your account to %{scheme}.") % {
-              scheme: scheme.description
-            }
- 
-          end
- 
-        end
- 
-      # Match on primary email: false
-      # NEW USER. We trust "email" because ORCID marks it as confirmed
-      elsif email.present?
- 
+
+      # No account: NEW USER, with the verified address.
+      # This also applies when other accounts are linked to this ORCID iD, but none of them has
+      # the verified address of this ORCID record (e.g. the old address was removed from ORCID)
+      else
+
         user = User.new(
-          email: email,
+          email: verified_emails.first,
           firstname: auth["info"].try("first_name"),
           surname: auth["info"].try("last_name")
         )
- 
+
         unless user.save
- 
+
           flash[:alert] = user.errors
                               .full_messages
                               .join("<br>")
           return redirect_to root_url
- 
+
         end
- 
+
         if Identifier.create(identifier_scheme: scheme,
                              value: auth.uid,
                              attrs: orcid_attrs,
                              identifiable: user)
- 
+
           flash[:notice] = _("Your account has been successfully linked to %{scheme}.") % {
             scheme: scheme.description
           }
- 
+
         else
- 
+
           flash[:alert] = _("Unable to link your account to %{scheme}.") % {
             scheme: scheme.description
           }
- 
+
         end
- 
-      # No orcid, no email: warn user
-      else
- 
-        flash[:alert] = "Unable to login with orcid: try setting the visibility of your email address to \"everyone\" or \"trusted parties\" (<a href=\"https://orcid.org/account\">orcid profile</a>). Do not forget to add this website to your \"Trusted Organisations\" if you're choosing for \"trusted parties\""
-        redirect_to root_url
-        return
- 
+
       end
- 
+
       set_flash_message(:notice, :success, kind: scheme.description) if is_navigational_format?
       sign_in_and_redirect user, event: :authentication
     end
