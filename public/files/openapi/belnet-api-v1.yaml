@@ -17,7 +17,8 @@ info:
     * [ ] Error messages
 
     ## Resolved issues
-    * [x] Invalid time periods in the `time-period` query parameter of the `GET /api/belnet-v1/plans` endpoint now return a `400 Bad Request` with a list of allowed values.
+    * Invalid time periods in the `time-period` query parameter of the `GET /api/belnet-v1/plans` endpoint now return a `400 Bad Request` with a list of allowed values.
+    * Improved documentation of the `GET /api/belnet-v1/configurations/validation-topics` endpoint, with examples of organization-specific validation topics.
 
 tags:
   - name: Plans

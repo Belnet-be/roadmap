@@ -1,7 +1,75 @@
 <div class="card mb-4" markdown="1">
 
 <div class="card-header" markdown="1">
-## Release Notes v5.0.2
+
+## Release Notes v5.0.3 (Planned 15 Oct 2026)
+
+</div>
+<div class="card-body" markdown="1">
+
+### Main goals
+- Upgrade foundation to DMPRoadmap version v5.0.3, resolving two security issues.
+
+### Resolved issues
+- API: Fix time period filter being silently ignored if wrong value was provided in URL parameter.
+- Documentation: Update [API Belnet v1](/help-reference-api-belnet-v1) to v1.0.1 for changed default validation topics and time period filter fix.
+- Documentation: Add existing functionality that org admins can do topic validation of DMPs, see [Can Admins review validation requests?](/help-admin-guide#can-admins-review-validation-requests)
+- Fix crash, caused by missing dragonfly file, when admins update organisation details and click Save button.
+- Fix template duplicate bug in /plans pages for users and org admins.
+- Fix more ORCID issues. Current behavior:
+  - Only verified ORCID emails that are made visible ("Everyone" / "trusted parties") will count in ORCID validation.
+    - If configured email in existing DMPonline account is not or no longer a verified ORCID email, the login is now refused with explanation (caused crash before, fixed in DMPonline v5.0.0).
+  - If one visible verified ORCID email address, user is logged in automatically:
+    - If no DMPonline account yet with that email -> account gets created with ORCID identifier linked (was already).
+    - If existing DMPonline account with that email, but no ORCID linked yet -> ORCID identifier linked automatically (new).
+  - If two or more visible verified ORCID email addresses, show a choice list, one option per ORCID email address (new):
+    - Those that have linked DMPonline accounts, show "log in" option.
+    - Those without linked DMPonline accounts, show "create new account" option.
+    - The choice expires after 15 minutes.
+
+### Other changes without functional impact
+- Use dashes instead of underscores for help guides URLs, route two old URLs to new ones.
+- Cleanup old documentation pages.
+
+</div>
+</div>
+
+<div class="card mb-4" markdown="1">
+
+<div class="card-header" markdown="1">
+
+## Release Notes v5.0.2 (01 Oct 2026)
+
+</div>
+<div class="card-body" markdown="1">
+
+### Resolved issues
+- v5.0.2: ORCID accounts are again fully supported: registration of new accounts, link to existing accounts and ORCID login.
+
+</div>
+</div>
+
+<div class="card mb-4" markdown="1">
+
+<div class="card-header" markdown="1">
+
+## Release Notes v5.0.1 (25 Sep 2026)
+
+</div>
+<div class="card-body" markdown="1">
+
+### Resolved issues
+- v5.0.1: Temporary hotfix to allow users already registered with ORCID account to log in again.
+
+</div>
+</div>
+
+<div class="card mb-4" markdown="1">
+
+<div class="card-header" markdown="1">
+
+## Release Notes v5.0.0 (24 Sep 2026)
+
 </div>
 <div class="card-body" markdown="1">
 
@@ -42,8 +110,6 @@
 - Admin panel is again accessible. Caused by timestamptz (Time Stamp Time Zone) not correctly being able to be read.
 - Fix Organizations index page items query: took very long before and sometimes the application hangs.
 - Fix crash when logging in via ORCID and no email address is provided (email is not made public yet).
-- v5.0.1: Temporary hotfix to allow users already registered with ORCID account to log in again.
-- v5.0.2: ORCID accounts are again fully supported: registration of new accounts, link to existing accounts and ORCID login.
 
 ### Other changes without functional impact
 - Upgrade to latest available DMPRoadmap version: from 4.2.0 to 5.0.2 (Rails 7.1.x and Ruby 3.1.x).
