@@ -16,6 +16,7 @@ class PlanPolicy < ApplicationPolicy
   def share?
     @record.is_plan_live_version? &&
       (@record.editable_by?(@user.id) ||
+      (@user.can_super_admin? && @record.readable_by?(@user.id)) ||
       (@user.can_org_admin? &&
        @user.org.plans.include?(@record)))
   end
