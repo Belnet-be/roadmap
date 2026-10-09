@@ -397,21 +397,6 @@ class User
     identifiers.select { |id| id.identifier_scheme_id == scheme.id }.first
   end
 
-  def alternative_accounts
-    orcid = identifier_orcid
-
-    return [] if orcid.nil?
-
-    Identifier.where(
-      "identifier_scheme_id = ? AND identifiable_type = ? AND value = ? AND identifiable_id <> ?",
-      orcid.identifier_scheme_id,
-      "User",
-      orcid.value,
-      id
-    )
-              .map(&:identifiable)
-  end
-
   def self.org_from_email(email)
 
     parts_email = email.split("@")

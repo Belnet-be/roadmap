@@ -5,17 +5,14 @@
     <!-- if the user has projects -->
     <div class="card card-body bg-light mb-10">
       <p>The table below lists all the plans associated with the <b>current user account</b>. This includes the plans you have created with this account and  the plans that have been shared with you for this account.</p>
-      <% if current_user.alternative_accounts.any? %>
       <a data-bs-toggle="collapse" href="#plans_missing_more_info">Don't see all your plans?</a>
       <div id="plans_missing_more_info" class="collapse">
-        <p>If you have multiple user accounts in DMPonline.be, and you want to view the plans associated with another account, switch to your other account. This can be done as follows:</p>
+        <p>If you have multiple user accounts in DMPonline.be, and you want to view the plans associated with another account, sign out and sign in again with your other account:</p>
         <ul>
-          <li>If your different accounts are linked to your ORCID iD, simply click your name in the upper right corner and select <a href="<%= edit_switch_user_path %>">Switch user</a>.</li>
-          <li>If your accounts are not yet linked to your ORCID iD, first add your ORCID iD to your accounts. To add your ORCID iD to an account, click on your name in the upper right corner, select 'Edit profile' and 'Link to ORCID'.</li>
-          <li>Alternatively, sign out and log into DMPonline.be again with your other account.</li>
+          <li>Sign in with the institutional account that has the email address of your other account, or</li>
+          <li>Sign in with ORCID. You can sign in to every account whose email address is a verified email address in your ORCID record, visible to "Everyone" or "Trusted parties". If your ORCID record has several verified email addresses, you can choose which account to sign in to.</li>
         </ul>
       </div>
-      <% end %>
     </div>
   </div>
 </div>
