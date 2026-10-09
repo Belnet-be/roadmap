@@ -8,8 +8,10 @@ module ContactUs
     def create
       @contact = ContactUs::Contact.new(params[:contact_us_contact])
 
+      # Belnet: only verify the captcha here. ContactUs::Contact#save sends the email,
+      # so also calling it here sent every message from logged-out users twice
       if !user_signed_in? && Rails.configuration.x.recaptcha.enabled &&
-         !(verify_recaptcha(model: @contact) && @contact.save)
+         !verify_recaptcha(model: @contact)
         flash[:alert] = _('Captcha verification failed, please retry.')
         render_new_page and return
       end
