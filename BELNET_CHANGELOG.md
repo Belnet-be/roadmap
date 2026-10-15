@@ -2,7 +2,7 @@
 
 <div class="card-header" markdown="1">
 
-## Release Notes v5.0.3 (Planned 15 Oct 2026)
+## Release Notes v5.0.3 (15 Oct 2026)
 
 </div>
 <div class="card-body" markdown="1">
@@ -16,16 +16,6 @@
 - Documentation: Add existing functionality that org admins can do topic validation of DMPs, see [Can Admins review validation requests?](/help-admin-guide#can-admins-review-validation-requests)
 - Fix crash, caused by missing dragonfly file, when admins update organisation details and click Save button.
 - Fix template duplicate bug in /plans pages for users and org admins.
-- Fix more ORCID issues. Current behavior:
-  - Only verified ORCID emails that are made visible ("Everyone" / "trusted parties") will count in ORCID validation.
-    - If configured email in existing DMPonline account is not or no longer a verified ORCID email, the login is now refused with explanation (caused crash before, fixed in DMPonline v5.0.0).
-  - If one visible verified ORCID email address, user is logged in automatically:
-    - If no DMPonline account yet with that email -> account gets created with ORCID identifier linked (was already).
-    - If existing DMPonline account with that email, but no ORCID linked yet -> ORCID identifier linked automatically (new).
-  - If two or more visible verified ORCID email addresses, show a choice list, one option per ORCID email address (new):
-    - Those that have linked DMPonline accounts, show "log in" option.
-    - Those without linked DMPonline accounts, show "create new account" option.
-    - The choice expires after 15 minutes.
 
 ### Other changes without functional impact
 - Use dashes instead of underscores for help guides URLs, route two old URLs to new ones.
