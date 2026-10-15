@@ -581,14 +581,13 @@ module Users
       # If the user isn't logged in
       if current_user.nil?
 
-        # One email address always yields the same account, whether logging in via Shibboleth,
-        # ORCID or password: look up the account by email (uid is the email address).
-        # A Shibboleth identifier linked to an account with another email address does not
-        # give access to that account.
-        # (case insensitive: older accounts may have been stored with capitals)
-        user = User.where("LOWER(email) = ?", auth.uid).first
+        # no user found: two reasons:
+        #   1) no user in table users
+        #   2) no identifier of scheme shibboleth yet
 
-        # no user with this email: create one
+        user = User.find_by_email(auth.uid) if user.nil?
+
+        # still no user: create one
         if user.nil?
 
           email = auth["extra"].try("raw_info").try("mail")
@@ -663,7 +662,7 @@ module Users
       # already been attached to another account (likely the user has 2 accounts)
       elsif user.id != current_user.id
 
-        flash[:alert] = _("The current #{scheme.description} iD has been already linked to a user with email #{user.email}")
+        flash[:alert] = _("The current #{scheme.description} iD has been already linked to a user with email #{identifier.user.email}")
 
       end
 
