@@ -149,8 +149,12 @@ $(() => {
     card.closest('.card-body').find('.new-question-button a.ajaxified-question[data-remote="true"]').show();
   });
 
-  // Handle the section that has focus on initial page load
-  const currentUpdatedSection = $('.accordion-collapse.collapse.show');
+  // Handle the section that has focus on initial page load.
+  // Keep this scoped to the template editor: this file runs on every page, and
+  // on the plan write page a section the user already opened would otherwise be
+  // turned into one big TinyMCE editor (happens in Firefox, which runs jQuery's
+  // ready handlers late while the page is still loading).
+  const currentUpdatedSection = $(`${parentSelector} .accordion-collapse.collapse.show`);
   if (currentUpdatedSection.length > 0) {
     initSection(`${currentUpdatedSection.attr('id')}`);
   }
