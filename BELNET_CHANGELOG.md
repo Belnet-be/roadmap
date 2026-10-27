@@ -2,6 +2,24 @@
 
 <div class="card-header" markdown="1">
 
+## Release Notes v5.0.4 (29 Oct 2026)
+
+</div>
+<div class="card-body" markdown="1">
+
+### Resolved issues
+- Differentiate on editable plan or not when working with templates.
+- Resolve Firefox issue that give the impression that you can edit a template when not having to rights to do that.
+  - Was never a security issue, the back end validated the rights correctly.
+
+
+</div>
+</div>
+
+<div class="card mb-4" markdown="1">
+
+<div class="card-header" markdown="1">
+
 ## Release Notes v5.0.3 (15 Oct 2026)
 
 </div>
