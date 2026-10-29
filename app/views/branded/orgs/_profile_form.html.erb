@@ -44,6 +44,17 @@
     <div class="form-control mb-3 col-sm-8">
       <%= f.label :logo, _('Organization logo'), class: "form-label"  %>
 
+      <%
+        logo_formats = Org::LOGO_FORMATS.map(&:upcase).sort
+        logo_input_opts = { accept: Org::LOGO_FORMATS.map { |ext| ".#{ext}" }.join(','),
+                            aria: { describedby: 'logo-format-info' } }
+      %>
+      <div id="logo-format-info" class="alert alert-info py-2 small" role="note">
+        <i class="fas fa-circle-info" aria-hidden="true"></i>
+        <%= _('Allowed file types: %{formats}. Maximum size: %{size}. The logo is automatically resized to a height of 100 pixels.') % {
+              formats: logo_formats.join(', '), size: '500 KB' } %>
+      </div>
+
       <% if org.logo.present? %>
         <div class="clearfix"></div>
         <%= image_tag logo_url_for_org(org), alt: "#{org.name} #{_('logo')}", class: "org-logo" %>
@@ -54,10 +65,10 @@
             <%= _('Remove logo') %>
           <% end %>
           <strong> - <%= _('or') %> - </strong>
-          <span class="btn btn-secondary btn-file"><%= f.file_field :logo %></span>
+          <span class="btn btn-secondary btn-file"><%= f.file_field :logo, logo_input_opts %></span>
         </div>
       <% else %>
-        <%= f.file_field :logo %>
+        <%= f.file_field :logo, logo_input_opts %>
       <% end %>
     </div>
   </div>

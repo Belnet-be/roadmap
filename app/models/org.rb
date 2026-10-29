@@ -41,7 +41,7 @@ class Org < ApplicationRecord
 
   validates_with OrgLinksValidator
 
-  LOGO_FORMATS = %w[jpeg png gif jpg bmp].freeze
+  LOGO_FORMATS = %w[jpeg png jpg bmp].freeze
 
   HUMANIZED_ATTRIBUTES = {
     feedback_msg: _('Feedback email message')
@@ -124,9 +124,9 @@ class Org < ApplicationRecord
   validates :managed, inclusion: { in: BOOLEAN_VALUES,
                                    message: INCLUSION_MESSAGE }
 
-  validates_property :format, of: :logo, in: LOGO_FORMATS,
+  validates_property :format, of: :logo, in: LOGO_FORMATS, if: :logo_changed?,
                               message: _('must be one of the following formats: ' \
-                                         'jpeg, jpg, png, gif, bmp')
+                                         'jpeg, jpg, png, bmp')
 
   validates_size_of :logo,
                     maximum: 500.kilobytes,
