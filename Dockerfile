@@ -1,15 +1,17 @@
 # syntax=docker/dockerfile:1
 
 # Make sure RUBY_VERSION matches the Ruby version in .ruby-version and Gemfile
-ARG RUBY_VERSION=3.1.4
+ARG RUBY_VERSION=3.4.13
 
 ### 1 base stage
-FROM docker.io/library/ruby:${RUBY_VERSION}-slim AS base
+# Pinned to Debian 12 (bookworm), the same base as before the Ruby 3.4 upgrade, so the
+# apt packages below (e.g. ImageMagick 6, libpng16-16) stay the same.
+FROM docker.io/library/ruby:${RUBY_VERSION}-slim-bookworm AS base
 
 WORKDIR /opt/roadmap
 
-# Update RubyGems to a specific version, latest valid for Ruby version 3.1.x
-ARG RUBYGEMS_VERSION=3.6.9
+# Update RubyGems to a specific version; 3.7.2 ships Bundler 2.7.2 (BUNDLED WITH in Gemfile.lock)
+ARG RUBYGEMS_VERSION=3.7.2
 # Install base packages
 RUN apt-get update -qq && \
   gem update --system ${RUBYGEMS_VERSION} --no-document --silent && \
@@ -31,7 +33,7 @@ FROM base AS build
 # Install packages needed to build gems
 RUN apt-get update -qq && \
   apt-get install --no-install-recommends -y \
-  build-essential git pkg-config libyaml-dev libxml2-dev libssl-dev vim bison && \
+  build-essential git pkg-config libyaml-dev libxml2-dev libssl-dev libffi-dev vim bison && \
   rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
 # Install Node.js and JavaScript dependencies for asset compilation

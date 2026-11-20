@@ -139,3 +139,6 @@ cloud9-start.sh
 vendor/bundle
 /env.sh
 #ugent - end
+
+# Ignore key files for decrypting credentials and more.
+/config/*.key

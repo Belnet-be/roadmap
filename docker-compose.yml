@@ -25,6 +25,9 @@ services:
       - DMP_SMTP_ADDRESS=mail
       - DMP_SMTP_PORT=1025
       - BINDING=0.0.0.0
+      # Stop annotate_rb (DMPRoadmap v6) from rewriting the schema comments in ~80 model and
+      # factory files after the db:migrate that entrypoint-dev.sh runs on every start.
+      - ANNOTATERB_SKIP_ON_DB_TASKS=${ANNOTATERB_SKIP_ON_DB_TASKS:-1}
       - BELNET_SPLITTED_LOGS=${BELNET_SPLITTED_LOGS:-false}
       - SECRET_KEY_BASE=${SECRET_KEY_BASE:?SECRET_KEY_BASE must be set}
       - BELNET_DRAGONFLY_SECRET=${BELNET_DRAGONFLY_SECRET:?BELNET_DRAGONFLY_SECRET must be set}
