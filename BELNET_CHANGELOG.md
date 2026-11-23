@@ -2,7 +2,7 @@
 
 <div class="card-header" markdown="1">
 
-## Release Notes v6.0.0 (Planned 23 Nov 2026)
+## Release Notes v6.0.0 (23 Nov 2026)
 
 </div>
 <div class="card-body" markdown="1">
