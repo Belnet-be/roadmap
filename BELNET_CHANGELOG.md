@@ -2,6 +2,30 @@
 
 <div class="card-header" markdown="1">
 
+## Release Notes v6.0.0 (Planned 23 Nov 2026)
+
+</div>
+<div class="card-body" markdown="1">
+
+### Main goals
+- Upgrade foundation to DMPRoadmap version v6.0.2, due to critical security issues.
+
+### Functional changes
+- None.
+
+### Resolved issues
+- Ruby v3.4.13 solved several critical CVEs, not solved in previous used Ruby v3.1.
+
+### Other changes without functional impact
+- Upgrade to latest available DMPRoadmap version: from v5.0.3 to v6.0.2 (Rails 8.1.4 and Ruby 3.4.13).
+
+</div>
+</div>
+
+<div class="card mb-4" markdown="1">
+
+<div class="card-header" markdown="1">
+
 ## Release Notes v5.0.4 (29 Oct 2026)
 
 </div>

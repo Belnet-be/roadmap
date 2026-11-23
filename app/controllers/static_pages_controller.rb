@@ -37,8 +37,8 @@ class StaticPagesController < ApplicationController
     @app_version = ENV.fetch('BELNET_DMPONLINE_VERSION', 'Unknown')
     @build_date = "#{BOOTED_AT.strftime('%Y-%m-%d %H:%M:%S %Z')} (#{time_ago_in_words(BOOTED_AT)} ago)"
     @app_based_on = {
-      'name' => 'DMPRoadmap v5.0.3',
-      'url' => 'https://github.com/DMPRoadmap/roadmap/releases/tag/v5.0.3'
+      'name' => 'DMPRoadmap v6.0.2',
+      'url' => 'https://github.com/DMPRoadmap/roadmap/releases/tag/v6.0.2'
     }
     # We get the list of js dependencies from package.json
     @js_dependencies = parse_package_json
