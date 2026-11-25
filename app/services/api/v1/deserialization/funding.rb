@@ -20,6 +20,7 @@ module Api
 
             # Attach the Funder
             plan.funder = Api::V1::Deserialization::Org.deserialize(json: json)
+            plan.funding_status = funding_status(value: json[:funding_status]) if json[:funding_status].present?
             return plan unless json[:grant_id].present?
 
             # Attach the grant Identifier to the Plan if present
@@ -28,6 +29,12 @@ module Api
               class_name: plan.class.name, json: json[:grant_id]
             )
             plan
+          end
+
+          # The RDA DMP Common Standard status as a Plan funding_status. "applied" has no value
+          # of its own and counts as planned (Api::V1::FundingPresenter maps them back).
+          def funding_status(value:)
+            { 'granted' => :funded, 'rejected' => :denied }.fetch(value.to_s.downcase, :planned)
           end
         end
       end

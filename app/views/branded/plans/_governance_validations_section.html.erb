@@ -41,9 +41,9 @@
                   <% end %>
                 </td>
                 <td><%= validation.requested_by&.name || _('Unknown') %></td>
-                <td><%= l(validation.requested_at, format: :long) if validation.requested_at.present? %></td>
+                <td><%= l(validation.requested_at.in_time_zone('Brussels'), format: :long) if validation.requested_at.present? %></td>
                 <td><%= validation.reviewed_by&.name || _('Not reviewed') %></td>
-                <td><%= l(validation.reviewed_at, format: :long) if validation.reviewed_at.present? %></td>
+                <td><%= l(validation.reviewed_at.in_time_zone('Brussels'), format: :long) if validation.reviewed_at.present? %></td>
                 <td><%= validation.rationale.presence || '' %></td>
                 <td><%= validation.conditions.presence || '' %></td>
                 <td>

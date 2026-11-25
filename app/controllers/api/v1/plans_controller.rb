@@ -30,6 +30,10 @@ module Api
         errs = Api::V1::JsonValidationService.validation_errors(json: dmp)
         render_error(errors: errs, status: :bad_request) and return if errs.any?
 
+        # A template that doesn't exist or may not be used is an error, not a reason to use another
+        template_err = _('Unknown template: the :template :id must be a template from GET /api/v1/templates')
+        render_error(errors: [template_err], status: :bad_request) and return unless template_available?(json: dmp)
+
         # Convert the JSON into a Plan and it's associations
         plan = Api::V1::Deserialization::Plan.deserialize(json: dmp)
         if plan.present?
@@ -106,6 +110,23 @@ module Api
 
         scheme = IdentifierScheme.by_name(json[:dmp_id][:type]).first
         Identifier.where(value: json[:dmp_id][:identifier], identifier_scheme: scheme).any?
+      end
+
+      # True unless the DMP names a template the caller may not use. Usable are published templates
+      # that are public, or of the caller's own organisation: the templates GET /api/v1/templates
+      # lists, plus the organisation's own templates for an API client of that organisation.
+      # Without a template the default template is used (see Deserialization::Plan).
+      def template_available?(json:)
+        template = Api::V1::DeserializationService.app_extensions(json: json)[:template]
+        id = template.is_a?(Hash) ? template[:id] : template
+        return true if id.blank?
+
+        Template.published
+                .where('(templates.visibility = ? AND templates.org_id = ?) OR ' \
+                       '(templates.visibility = ? AND templates.customization_of IS NULL)',
+                       Template.visibilities[:organisationally_visible], client.try(:org_id),
+                       Template.visibilities[:publicly_visible])
+                .exists?(id: id)
       end
 
       # The user who owns a plan created through the API:

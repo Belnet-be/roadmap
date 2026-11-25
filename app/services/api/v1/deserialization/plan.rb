@@ -163,8 +163,10 @@ module Api
           def find_template(json: {})
             return nil unless json.present?
 
-            template = ::Template.find_by(id: template_id(json: json))
-            template.present? ? template : Template.find_by(is_default: true)
+            # The default template only when the DMP names none: a template id that doesn't exist
+            # is an error, not a reason to use another template (PlansController#create checks it)
+            id = template_id(json: json)
+            id.present? ? ::Template.find_by(id: id) : Template.find_by(is_default: true)
           end
 
           # Extract the Template id from the JSON

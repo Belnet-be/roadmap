@@ -9,6 +9,9 @@ module Api
       BAD_ORG_MSG = _(':name is required for every :affiliation and :funding').freeze
       BAD_CONTRIB_MSG = _(':role and either the :name or :email are required for each :contributor').freeze
       BAD_FUNDING_MSG = _(':name, :funder_id or :grant_id are required for each funding').freeze
+      # The values of the RDA DMP Common Standard
+      FUNDING_STATUSES = %w[planned applied granted rejected].freeze
+      BAD_FUNDING_STATUS_MSG = _(':funding_status must be one of: planned, applied, granted, rejected').freeze
       BAD_DATASET_MSSG = _(':title is required for each :dataset').freeze
       class << self
         def plan_valid?(json:)
@@ -37,6 +40,12 @@ module Api
           funder_id = json.fetch(:funder_id, {})[:identifier]
           grant_id = json.fetch(:grant_id, {})[:identifier]
           json[:name].present? || funder_id.present? || grant_id.present?
+        end
+
+        # Optional, but when present one of the RDA DMP Common Standard values
+        def funding_status_valid?(json:)
+          status = json[:funding_status]
+          status.blank? || FUNDING_STATUSES.include?(status.to_s.downcase)
         end
 
         def dataset_valid?(json:)
@@ -96,6 +105,7 @@ module Api
           return errs unless json.present?
 
           errs << BAD_FUNDING_MSG unless funding_valid?(json: json)
+          errs << BAD_FUNDING_STATUS_MSG unless funding_status_valid?(json: json)
           errs << org_validation_errors(json: json)
           errs << BAD_ID_MSG if json[:grant_id].present? && !identifier_valid?(json: json[:grant_id])
           errs

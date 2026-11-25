@@ -120,7 +120,7 @@
                   (<%= validation.requested_by.email %>)
                 <% end %>
                 <br>
-                <%= l(validation.requested_at, format: :long) if validation.requested_at.present? %>
+                <%= l(validation.requested_at.in_time_zone('Brussels'), format: :long) if validation.requested_at.present? %>
               </td>
               <td>
                 <%= validation.reviewed_by&.name || _('Unknown') %>
@@ -128,7 +128,7 @@
                   (<%= validation.reviewed_by.email %>)
                 <% end %>
                 <br>
-                <%= l(validation.reviewed_at, format: :long) %>
+                <%= l(validation.reviewed_at.in_time_zone('Brussels'), format: :long) %>
               </td>
               <td><%= validation.rationale.presence || '' %></td>
               <td><%= validation.conditions.presence || '' %></td>

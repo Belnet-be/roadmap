@@ -67,6 +67,78 @@
               "examples": [
                 "Charlie Chaplin"
               ]
+            },
+            "affiliation": {
+              "$id": "#/properties/dmp/properties/contact/properties/affiliation",
+              "type": "object",
+              "title": "The Contact Affiliation Schema",
+              "description": "Organisation of the contact. An extension of DMPRoadmap, not part of the RDA DMP Common Standard: DMPonline.be accepts it and returns it.",
+              "properties": {
+                "name": {
+                  "$id": "#/properties/dmp/properties/contact/properties/affiliation/properties/name",
+                  "type": "string",
+                  "title": "The Affiliation Name Schema",
+                  "description": "Name of the organisation",
+                  "examples": [
+                    "Example University"
+                  ]
+                },
+                "abbreviation": {
+                  "$id": "#/properties/dmp/properties/contact/properties/affiliation/properties/abbreviation",
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "title": "The Affiliation Abbreviation Schema",
+                  "description": "Abbreviation of the organisation (returned only)",
+                  "examples": [
+                    "EXU"
+                  ]
+                },
+                "region": {
+                  "$id": "#/properties/dmp/properties/contact/properties/affiliation/properties/region",
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "title": "The Affiliation Region Schema",
+                  "description": "Region of the organisation (returned only)",
+                  "examples": [
+                    "BE"
+                  ]
+                },
+                "affiliation_id": {
+                  "$id": "#/properties/dmp/properties/contact/properties/affiliation/properties/affiliation_id",
+                  "type": "object",
+                  "title": "The Affiliation ID Schema",
+                  "properties": {
+                    "identifier": {
+                      "$id": "#/properties/dmp/properties/contact/properties/affiliation/properties/affiliation_id/properties/identifier",
+                      "type": "string",
+                      "title": "The Affiliation Identifier Schema",
+                      "examples": [
+                        "https://ror.org/000000000"
+                      ]
+                    },
+                    "type": {
+                      "$id": "#/properties/dmp/properties/contact/properties/affiliation/properties/affiliation_id/properties/type",
+                      "type": "string",
+                      "title": "The Affiliation Identifier Type Schema",
+                      "description": "Identifier type, for example ror or fundref",
+                      "examples": [
+                        "ror"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "identifier",
+                    "type"
+                  ]
+                }
+              },
+              "required": [
+                "name"
+              ]
             }
           },
           "required": [
@@ -153,6 +225,78 @@
                   ]
                 },
                 "uniqueItems": true
+              },
+              "affiliation": {
+                "$id": "#/properties/dmp/properties/contributor/items/properties/affiliation",
+                "type": "object",
+                "title": "The Contributor Affiliation Schema",
+                "description": "Organisation of the contributor. An extension of DMPRoadmap, not part of the RDA DMP Common Standard: DMPonline.be accepts it and returns it.",
+                "properties": {
+                  "name": {
+                    "$id": "#/properties/dmp/properties/contributor/items/properties/affiliation/properties/name",
+                    "type": "string",
+                    "title": "The Affiliation Name Schema",
+                    "description": "Name of the organisation",
+                    "examples": [
+                      "Example University"
+                    ]
+                  },
+                  "abbreviation": {
+                    "$id": "#/properties/dmp/properties/contributor/items/properties/affiliation/properties/abbreviation",
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "title": "The Affiliation Abbreviation Schema",
+                    "description": "Abbreviation of the organisation (returned only)",
+                    "examples": [
+                      "EXU"
+                    ]
+                  },
+                  "region": {
+                    "$id": "#/properties/dmp/properties/contributor/items/properties/affiliation/properties/region",
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "title": "The Affiliation Region Schema",
+                    "description": "Region of the organisation (returned only)",
+                    "examples": [
+                      "BE"
+                    ]
+                  },
+                  "affiliation_id": {
+                    "$id": "#/properties/dmp/properties/contributor/items/properties/affiliation/properties/affiliation_id",
+                    "type": "object",
+                    "title": "The Affiliation ID Schema",
+                    "properties": {
+                      "identifier": {
+                        "$id": "#/properties/dmp/properties/contributor/items/properties/affiliation/properties/affiliation_id/properties/identifier",
+                        "type": "string",
+                        "title": "The Affiliation Identifier Schema",
+                        "examples": [
+                          "https://ror.org/000000000"
+                        ]
+                      },
+                      "type": {
+                        "$id": "#/properties/dmp/properties/contributor/items/properties/affiliation/properties/affiliation_id/properties/type",
+                        "type": "string",
+                        "title": "The Affiliation Identifier Type Schema",
+                        "description": "Identifier type, for example ror or fundref",
+                        "examples": [
+                          "ror"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "identifier",
+                      "type"
+                    ]
+                  }
+                },
+                "required": [
+                  "name"
+                ]
               }
             },
             "required": [

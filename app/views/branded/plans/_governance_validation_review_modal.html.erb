@@ -38,7 +38,7 @@
               </dd>
 
               <dt class="col-sm-4"><%= _('Requested at') %></dt>
-              <dd class="col-sm-8"><%= l(validation.requested_at, format: :long) %></dd>
+              <dd class="col-sm-8"><%= l(validation.requested_at.in_time_zone('Brussels'), format: :long) %></dd>
             </dl>
           </div>
 
