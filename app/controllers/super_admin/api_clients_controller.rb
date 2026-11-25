@@ -9,6 +9,11 @@ module SuperAdmin
 
     helper PaginableHelper
 
+    # Only super admins may manage API clients. Check this before loading any record, so other
+    # callers can't change or receive credentials, or find out which API client IDs exist.
+    before_action :authenticate_user!
+    before_action -> { authorize(ApiClient) }
+
     # GET /api_clients
     def index
       authorize(ApiClient)
@@ -86,10 +91,10 @@ module SuperAdmin
       end
     end
 
-    # GET /api_clients/:id/refresh_credentials/
+    # PATCH /api_clients/:id/refresh_credentials
     def refresh_credentials
       @api_client = ApiClient.find(params[:id])
-      return unless @api_client.present?
+      authorize(@api_client)
 
       original = @api_client.client_secret
       @api_client.generate_credentials
@@ -97,10 +102,11 @@ module SuperAdmin
       @success = original != @api_client.client_secret
     end
 
-    # GET /api_clients/:id/email_credentials/
+    # POST /api_clients/:id/email_credentials
     def email_credentials
       @api_client = ApiClient.find(params[:id])
-      UserMailer.api_credentials(@api_client).deliver_now if @api_client.present?
+      authorize(@api_client)
+      UserMailer.api_credentials(@api_client).deliver_now
     end
 
     private

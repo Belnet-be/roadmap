@@ -426,8 +426,9 @@ Rails.application.routes.draw do
 
     resources :api_clients do
       member do
-        get :email_credentials
-        get :refresh_credentials
+        # Write methods only: these change state or send secrets, so they need a CSRF token
+        post :email_credentials
+        patch :refresh_credentials
       end
     end
   end

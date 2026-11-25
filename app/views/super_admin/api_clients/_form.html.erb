@@ -69,11 +69,12 @@ orgs = Org.where(is_other: false).includes(identifiers: :identifier_scheme)
     <% unless @api_client.new_record? %>
       <%= link_to _("Refresh client ID and secret"),
                   refresh_credentials_super_admin_api_client_path(@api_client),
-                  class: "btn btn-secondary", remote: true %>
+                  class: "btn btn-secondary", remote: true, method: :patch,
+                  data: { confirm: _('The current client ID and secret will stop working immediately. Continue?') } %>
 
       <%= link_to _("Email credentials to contact"),
                   email_credentials_super_admin_api_client_path(@api_client),
-                  class: "btn btn-secondary", remote: true %>
+                  class: "btn btn-secondary", remote: true, method: :post %>
 
       <%= link_to(
             _('Delete'),
