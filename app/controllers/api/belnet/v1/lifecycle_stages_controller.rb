@@ -28,6 +28,7 @@ module Api
         def create
           plan = find_plan
           return unless plan
+          return unless plan_change_allowed?(plan, :update_stage?)
 
           unless plan.is_plan_live_version?
             render_error(errors: [_('Lifecycle stage can only be added to an editable DMP')],
@@ -48,6 +49,7 @@ module Api
         def update
           plan = find_plan
           return unless plan
+          return unless plan_change_allowed?(plan, :update_stage?)
 
           stage_name = require_stage_name
           return if performed?

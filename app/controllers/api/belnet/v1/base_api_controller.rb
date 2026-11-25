@@ -34,6 +34,17 @@ module Api
           render '/api/belnet/v1/error', status: status
         end
 
+        # A user may change a plan through the API only as far as the web interface allows
+        # (PlanPolicy#rule, e.g. :update_stage?). An API client acts for its organisation and is
+        # limited to the plans in its scope. Renders 403 and returns false when refused.
+        def plan_change_allowed?(plan, rule)
+          return true unless client.is_a?(User)
+          return true if ::PlanPolicy.new(client, plan).public_send(rule)
+
+          render_error(errors: [_('You are not allowed to make this change to the DMP')], status: :forbidden)
+          false
+        end
+
         private
 
         attr_accessor :json

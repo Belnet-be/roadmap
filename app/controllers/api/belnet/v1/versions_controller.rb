@@ -61,6 +61,7 @@ module Api
 
           plan = find_editable_plan
           return if performed?
+          return unless plan_change_allowed?(plan, :update?)
 
           version = plan.plan_versions
                         .includes(:belnet_version_metadata)
@@ -117,6 +118,7 @@ module Api
           # is 0 (This means it's the LIVE version).
           plan = find_editable_plan
           return if performed?
+          return unless plan_change_allowed?(plan, :create_new_version?)
 
           stage = resolve_version_stage(plan)
           return if performed?

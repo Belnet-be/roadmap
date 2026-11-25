@@ -25,7 +25,6 @@ module Api
         def plans_for_client
           return [] unless @user.present?
 
-          puts "user: #{@user.org.plans.count}"
           ids = @user.plans.pluck(:id)
           ids += @user.org.plans.pluck(:id) if @user.org.present?
           ids.uniq
@@ -35,7 +34,8 @@ module Api
           return [] unless @user.present?
 
           ids = @user.org.plans.organisationally_visible.pluck(:id)
-          ids += @user.plans.pluck(:id)
+          # Only active roles give access, as in the web interface (Plan#readable_by?)
+          ids += @user.roles.where(active: true).pluck(:plan_id)
           ids += @user.org.plans.pluck(:id) if @user.can_org_admin?
           ids.uniq
         end

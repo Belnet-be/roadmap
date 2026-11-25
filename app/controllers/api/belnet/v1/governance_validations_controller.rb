@@ -39,6 +39,7 @@ module Api
         def update
           plan = find_editable_plan
           return if performed?
+          return unless plan_change_allowed?(plan, :review_validation?)
 
           validation = find_validation(plan)
           return unless validation
@@ -67,6 +68,7 @@ module Api
         def create
           plan = find_editable_plan
           return if performed?
+          return unless plan_change_allowed?(plan, :update?)
 
           require_param(:topic)
           return if performed?
