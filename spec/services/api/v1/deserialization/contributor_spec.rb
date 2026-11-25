@@ -65,56 +65,27 @@ RSpec.describe Api::V1::Deserialization::Contributor do
   end
 
   context 'private methods' do
-    describe ':find_or_initialize(id_json:, json: {})' do
+    # A plan's contributors are built from the submitted data only, never copied from another
+    # plan's contributor (that would copy someone else's details into this plan)
+    describe ':new_contributor(json: {})' do
       it 'returns nil if json is not present' do
-        result = described_class.send(:find_or_initialize, id_json: nil, json: nil)
-        expect(result).to eql(nil)
+        expect(described_class.send(:new_contributor, json: nil)).to eql(nil)
       end
-      it 'returns a cloned copy of the Contributor when found by identifier' do
-        contributor = create(:contributor, plan: @plan)
-        Api::V1::DeserializationService.expects(:object_from_identifier).returns(contributor)
-        result = described_class.send(:find_or_initialize, id_json: nil, json: @json)
-        expect(result).not_to eql(contributor)
-        expect(result.new_record?).to eql(true)
-        expect(result.plan).to eql(nil)
-        expect(result.name).to eql(contributor.name)
-        expect(result.email).to eql(contributor.email)
-      end
-      it 'returns a cloned copy of the Contributor when found by email' do
-        contributor = create(:contributor, email: @json[:mbox], plan: @plan)
-        Api::V1::DeserializationService.expects(:object_from_identifier).returns(nil)
-        result = described_class.send(:find_or_initialize, id_json: nil, json: @json)
-        expect(result).not_to eql(contributor)
-        expect(result.new_record?).to eql(true)
-        expect(result.plan).to eql(nil)
-        expect(result.name).to eql(contributor.name)
-        expect(result.email).to eql(contributor.email)
-      end
-      it 'initializes the Contributor if there were no viable matches' do
-        json = {
-          name: Faker::TvShows::Simpsons.character,
-          mbox: Faker::Internet.unique.email
-        }
-        Api::V1::DeserializationService.expects(:object_from_identifier).returns(nil)
-        result = described_class.send(:find_or_initialize, id_json: nil, json: json)
+      it 'initializes the Contributor from the submitted data' do
+        json = { name: Faker::TvShows::Simpsons.character, mbox: Faker::Internet.unique.email }
+        result = described_class.send(:new_contributor, json: json)
         expect(result.new_record?).to eql(true)
         expect(result.plan).to eql(nil)
         expect(result.name).to eql(json[:name])
         expect(result.email).to eql(json[:mbox])
       end
-    end
-
-    describe ':duplicate_contributor(contributor:)' do
-      it 'returns nil if the contributor is not present' do
-        expect(described_class.send(:duplicate_contributor, contributor: nil)).to eql(nil)
-      end
-      it 'duplicates the contributor' do
-        result = described_class.send(:duplicate_contributor, contributor: @contributor)
+      it "doesn't copy another plan's Contributor with the same email" do
+        existing = create(:contributor, email: @json[:mbox], plan: @plan, name: 'Someone Else')
+        result = described_class.send(:new_contributor, json: @json)
+        expect(result).not_to eql(existing)
         expect(result.new_record?).to eql(true)
-      end
-      it 'removes the plan association' do
-        result = described_class.send(:duplicate_contributor, contributor: @contributor)
-        expect(result.plan).to eql(nil)
+        expect(result.name).to eql(@json[:name])
+        expect(result.phone).to eql(nil)
       end
     end
 

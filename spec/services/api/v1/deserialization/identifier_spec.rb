@@ -30,11 +30,23 @@ RSpec.describe Api::V1::Deserialization::Identifier do
       expect(rslt.new_record?).to eql(true)
       validate_identifier(result: rslt, scheme: nil, value: @value)
     end
-    it 'returns an existing Identifier when :type matches an IdentifierScheme' do
-      id = create(:identifier, identifier_scheme: @scheme, value: @json[:identifier],
-                               identifiable: create(:org))
+    # Attaching an existing Identifier to a new object would move it away from its owner
+    it "doesn't return another record's Identifier of the same scheme" do
+      other = create(:identifier, identifier_scheme: @scheme, value: SecureRandom.uuid,
+                                  identifiable: create(:org))
       result = described_class.deserialize(class_name: @class_name, json: @json)
-      expect(result).to eql(id)
+      expect(result).not_to eql(other)
+      expect(result.new_record?).to eql(true)
+      validate_identifier(result: result, scheme: @scheme,
+                          value: "#{@scheme.identifier_prefix}#{@json[:identifier]}")
+    end
+    it 'returns a new Identifier even when one with the same scheme and value exists' do
+      existing = create(:identifier, identifier_scheme: @scheme, value: @json[:identifier],
+                                     identifiable: create(:org))
+      result = described_class.deserialize(class_name: @class_name, json: @json)
+      expect(result).not_to eql(existing)
+      expect(result.new_record?).to eql(true)
+      expect(result.value).to eql(existing.value)
     end
     it 'initializes a new Identifier when :type matches an IdentifierScheme' do
       result = described_class.deserialize(class_name: @class_name, json: @json)

@@ -54,6 +54,11 @@ module Api
             plan = find_or_initialize(id_json: id_json, json: json)
             return nil unless plan.present? && plan.template.present?
 
+            # A DMP naming an existing plan is refused ("Plan already exists"). Return that plan
+            # untouched: adding contributors or a grant to a saved plan would write at once,
+            # whoever owns it.
+            return plan if plan.persisted?
+
             plan.description = json[:description] if json[:description].present?
             issues = Api::V1::ConversionService.yes_no_unknown_to_boolean(
               json[:ethical_issues_exist]

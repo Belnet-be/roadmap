@@ -20,12 +20,15 @@ module Api
           nil
         end
 
-        # Attach the identifier to the object if it does not already exist
+        # Attach the identifier to the object if it does not already exist. Only new objects get
+        # one: API data describes the new plan and never changes a record that already exists
+        # (e.g. an Org found by name), and on a saved record `<<` would write at once.
         # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
         def attach_identifier(object:, json:)
           return object unless object.present? && object.respond_to?(:identifiers) &&
                                json.present? &&
                                json[:type].present? && json[:identifier].present?
+          return object if object.persisted?
 
           existing = object.identifiers.select do |id|
             id.identifier_scheme&.name&.downcase == json[:type].downcase

@@ -49,15 +49,27 @@ RSpec.describe Api::V1::Deserialization::Org do
       Org.any_instance.stubs(:valid?).returns(false)
       expect(described_class.deserialize(json: @json)).to eql(nil)
     end
-    it 'attaches the identifier to the Org' do
+    # API data describes the new plan and never changes an Org that already exists
+    it "doesn't change the identifiers of an existing Org" do
+      scheme = create(:identifier_scheme, identifier_prefix: nil, name: 'foo')
+      json = @json.merge(
+        { affiliation_id: { type: scheme.name, identifier: SecureRandom.uuid } }
+      )
+      result = described_class.deserialize(json: json)
+      expect(result).to eql(@org)
+      expect(@org.reload.identifiers.map(&:id)).to eql([@identifier.id])
+    end
+    it 'attaches the identifier to a new Org' do
       id = SecureRandom.uuid
       scheme = create(:identifier_scheme, identifier_prefix: nil, name: 'foo')
+      described_class.stubs(:find_by_name)
+                     .returns(build(:org, name: Faker::Company.unique.name))
       json = @json.merge(
         { affiliation_id: { type: scheme.name, identifier: id } }
       )
       result = described_class.deserialize(json: json)
-      expect(result.identifiers.length).to eql(2)
-      expect(result.identifiers.last.value).to eql(id)
+      expect(result.new_record?).to eql(true)
+      expect(result.identifiers.map(&:value)).to eql([id])
     end
     it 'is able to initialize a new Org' do
       described_class.stubs(:find_by_name)

@@ -138,11 +138,20 @@ RSpec.describe Api::V1::PersistenceService do
         contributor = build(:contributor, plan: create(:plan), email: nil)
         expect(described_class.send(:safe_save_contributor, contributor: contributor)).to eql(nil)
       end
-      it 'loads the Contributor if the :contributor already exists' do
-        existing = create(:contributor, plan: create(:plan), investigation: true)
-        contributor = build(:contributor, email: existing.email, investigation: true)
+      it 'loads the Contributor if it already exists on the same plan' do
+        plan = create(:plan)
+        existing = create(:contributor, plan: plan, investigation: true)
+        contributor = build(:contributor, plan: plan, email: existing.email, investigation: true)
         result = described_class.send(:safe_save_contributor, contributor: contributor)
         expect(result).to eql(existing)
+      end
+      it "doesn't reuse a Contributor with the same email on another plan" do
+        existing = create(:contributor, plan: create(:plan), investigation: true)
+        contributor = build(:contributor, plan: create(:plan), email: existing.email, investigation: true)
+        result = described_class.send(:safe_save_contributor, contributor: contributor)
+        expect(result).not_to eql(existing)
+        expect(result.plan).to eql(contributor.plan)
+        expect(existing.reload.plan).not_to eql(contributor.plan)
       end
       it 'creates the Contributor' do
         contributor = build(:contributor, plan: create(:plan), investigation: true)

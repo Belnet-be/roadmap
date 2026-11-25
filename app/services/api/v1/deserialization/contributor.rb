@@ -33,9 +33,9 @@ module Api
 
             json = json.with_indifferent_access
 
-            # Try to find the Contributor or initialize a new one
+            # Build the Contributor from the submitted data
             id_json = json.fetch(:contributor_id, json.fetch(:contact_id, {}))
-            contrib = find_or_initialize(id_json: id_json, json: json)
+            contrib = new_contributor(json: json)
             return nil unless contrib.present?
 
             # Attach the Org unless its already defined
@@ -57,31 +57,14 @@ module Api
 
           private
 
-          # Each plan's contributors are unique records, so if we found a
-          # match we need to dup it, otherwise initialize a new one
-          def find_or_initialize(id_json:, json: {})
+          # Each plan's contributors are its own records, built from the submitted data only.
+          # Never start from another plan's contributor found by ORCID iD or email: that copies
+          # someone else's details (name, email, phone, organisation) into this plan and into
+          # the API response.
+          def new_contributor(json: {})
             return nil unless json.present?
 
-            contrib = Api::V1::DeserializationService.object_from_identifier(
-              class_name: 'Contributor', json: id_json
-            )
-            return duplicate_contributor(contributor: contrib) if contrib.present?
-
-            if json[:mbox].present?
-              # Try to find by email
-              contrib = ::Contributor.where('LOWER(email) = ?', json[:mbox]&.downcase).last
-              return duplicate_contributor(contributor: contrib) if contrib.present?
-            end
-
             ::Contributor.new(name: json[:name], email: json[:mbox])
-          end
-
-          def duplicate_contributor(contributor:)
-            return nil unless contributor.present?
-
-            contrib = contributor.dup
-            contrib.plan = nil
-            contrib
           end
 
           # Assign the default Contact roles

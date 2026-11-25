@@ -69,7 +69,9 @@ module Api
           return nil unless contributor.is_a?(Contributor) && contributor.valid?
 
           Contributor.transaction do
-            contrib = Contributor.find_or_initialize_by(email: contributor.email)
+            # Contributors belong to one plan: only reuse this plan's own record. A contributor
+            # with the same email on another plan must not stand in for (and drop) this one.
+            contrib = Contributor.find_or_initialize_by(plan_id: contributor.plan_id, email: contributor.email)
 
             if contrib.new_record?
               contrib.update(saveable_attributes(attrs: contributor.attributes))
