@@ -14,7 +14,7 @@ class DepartmentPolicy < ApplicationPolicy
   end
 
   def create?
-    @user.can_org_admin? || @user.can_super_admin?
+    (@user.can_org_admin? && @user.org_id == @record.org_id) || @user.can_super_admin?
   end
 
   def edit?

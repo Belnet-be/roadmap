@@ -5,6 +5,8 @@ module Paginable
   class NotificationsController < ApplicationController
     include Paginable
 
+    after_action :verify_authorized
+
     # /paginable/notifications/index/:page
     def index
       authorize(Notification)

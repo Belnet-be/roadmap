@@ -20,6 +20,7 @@
   <div class="form-control mb-3 col-xs-8">
     <%= link_to _("Regenerate token"),
                 refresh_token_user_path(user),
-                class: "btn btn-secondary", remote: true %>
+                class: "btn btn-secondary", remote: true, method: :patch,
+                data: { confirm: _("Applications using the current token will stop working. Continue?") } %>
   </div>
 </div>

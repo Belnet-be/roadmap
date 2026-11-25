@@ -5,6 +5,8 @@ module OrgAdmin
   class PhaseVersionsController < ApplicationController
     include Versionable
 
+    after_action :verify_authorized
+
     # POST /org_admin/templates/:template_id/phases/:phase_id/versions
     def create
       @phase = Phase.find(params[:phase_id])

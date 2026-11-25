@@ -5,6 +5,8 @@ module Paginable
   class UsersController < ApplicationController
     include Paginable
 
+    after_action :verify_authorized
+
     # /paginable/users/index/:page
     # rubocop:disable Metrics/AbcSize
     def index

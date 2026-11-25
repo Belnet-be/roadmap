@@ -6,6 +6,9 @@ module Paginable
     include Paginable
     include PlanDashboardFilters
 
+    # Every action checks authorization; the public list is open to everyone
+    after_action :verify_authorized, except: :publicly_visible
+
     # /paginable/plans/privately_visible/:page
     def privately_visible
       authorize Plan
@@ -88,6 +91,8 @@ module Paginable
     # rubocop:disable Metrics/AbcSize
     def org_admin
       raise Pundit::NotAuthorizedError unless current_user.present? && current_user.can_org_admin?
+
+      skip_authorization # checked just above, without a policy
 
       # check if current user if super_admin
       @super_admin = current_user.can_super_admin?

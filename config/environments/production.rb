@@ -51,7 +51,14 @@ Rails.application.configure do
   # config.action_cable.allowed_request_origins = [ 'http://example.com', /http:\/\/example.*/ ]
 
   # Force all access to the app over SSL, use Strict-Transport-Security, and use secure cookies.
-  # config.force_ssl = true
+  # TLS ends at the reverse proxy, so Rails assumes every request came in over HTTPS (no redirect
+  # loop behind the proxy) and still marks cookies secure and sends HSTS. An environment that is
+  # served over plain HTTP sets RAILS_FORCE_SSL=false.
+  force_ssl = ENV.fetch('RAILS_FORCE_SSL', 'true') != 'false'
+  config.assume_ssl = force_ssl
+  config.force_ssl = force_ssl
+  # HSTS for this host only: other hosts under the same domain may be set up differently
+  config.ssl_options = { hsts: { subdomains: false } }
 
   # Use the lowest log level to ensure availability of diagnostic information
   # when problems arise.

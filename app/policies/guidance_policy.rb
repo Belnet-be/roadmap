@@ -29,8 +29,9 @@ class GuidancePolicy < ApplicationPolicy
     @user.can_modify_guidance?
   end
 
+  # The guidance group chosen in the form must be one of the user's organisation
   def admin_create?
-    @user.can_modify_guidance?
+    @user.can_modify_guidance? && @record.in_group_belonging_to?(@user.org_id)
   end
 
   def admin_destroy?
@@ -38,10 +39,10 @@ class GuidancePolicy < ApplicationPolicy
   end
 
   def admin_publish?
-    @user.can_modify_guidance?
+    @user.can_modify_guidance? && @record.in_group_belonging_to?(@user.org_id)
   end
 
   def admin_unpublish?
-    @user.can_modify_guidance?
+    @user.can_modify_guidance? && @record.in_group_belonging_to?(@user.org_id)
   end
 end

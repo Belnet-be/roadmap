@@ -48,7 +48,7 @@ module Api
             id = obj.email if obj.is_a?(User)
             return nil unless id.present?
 
-            payload = { client_id: id }
+            payload = { client_id: id, cv: JsonWebToken.credentials_fingerprint(obj) }
             token = JsonWebToken.encode(payload: payload)
             # JWT appends the expiration directly to the incoming payload
             @expiration = payload[:exp]
@@ -74,6 +74,8 @@ module Api
           # Tries to find an ApiClient that matches the :client_id. If found
           # it will attempt to authenticate the :client_secret
           def authenticate_client
+            return nil unless @client_id.is_a?(String) && @client_secret.is_a?(String)
+
             clients = ApiClient.where(client_id: @client_id)
             return nil unless clients.present? && clients.any?
 
@@ -84,13 +86,19 @@ module Api
           # Tries to find a User whose email matches the :client_id. If found
           # it will attempt to authenticate the :api_token against the :client_secret
           def authenticate_user
-            users = User.where('lower(email) LIKE lower(?)', @client_id)
-            return nil unless users.present? && users.any?
+            return nil unless @client_id.is_a?(String) && @client_secret.is_a?(String)
 
-            usr = users.first
+            # The exact address (case-insensitive): with LIKE, '%' and '_' in the submitted
+            # address matched other accounts
+            usr = User.where_case_insensitive('email', @client_id.strip).first
             # Valid if User is active, has permission to use the API and
             # the :client_secret matches the token
-            usr.active && usr.can_use_api? && usr.api_token == @client_secret ? usr : nil
+            usr if usr&.active && usr.can_use_api? && api_token_matches?(usr)
+          end
+
+          # Compares in constant time
+          def api_token_matches?(usr)
+            usr.api_token.present? && ActiveSupport::SecurityUtils.secure_compare(usr.api_token, @client_secret)
           end
 
           # Handles ApiClient credentials

@@ -11,8 +11,8 @@ module OrgAdmin
     # GET /org_admin/templates/[:template_id]/phases/[:phase_id]/sections
     # rubocop:disable Metrics/AbcSize
     def index
-      authorize Section.new
       phase = Phase.includes(:template, :sections).find(params[:phase_id])
+      authorize Section.new(phase: phase)
       edit = phase.template.latest? &&
              current_user.can_modify_templates? &&
              (phase.template.org_id == current_user.org_id)

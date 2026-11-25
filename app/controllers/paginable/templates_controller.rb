@@ -6,6 +6,9 @@ module Paginable
     include CustomizableTemplateLinkHelper
     include Paginable
 
+    # Every action checks authorization; the public list is open to everyone
+    after_action :verify_authorized, except: :publicly_visible
+
     # TODO: Clean up this code for Rubocop
 
     # GET /paginable/templates/:page  (AJAX)

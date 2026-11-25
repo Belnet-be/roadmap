@@ -10,12 +10,14 @@ class SectionPolicy < ApplicationPolicy
   #  - They can modify templates
   #  - The template which they are modifying belongs to their org
   ##
+  # Reading a template's sections needs the right to view that template
   def index?
-    @user.present?
+    template = @record.phase&.template
+    template.present? && TemplatePolicy.new(@user, template).show?
   end
 
   def show?
-    @user.present?
+    TemplatePolicy.new(@user, @record.phase.template).show?
   end
 
   def edit?

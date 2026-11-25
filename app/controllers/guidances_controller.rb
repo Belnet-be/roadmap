@@ -63,8 +63,11 @@ class GuidancesController < ApplicationController
   def admin_update
     @guidance = Guidance.find(params[:id])
     authorize @guidance
+    # Check again with the submitted guidance group: guidance can't move to another organisation
+    @guidance.assign_attributes(guidance_params)
+    authorize @guidance
 
-    if @guidance.update(guidance_params)
+    if @guidance.save
       if @guidance.published?
         guidance_group = GuidanceGroup.find(@guidance.guidance_group_id)
         if !guidance_group.published? || guidance_group.published.nil?

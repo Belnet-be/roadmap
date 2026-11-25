@@ -30,12 +30,27 @@ module Api
             return @api_client unless token.present? && token[:client_id].present?
 
             @api_client = ApiClient.where(client_id: token[:client_id]).first
-            return @api_client if @api_client.present?
+            return @api_client = current_credentials(token, @api_client) if @api_client.present?
 
             # Valid if User is active, has permission to use the API and
             # the :client_secret matches the token
             usr = User.where(email: token[:client_id], active: true).first
-            @api_client = usr.present? && usr.can_use_api? ? usr : nil
+            @api_client = usr.present? && usr.can_use_api? ? current_credentials(token, usr) : nil
+          end
+
+          # The client, if the token was issued for its current credentials. Tokens issued before
+          # the API client's secret or the user's API token changed, and tokens from before this
+          # check (without a fingerprint), are refused.
+          def current_credentials(token, client)
+            expected = JsonWebToken.credentials_fingerprint(client)
+            given = token[:cv]
+            if expected.present? && given.is_a?(String) &&
+               ActiveSupport::SecurityUtils.secure_compare(expected, given)
+              return client
+            end
+
+            errors[:token] = _('Invalid token')
+            nil
           end
 
           def decoded_auth_token

@@ -3,6 +3,8 @@
 module SuperAdmin
   # Controller for managing Themes
   class ThemesController < ApplicationController
+    after_action :verify_authorized
+
     helper PaginableHelper
     def index
       authorize(Theme)

@@ -5,6 +5,8 @@ module Paginable
   class ThemesController < ApplicationController
     include Paginable
 
+    after_action :verify_authorized
+
     # /paginable/themes/index/:page
     def index
       authorize(Theme)

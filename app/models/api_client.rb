@@ -80,9 +80,11 @@ class ApiClient < ApplicationRecord
     name
   end
 
-  # Verify that the incoming secret matches
+  # Verify that the incoming secret matches, in constant time
   def authenticate(secret:)
-    client_secret == secret
+    return false unless client_secret.present? && secret.is_a?(String) && secret.present?
+
+    ActiveSupport::SecurityUtils.secure_compare(client_secret, secret)
   end
 
   # Generate UUIDs for the client_id and client_secret

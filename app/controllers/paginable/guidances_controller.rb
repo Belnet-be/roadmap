@@ -5,6 +5,8 @@ module Paginable
   class GuidancesController < ApplicationController
     include Paginable
 
+    after_action :verify_authorized
+
     # /paginable/guidances/index/:page
     def index
       authorize(Guidance)

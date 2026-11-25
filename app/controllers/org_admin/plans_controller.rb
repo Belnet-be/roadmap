@@ -5,12 +5,16 @@ module OrgAdmin
   class PlansController < ApplicationController
     include PlanDashboardFilters
 
+    after_action :verify_authorized
+
     # GET org_admin/plans
     # rubocop:disable Metrics/AbcSize
     def index
       # Test auth directly and throw Pundit error sincePundit
       # is unaware of namespacing
       raise Pundit::NotAuthorizedError unless current_user.present? && current_user.can_org_admin?
+
+      skip_authorization # checked just above, without a policy
 
       sql = 'users.org_id = ? AND plans.feedback_requested is TRUE AND roles.active is TRUE'
       feedback_ids = Role.creator.joins(:user, :plan)

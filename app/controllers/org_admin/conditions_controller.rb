@@ -3,9 +3,13 @@
 module OrgAdmin
   # Controller that handles conditional questions
   class ConditionsController < ApplicationController
+    after_action :verify_authorized
+
     # /org_admin/questions/:question_id/conditions/new
     def new
       question = Question.find(params[:question_id])
+      # The form shows the template's questions and options: only for its editors
+      authorize question, :edit?
       condition_no = new_condition_params[:condition_no]
       next_condition_no = condition_no.to_i + 1
       render json: { add_link: render_to_string(partial: 'add',

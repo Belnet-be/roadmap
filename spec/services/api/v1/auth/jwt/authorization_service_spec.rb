@@ -33,7 +33,14 @@ RSpec.describe Api::V1::Auth::Jwt::AuthorizationService do
         expect(@service.send(:client)).to eql(rslt)
       end
       it 'sets client to the one found with the JWT' do
+        fingerprint = Api::V1::Auth::Jwt::JsonWebToken.credentials_fingerprint(@client)
+        Api::V1::Auth::Jwt::JsonWebToken.stubs(:decode).returns({ client_id: @token, cv: fingerprint })
         expect(@service.send(:client)).to eql(@client)
+      end
+      it "refuses a JWT issued for the client's earlier credentials" do
+        Api::V1::Auth::Jwt::JsonWebToken.stubs(:decode).returns({ client_id: @token, cv: 'earlier' })
+        expect(@service.send(:client)).to be_nil
+        expect(@service.errors[:token]).to eql('Invalid token')
       end
       it "adds 'invalid token' to errors if no client matches the JWT" do
         @service.expects(:decoded_auth_token).returns(nil)

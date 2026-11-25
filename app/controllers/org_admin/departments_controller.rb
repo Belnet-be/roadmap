@@ -17,8 +17,8 @@ module OrgAdmin
     # POST /departments
     # POST /departments.json
     def create
-      @department = Department.new(department_params)
       @org_id = org_id
+      @department = new_department
 
       authorize @department
 
@@ -72,8 +72,13 @@ module OrgAdmin
 
     private
 
+    # No org_id or id: the organisation comes from #org_id (the user's own, unless super admin)
     def department_params
-      params.require(:department).permit(:id, :name, :code, :org_id)
+      params.require(:department).permit(:name, :code)
+    end
+
+    def new_department
+      Department.new(department_params.merge(org_id: @org_id))
     end
 
     def org_id

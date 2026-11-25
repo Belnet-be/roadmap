@@ -3,6 +3,8 @@
 module SuperAdmin
   # Controller for managing system wide notifications
   class NotificationsController < ApplicationController
+    after_action :verify_authorized
+
     before_action :set_notification, only: %i[show edit update destroy acknowledge]
     before_action :set_notifications, only: :index
 

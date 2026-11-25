@@ -14,8 +14,9 @@ class QuestionPolicy < ApplicationPolicy
     @user.present?
   end
 
+  # Reading a template's question needs the right to view that template
   def show?
-    @user.present?
+    TemplatePolicy.new(@user, @record.section.phase.template).show?
   end
 
   def open_conditions?

@@ -101,7 +101,9 @@ class GuidanceGroupsController < ApplicationController
 
   private
 
+  # No org_id: a guidance group always belongs to the organisation of the user who creates it
+  # (see #admin_create) and can't be moved to another one
   def guidance_group_params
-    params.require(:guidance_group).permit(:org_id, :name, :published, :optional_subset)
+    params.require(:guidance_group).permit(:name, :published, :optional_subset)
   end
 end

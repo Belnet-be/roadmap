@@ -170,7 +170,7 @@ class UsersController < ApplicationController
     render body: nil
   end
 
-  # GET /users/:id/refresh_token (accessed via JSON call from profile page)
+  # PATCH /users/:id/refresh_token (accessed via JS call from profile page)
   def refresh_token
     authorize current_user
     original = current_user.api_token

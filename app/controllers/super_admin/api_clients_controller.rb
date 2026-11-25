@@ -3,6 +3,8 @@
 module SuperAdmin
   # Controller for managing ApiClients for API V1
   class ApiClientsController < ApplicationController
+    after_action :verify_authorized
+
     respond_to :html
 
     include OrgSelectable
