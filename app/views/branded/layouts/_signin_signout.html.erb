@@ -11,14 +11,6 @@
       <li>
         <%= link_to '<i class="fas fa-square-pen" aria-hidden="true">&nbsp;</i>&nbsp;'.html_safe + _('Edit profile'), edit_user_registration_path, class: 'dropdown-item' %>
       </li>
-      <% if current_user.alternative_accounts.any? %>
-      <li>
-        <a href="<%= edit_switch_user_path %>" class="dropdown-item">
-          <i class="fas fa-sign-in" aria-hidden="true">&nbsp;</i>
-          Switch user
-        </a>
-      </li>
-      <% end %>
       <li>
         <%= link_to '<i class="fas fa-right-to-bracket" aria-hidden="true">&nbsp;</i>&nbsp;'.html_safe + _('Logout'), destroy_user_session_path, method: :delete, class: 'dropdown-item' %>
       </li>

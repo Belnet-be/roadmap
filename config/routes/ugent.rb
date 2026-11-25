@@ -5,9 +5,6 @@ Rails.application.routes.draw do
   get "selectable_user/edit", controller: "ugent/selectable_user", action: :edit, as: :edit_selectable_user
   post "selectable_user", controller: "ugent/selectable_user", action: :update, as: :update_selectable_user
 
-  get "switch_user/edit", controller: "ugent/switch_user", action: :edit, as: :edit_switch_user
-  post "switch_user", controller: "ugent/switch_user", action: :update, as: :update_switch_user
-
   mount RailsAdmin::Engine => "/admin", as: "rails_admin"
 
   # legacy routes

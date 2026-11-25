@@ -362,6 +362,17 @@ class Identifier
     end
   end
 
+  # An ORCID iD only proves who owns an account when it was linked through an ORCID login: then
+  # attrs holds ORCID's own answer, with provider "orcid" and the same uid. ORCID iDs that came
+  # in as data (e.g. a DMP contact sent through the API) have no such proof.
+  def verified_orcid_link?
+    data = JSON.parse(attrs.presence || "{}")
+    data.is_a?(Hash) && data["provider"] == "orcid" && data["uid"].present? &&
+      value.to_s.end_with?(data["uid"].to_s)
+  rescue JSON::ParserError
+    false
+  end
+
 end
 
 class User
@@ -395,21 +406,6 @@ class User
   def identifier_orcid
     scheme = User.identifier_scheme_orcid
     identifiers.select { |id| id.identifier_scheme_id == scheme.id }.first
-  end
-
-  def alternative_accounts
-    orcid = identifier_orcid
-
-    return [] if orcid.nil?
-
-    Identifier.where(
-      "identifier_scheme_id = ? AND identifiable_type = ? AND value = ? AND identifiable_id <> ?",
-      orcid.identifier_scheme_id,
-      "User",
-      orcid.value,
-      id
-    )
-              .map(&:identifiable)
   end
 
   def self.org_from_email(email)
@@ -711,14 +707,23 @@ module Users
  
           end
  
+        elsif !existing_id.verified_orcid_link?
+
+          # The ORCID iD was already on this account without proof (an older link or imported
+          # data). The person just signed in to ORCID while logged in here, so record the proof.
+          existing_id.update(attrs: orcid_attrs)
+          flash[:notice] = _("Your account has been successfully linked to %{scheme}.") % {
+            scheme: scheme.description
+          }
+
         else
- 
+
           flash[:alert] = _("Your account has already been linked to %{scheme}") % {
             scheme: scheme.description
           }
- 
+
         end
- 
+
         redirect_to edit_user_registration_path
         return
  
@@ -733,10 +738,14 @@ module Users
       #            was linked to user before
       login_without_email = ENV.fetch("ORCID_LOGIN_WITHOUT_EMAIL", "false") == "true"
 
-      # Match orcid with one of more users
+      # Match the ORCID iD only with active accounts it was linked to through an ORCID login,
+      # which proves the person owns both. An ORCID iD that came in as data (e.g. a DMP contact
+      # sent through the API) is no proof and must never give access to an account.
       orcid_users = Identifier.where(identifiable_type: "User", identifier_scheme_id: scheme.id, value: full_uid)
+                              .select(&:verified_orcid_link?)
                               .map(&:identifiable)
                               .reject(&:nil?)
+                              .select(&:active?)
 
       email = auth["info"].try("[]", "email")
       # downcase without !
@@ -781,7 +790,12 @@ module Users
  
       # Match on ORCID: OK
       if user
- 
+
+        # An older ORCID iD on this account without proof now counts as verified: ORCID just
+        # confirmed the iD, and the account was matched on a verified link or on the verified
+        # email address ORCID returned.
+        confirm_orcid_link(user, scheme, full_uid, orcid_attrs)
+
         # set firstname and surname when not present yet
         user.firstname = auth["info"].try("first_name") if user.firstname.blank? || user.firstname == User.nemo
         user.surname = auth["info"].try("last_name") if user.surname.blank? || user.surname == User.nemo
@@ -865,6 +879,17 @@ module Users
       sign_in_and_redirect user, event: :authentication
     end
     # rubocop:enable Metrics/MethodLength, Metrics/AbcSize
+
+    # Store ORCID's answer on the account's ORCID iDs that have no proof yet (older links or
+    # imported data). Only call this once the person has shown they own both the ORCID iD
+    # and the account.
+    def confirm_orcid_link(user, scheme, full_uid, orcid_attrs)
+      user.identifiers
+          .select { |id| id.identifier_scheme_id == scheme.id && id.value == full_uid }
+          .reject(&:verified_orcid_link?)
+          .each { |id| id.update(attrs: orcid_attrs) }
+    end
+    private :confirm_orcid_link
 
     def handle_omniauth(scheme)
       if scheme.name == "shibboleth"
